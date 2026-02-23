@@ -4,14 +4,21 @@ from commands2 import Subsystem
 from wpilib import RobotState
 from ntcore.util import ntproperty
 
-from wpimath.units import degrees
+from wpimath.units import *
+from phoenix6.units import *
 
 from phoenix6.hardware import TalonFX
-from phoenix6.configs import TalonFXConfiguration, MotorOutputConfigs
-from phoenix6.signals import InvertedValue, NeutralModeValue
+from phoenix6.configs import TalonFXConfiguration, MotorOutputConfigs, Slot0Configs, FeedbackConfigs
+from phoenix6.signals import InvertedValue, NeutralModeValue, FeedbackSensorSourceValue
 from phoenix6.controls import PositionVoltage
 
 from util.FalconLogger import FalconLogger
+
+class IntakeConstants:
+    kP:float=0.0 # proportion       The farther away, the harder it pushes
+    kI:float=0.0 # integral         The longer it's been off, the harder it pushes
+    kD:float=0.0 # differential     The harder it pushes, the less it pushes
+    kG:float=0.0 # gravity          Constant force, but accounting for gravity
 
 class Intake(Subsystem):
     class IntakeSpeeds:
@@ -30,35 +37,42 @@ class Intake(Subsystem):
         IN:degrees = 80 #NOTE: currently underestimate for safety in testing
         OUT:degrees = 10 #NOTE: currently underestimate for safety in testing
 
-
-    # Variable Declaration
-
-    def __init__(self, intakeMotorID:int, pivotLeadMotorID:int, pivotFollowMotorID:int) -> None:
+    def __init__(self, intakeMotorID:int, pivotLeadMotorID:int, pivotEncoderID:int) -> None:
         ### Motor Setup
         ## Launch Motor
         self.intake_motor = TalonFX(intakeMotorID, "rio")
 
-        #TODO: configs
-        # m_config = TalonFXConfiguration()
-        # self.launchMotor.configurator.apply(m_config)
+        # Config
+        intake_motor_config = TalonFXConfiguration()
+        intake_motor_config = intake_motor_config.with_motor_output(
+            MotorOutputConfigs()
+            .with_neutral_mode(NeutralModeValue.BRAKE)
+            .with_inverted(InvertedValue.CLOCKWISE_POSITIVE)
+        )
+        self.intake_motor.configurator.apply(intake_motor_config)
 
-        ## Pivot Motors
-        #TODO: Pivot
-        self.lead_pivot_motor = TalonFX(pivotLeadMotorID, "rio")
-        # self.follow_pivot_motor = TalonFX(pivotFollowMotorID, "rio")
+        ## Pivot Motor
+        self.pivot_motor = TalonFX(pivotLeadMotorID, "rio")
 
         # Config
-        base_config = TalonFXConfiguration()
-        base_config = base_config.with_motor_output(
+        pivot_motor_config = TalonFXConfiguration()
+        pivot_motor_config = pivot_motor_config.with_motor_output(
             MotorOutputConfigs()
             .with_neutral_mode(NeutralModeValue.COAST)
+        ).with_slot0(
+            Slot0Configs()
+                .with_k_p(IntakeConstants.kP)
+                .with_k_i(IntakeConstants.kI)
+                .with_k_d(IntakeConstants.kD)
+                .with_k_g(IntakeConstants.kG)
+        ).with_feedback(
+            FeedbackConfigs()
+                .with_feedback_remote_sensor_id(pivotEncoderID)
+                .with_feedback_sensor_source(FeedbackSensorSourceValue.REMOTE_CANCODER)
         )
-
-        self.lead_pivot_motor.configurator.apply(base_config)
-
-        # follow_config = base_config.__setattr__
-        
-        # self.follow_pivot_motor.configurator.apply(base_config)
+        pivot_motor_config = pivot_motor_config.with_closed_loop_general(
+        )
+        self.pivot_motor.configurator.apply(pivot_motor_config)
 
         ### Functionality Setup
         self.intake_speed = self.IntakeSpeeds.STOP
@@ -84,10 +98,11 @@ class Intake(Subsystem):
 
         ## Pivot
         #control position
-        self.lead_pivot_motor.set_control(PositionVoltage(self.pivot_setpoint))
+        self.pivot_motor.set_control(PositionVoltage(self.pivot_setpoint))
 
     def stop(self) -> None:
-        pass
+        self.intake_speed = 0
+        # self.pivot_setpoint = self.getPo
 
     def setIntakeSpeed(self, speed:IntakeSpeeds) -> None:
         self.intake_speed = speed
@@ -100,3 +115,6 @@ class Intake(Subsystem):
     
     def getPivotSetpoint(self) -> degrees:
         return self.pivot_setpoint
+    
+    def getPivotPosition(self) -> rotation:
+        return self.pivot_motor.get_position().value

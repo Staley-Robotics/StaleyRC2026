@@ -21,9 +21,10 @@ class ControlPivotPos(Command):
 
     def initialize(self) -> None:
         pass
+        # self.intake_sys.setPivotSetpoint(self.get_speed())
 
     def execute(self) -> None:
-        pass
+        self.intake_sys.setPivotSetpoint(self.get_speed())
 
     def end(self, interrupted:bool) -> None:
         self.intake_sys.setIntakeSpeed(Intake.IntakeSpeeds.STOP)

@@ -3,7 +3,7 @@ from wpilib import SendableChooser, SmartDashboard
 from commands2 import Command, cmd
 
 # Local Imports
-from subsystems import SampleSubsystem
+from subsystems import Climber
 from commands import SampleCommand
 from util import FalconXboxController
 from ntcore.util import ntproperty
@@ -24,21 +24,21 @@ class RobotContainer:
         driver1 = FalconXboxController( 0 )
 
         # Declare Subsystems
-        sysSample = SampleSubsystem( 0 )
+        climberSys = Climber(3)
 
         # Commands
-        cmdSampleLeft = SampleCommand(sysSample, driver1.getLeftX )
-        cmdSampleRight = SampleCommand(sysSample, driver1.getRightX )
+        # cmdSampleLeft = SampleCommand(sysSample, driver1.getLeftX )
+        # cmdSampleRight = SampleCommand(sysSample, driver1.getRightX )
 
         # Autonomous Chooser
-        self.__autoChooser.setDefaultOption( "1 - None", cmd.none() )
-        SmartDashboard.putData( "Autonomous Mode", self.__autoChooser )
+        # self.__autoChooser.setDefaultOption( "1 - None", cmd.none() )
+        # SmartDashboard.putData( "Autonomous Mode", self.__autoChooser )
 
         # Default Commands
-        sysSample.setDefaultCommand( cmdSampleLeft )
+        # sysSample.setDefaultCommand( cmdSampleLeft )
 
         # Driver Controller Button Binding
-        driver1.a().whileTrue( cmdSampleRight )
+        # driver1.a().whileTrue( cmdSampleRight )
 
     # Get Autonomous Command
     def getAutonomousCommand(self) -> Command:
