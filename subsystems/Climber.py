@@ -1,17 +1,10 @@
-from wpilib import TimedRobot, XboxController, SmartDashboard, Mechanism2d, Color8Bit, Color
+from commands2 import Subsystem
+from wpilib import  SmartDashboard, Mechanism2d, Color8Bit, Color, RobotState
 from wpimath.system.plant import DCMotor
-from wpilib.simulation import ElevatorSim, RoboRioSim
+from wpilib.simulation import ElevatorSim
 from wpimath.units import *
-from wpimath.controller import PIDController
 from rev import EncoderConfig, SparkMax, SparkMaxConfig,ClosedLoopConfig, ClosedLoopSlot, SparkMaxSim, SparkBase, LimitSwitchConfig, PersistMode, ResetMode
-import rev
 from phoenix6.units import *
-
-
-class ClimberSpeeds:
-    STOP:float = 0
-    FORWARD:float = 1
-    BACKWARD:float = -1
 
 class ClimberConstants:
     
@@ -23,6 +16,7 @@ class ClimberConstants:
     _kV = 0.0 # Apply __ voltage for target velocity
     _kFF = 0.0#0.001 # Feed Forward
 
+    _kAtSetpointTolerence:inches = 1.0
     _pulleyRadius:inches = 0.440
     _pulleyDiameter:inches = _pulleyRadius *2
     _gearRatio = 100.0
@@ -35,17 +29,19 @@ class ClimberPositions:
     TOP:inches = 9 # maximum height
     MIDDLE:inches = (BOTTOM + TOP) / 2
 
+class Climber(Subsystem):
+    # Variable Declaration
 
-class MyRobot(TimedRobot):
-    def __init__(self, period = 0.02):
-        super().__init__(period)
-        self.xboxController = XboxController(0)
-        self.climbMotor = rev.SparkMax(2, rev.SparkMax.MotorType.kBrushless)
+
+    # Initialization
+    def __init__(self, sysId:int) -> None:
+        self.climbMotor = SparkMax(2, SparkMax.MotorType.kBrushless)
         # self.position_request = controls.PositionVoltage(0.0)
         self.leadEncoder = self.climbMotor.getEncoder()
 
         self.leadEncoder.setPosition(ClimberPositions.BOTTOM)
-        self.setpoint = 0.0
+        self.setPos = 0.0
+        self.setPoint = 0.0
         self.__pidController = self.climbMotor.getClosedLoopController()
 
         convFactor = ClimberConstants._motorRotsPerHeightInches
@@ -114,7 +110,7 @@ class MyRobot(TimedRobot):
             measurementStdDevs=[0.01, 0.00] # Tolerance????
         )
         self.elevatorSim.setState(ClimberPositions.TOP, (0.0 ))
-        self.setPos = 0
+        # self.setPos = 0
         # self.slot0_configs = configs.Slot0Configs()
         # self.slot0_configs.k_p = ClimberConstants._kPc
         # self.slot0_configs.k_i = ClimberConstants._kI
@@ -126,23 +122,10 @@ class MyRobot(TimedRobot):
         self.__simMotor = SparkMaxSim(self.climbMotor, DCMotor.NEO() )
         self.__simMotor.setPosition( ClimberPositions.BOTTOM )
         
-    def robotinit(self):
-        pass
-
-    def autonomousPeriodic(self):   
-        return super().autonomousPeriodic()
-
-    def teleopPeriodic(self):
-        # Keybind: move climber to low position
-        if self.xboxController.getBButtonPressed():
-            self.target_rotations = ClimberPositions.BOTTOM
-        # Keybind: move climber to high position
-        if self.xboxController.getAButtonPressed():
-            self.target_rotations = ClimberPositions.TOP
 
     def run(self) -> None:
         self.__pidController.setReference(
-            self.setpoint,
+            self.setPoint,
             SparkBase.ControlType.kPosition, 
             ClosedLoopSlot.kSlot0
         )
@@ -154,10 +137,42 @@ class MyRobot(TimedRobot):
         SmartDashboard.putNumber("Climber/RotError", error)
 
     def _simulationPeriodic(self):  
-        motorOutput = self.elevatorSim.getOutput()
+        self.motorOutput = self.elevatorSim.getOutput()
 
-    def changePos(self, pos:float):
+    def changeDesiredPos(self, pos:float):
         self.setPos = pos
+
+    def getSetPos(self):
+        return self.setPos
+    
+    def updateSetpoint(self):
+        self.setPoint = self.setPos
+
+    def getSetPointAtSetPos(self):
+        return self.setPoint == self.setPos
 
     def getCurPos(self)->inches:
         self.curPos = self.climbMotor.get_position().value
+
+    # Periodic Loop
+    def periodic(self) -> None:
+        # Logging: Write Current Subsystem State
+        self.m_logging.putNumber( "SubsystemData", 0.0 )
+
+        # Run Subsystem: Set New State To Subsystem
+        if RobotState.isDisabled():
+            self.stop()
+        else:
+            self.run()
+        
+        # Logging: Write Post Operation Information
+        self.m_logging.putNumber( "Setpoint", self.getSetpoint() )
+        self.m_logging.putNumber( "Measured", self.m_system )
+
+    # Stop the Subsystem
+    def stop(self) -> None:
+        pass
+
+    def getAtPosition(self) -> bool:
+        return abs(self.getCurPos() - self.setPos )< ClimberConstants._kAtSetpointTolerence
+    # 6 6+1 saver
