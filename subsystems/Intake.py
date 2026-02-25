@@ -1,7 +1,8 @@
 from enum import Enum
 
 from commands2 import Subsystem
-from wpilib import RobotState
+from wpilib import RobotState, DutyCycleEncoder
+from wpimath.controller import PIDController
 from ntcore.util import ntproperty
 
 from wpimath.units import *
@@ -11,6 +12,8 @@ from phoenix6.hardware import TalonFX
 from phoenix6.configs import TalonFXConfiguration, MotorOutputConfigs, Slot0Configs, FeedbackConfigs
 from phoenix6.signals import InvertedValue, NeutralModeValue, FeedbackSensorSourceValue
 from phoenix6.controls import PositionVoltage
+
+from rev.
 
 from util.FalconLogger import FalconLogger
 
@@ -37,9 +40,9 @@ class Intake(Subsystem):
         IN:degrees = 80 #NOTE: currently underestimate for safety in testing
         OUT:degrees = 10 #NOTE: currently underestimate for safety in testing
 
-    def __init__(self, intakeMotorID:int, pivotLeadMotorID:int, pivotEncoderID:int) -> None:
+    def __init__(self, intakeMotorID:int, pivotMotorID:int, pivotEncoderID:int) -> None:
         ### Motor Setup
-        ## Launch Motor
+        ## Intake Motor
         self.intake_motor = TalonFX(intakeMotorID, "rio")
 
         # Config
@@ -52,24 +55,32 @@ class Intake(Subsystem):
         self.intake_motor.configurator.apply(intake_motor_config)
 
         ## Pivot Motor
-        self.pivot_motor = TalonFX(pivotLeadMotorID, "rio")
+        self.pivot_motor = TalonFX(pivotMotorID, "rio")
+        # Encoder
+        self.pivot_encoder = DutyCycleEncoder
+        self.comtroller = PIDController(
+            IntakeConstants.kP,
+            IntakeConstants.kI,
+            IntakeConstants.kD,
+            IntakeConstants.kG,
+        )
 
         # Config
         pivot_motor_config = TalonFXConfiguration()
         pivot_motor_config = pivot_motor_config.with_motor_output(
             MotorOutputConfigs()
-            .with_neutral_mode(NeutralModeValue.COAST)
-        ).with_slot0(
-            Slot0Configs()
-                .with_k_p(IntakeConstants.kP)
-                .with_k_i(IntakeConstants.kI)
-                .with_k_d(IntakeConstants.kD)
-                .with_k_g(IntakeConstants.kG)
-        ).with_feedback(
-            FeedbackConfigs()
-                .with_feedback_remote_sensor_id(pivotEncoderID)
-                .with_feedback_sensor_source(FeedbackSensorSourceValue.REMOTE_CANCODER)
-        )
+            .with_neutral_mode(NeutralModeValue.COAST))
+        # ).with_slot0(
+        #     Slot0Configs()
+        #         .with_k_p(IntakeConstants.kP)
+        #         .with_k_i(IntakeConstants.kI)
+        #         .with_k_d(IntakeConstants.kD)
+        #         .with_k_g(IntakeConstants.kG)
+        # ).with_feedback(
+        #     FeedbackConfigs()
+        #         .with_feedback_remote_sensor_id(pivotEncoderID)
+        #         .with_feedback_sensor_source(FeedbackSensorSourceValue.REMOTE_CANCODER)
+        # )
         pivot_motor_config = pivot_motor_config.with_closed_loop_general(
         )
         self.pivot_motor.configurator.apply(pivot_motor_config)
@@ -102,7 +113,7 @@ class Intake(Subsystem):
 
     def stop(self) -> None:
         self.intake_speed = 0
-        # self.pivot_setpoint = self.getPo
+        self.pivot_setpoint = self.getPivotPosition()
 
     def setIntakeSpeed(self, speed:IntakeSpeeds) -> None:
         self.intake_speed = speed

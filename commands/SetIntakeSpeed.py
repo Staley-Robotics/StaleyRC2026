@@ -16,7 +16,7 @@ class SetIntakeSpeed(Command):
         self.intake_sys:Intake = intakeSys
         self.set_speed:Intake.IntakeSpeeds = speed
 
-        self.setName( f"SetIntakeSpeed - {speed}%" )
+        self.setName( f"SetIntakeSpeed: {speed}%" )
         self.addRequirements( intakeSys )
 
     def initialize(self) -> None:

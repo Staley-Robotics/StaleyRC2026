@@ -10,15 +10,15 @@ from phoenix6.units import *
 from phoenix6.hardware import TalonFX
 from phoenix6.configs import TalonFXConfiguration, MotorOutputConfigs, Slot0Configs
 from phoenix6.signals import InvertedValue, NeutralModeValue
-from phoenix6.controls import VelocityVoltage
+from phoenix6.controls import VoltageOut
 
 from util.FalconLogger import FalconLogger
 
-class Launcher(Subsystem):
-    def __init__(self, launchMotorID:int) -> None:
+class Agitator(Subsystem):
+    def __init__(self, motorID:int) -> None:
         ### Motor Setup
         ## Launch Motor
-        self.motor = TalonFX(launchMotorID, "rio")
+        self.motor = TalonFX(motorID, "rio")
 
         # Config
         motor_config = TalonFXConfiguration()
@@ -30,11 +30,13 @@ class Launcher(Subsystem):
         self.motor.configurator.apply(motor_config)
 
         ### Functionality Setup
-        self.desired_speed: rotations_per_second = 0
+        self.motor_volt_req = VoltageOut(0.0)
+
+        # Logging
+        FalconLogger.addLoggedObject("Agitator/Inputs/motor", self.motor)
 
     def periodic(self) -> None:
         # Logging: Write Current Measured Subsystem State
-        FalconLogger.logInput("/Intake/Inputs/launchMotor/velocity", self.motor.get_velocity().value)
 
         # Run Subsystem: Set New State To Subsystem
         if RobotState.isDisabled():
@@ -43,20 +45,17 @@ class Launcher(Subsystem):
             self.run()
         
         # Logging: Write Post Operation Information
-        FalconLogger.logOutput("/Intake/Outputs/Setpoint", self.getDesiredSpeed())
+        FalconLogger.logOutput("/Agitator/Outputs/Setpoint", self.getSetSpeed())
 
     def run(self) -> None:
         # control velocity
-        self.motor.set_control(VelocityVoltage, self.desired_speed)
+        self.motor.set_control(self.motor_volt_req)
 
     def stop(self) -> None:
-        pass
+        self.motor_volt_req.output = 0.0
 
-    def setDesiredSpeed(self, speed:rotations_per_second) -> None:
-        self.desired_speed = speed
+    def setSpeed(self, speed:percent) -> None:
+        self.motor_volt_req.output = speed * 12
 
-    def getDesiredSpeed(self) -> rotations_per_second:
-        return self.desired_speed
-    
-    def isAtSpeed(self) -> bool:
-        return self.motor.get_closed_loop_error().value
+    def getSetSpeed(self) -> percent:
+        return self.motor_volt_req.output / 12

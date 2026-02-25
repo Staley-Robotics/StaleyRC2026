@@ -115,6 +115,10 @@ class Climber(Subsystem):
 
     ## External Funcs
     def setDesiredPosition(self, pos:inches) -> None:
+        '''
+        Sets the setpoint sent to the pid controll to the `pos` param
+        restricts inputs to min/max of the climber mechanism
+        '''
         self.desired_position = (max(min(pos, self.ClimberPositions.MAX), self.ClimberPositions.MIN))
 
     def getDesiredPosition(self) -> inches:
