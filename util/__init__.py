@@ -1,4 +1,4 @@
 from .FalconLogger import *
-from .test import *
+from .telemetry import *
 from .FalconXboxController import *
 from .FalconDefaultCommand import *

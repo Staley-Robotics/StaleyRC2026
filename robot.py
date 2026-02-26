@@ -46,11 +46,10 @@ class MyRobot(TimedRobot):
     # Autonomous Mode
     def autonomousInit(self):
         # Start the Autonomous Package
-        try:
-            self.__autoCmd = self.__robotContainer.getAutonomousCommand()
-            self.__autoCmd.schedule()
-        except:
-            print("WARNING! getAutonomousCommand failed!")
+        self.autonomousCommand = self.__robotContainer.getAutonomousCommand()
+
+        if self.autonomousCommand:
+            CommandScheduler.getInstance().schedule(self.autonomousCommand)
     
     def autonomousPeriodic(self): pass
 

@@ -1,12 +1,3 @@
-# FRC Imports
-from wpilib import SendableChooser, SmartDashboard
-from commands2 import Command, cmd
-
-# Local Imports
-from subsystems import Climber
-from commands import SampleCommand
-from util import FalconXboxController
-from ntcore.util import ntproperty
 #
 # Copyright (c) FIRST and other WPILib contributors.
 # Open Source Software; you can modify and/or share it under the terms of
@@ -18,8 +9,8 @@ from commands2 import cmd
 from commands2.button import CommandXboxController, Trigger
 from commands2.sysid import SysIdRoutine
 
-from subsystems import TunerConstants
-from util import Telemetry
+from generated.tuner_constants import TunerConstants
+from telemetry import Telemetry
 
 from phoenix6 import swerve
 from wpilib import DriverStation
@@ -91,26 +82,6 @@ class RobotContainer:
                 )
             )
         )
-    """
-    RobotContainer is the Initial Container for an FRC Robot
-    """
-    # Variable Declaration
-    __autoChooser:SendableChooser = SendableChooser()
-
-    # Initialization
-    def __init__(self):
-        """
-        Initializes RobotContainer
-        """
-        # Driver Controller
-        driver1 = FalconXboxController( 0 )
-
-        # Declare Subsystems
-        climberSys = Climber(3)
-
-        # Commands
-        # cmdSampleLeft = SampleCommand(sysSample, driver1.getLeftX )
-        # cmdSampleRight = SampleCommand(sysSample, driver1.getRightX )
 
         # Idle while the robot is disabled. This ensures the configured
         # neutral mode is applied to the drive motors while disabled.
@@ -153,19 +124,6 @@ class RobotContainer:
         )
 
     def getAutonomousCommand(self) -> commands2.Command:
-        pass
-        # Autonomous Chooser
-        # self.__autoChooser.setDefaultOption( "1 - None", cmd.none() )
-        # SmartDashboard.putData( "Autonomous Mode", self.__autoChooser )
-
-        # Default Commands
-        # sysSample.setDefaultCommand( cmdSampleLeft )
-
-        # Driver Controller Button Binding
-        # driver1.a().whileTrue( cmdSampleRight )
-
-    # Get Autonomous Command
-    def getAutonomousCommand(self) -> Command:
         """
         Use this to pass the autonomous command to the main {@link Robot} class.
 
