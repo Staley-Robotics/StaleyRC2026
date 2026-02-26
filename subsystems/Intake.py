@@ -13,7 +13,7 @@ from phoenix6.configs import TalonFXConfiguration, MotorOutputConfigs, Slot0Conf
 from phoenix6.signals import InvertedValue, NeutralModeValue, FeedbackSensorSourceValue
 from phoenix6.controls import PositionVoltage
 
-from rev.
+# from rev
 
 from util.FalconLogger import FalconLogger
 

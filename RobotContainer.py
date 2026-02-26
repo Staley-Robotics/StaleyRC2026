@@ -7,14 +7,7 @@ from subsystems import Climber
 from commands import SampleCommand
 from util import FalconXboxController
 from ntcore.util import ntproperty
-#
-# Copyright (c) FIRST and other WPILib contributors.
-# Open Source Software; you can modify and/or share it under the terms of
-# the WPILib BSD license file in the root directory of this project.
-#
 
-import commands2
-from commands2 import cmd
 from commands2.button import CommandXboxController, Trigger
 from commands2.sysid import SysIdRoutine
 
@@ -28,14 +21,27 @@ from wpimath.units import rotationsToRadians
 
 
 class RobotContainer:
-    """
-    This class is where the bulk of the robot should be declared. Since Command-based is a
-    "declarative" paradigm, very little robot logic should actually be handled in the :class:`.Robot`
-    periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
-    subsystems, commands, and button mappings) should be declared here.
-    """
+    # Variable Declaration
+    __autoChooser:SendableChooser = SendableChooser()
 
     def __init__(self) -> None:
+        ## Controller
+        self.controller1 = FalconXboxController( 0 )
+
+        ### Subsystems
+
+        ## Climber
+        self.climbSys = Climber( 0 )
+
+        ## Intake
+
+        ## Agitator
+
+        ## Launcher
+
+        ## Drive
+        self.drivetrain = TunerConstants.create_drivetrain()
+
         self._max_speed = (
             1.0 * TunerConstants.speed_at_12_volts
         )  # speed_at_12_volts desired top speed
@@ -44,7 +50,7 @@ class RobotContainer:
         )  # 3/4 of a rotation per second max angular velocity
 
         # Setting up bindings for necessary control of the swerve drive platform
-        self._drive = (
+        self._drive_req = (
             swerve.requests.FieldCentric()
             .with_deadband(self._max_speed * 0.1)
             .with_rotational_deadband(
@@ -59,9 +65,13 @@ class RobotContainer:
 
         self._logger = Telemetry(self._max_speed)
 
-        self._joystick = CommandXboxController(0)
+        # self.controller1 = CommandXboxController(0)
 
-        self.drivetrain = TunerConstants.create_drivetrain()
+        
+
+        # Auto
+        # self.__autoChooser.setDefaultOption( "1 - None", cmd.none() )
+        # SmartDashboard.putData( "Autonomous Mode", self.__autoChooser )
 
         # Configure the button bindings
         self.configureButtonBindings()
@@ -79,38 +89,18 @@ class RobotContainer:
             # Drivetrain will execute this command periodically
             self.drivetrain.apply_request(
                 lambda: (
-                    self._drive.with_velocity_x(
-                        -self._joystick.getLeftY() * self._max_speed
+                    self._drive_req.with_velocity_x(
+                        -self.controller1.getLeftY() * self._max_speed
                     )  # Drive forward with negative Y (forward)
                     .with_velocity_y(
-                        -self._joystick.getLeftX() * self._max_speed
+                        -self.controller1.getLeftX() * self._max_speed
                     )  # Drive left with negative X (left)
                     .with_rotational_rate(
-                        -self._joystick.getRightX() * self._max_angular_rate
+                        -self.controller1.getRightX() * self._max_angular_rate
                     )  # Drive counterclockwise with negative X (left)
                 )
             )
         )
-    """
-    RobotContainer is the Initial Container for an FRC Robot
-    """
-    # Variable Declaration
-    __autoChooser:SendableChooser = SendableChooser()
-
-    # Initialization
-    def __init__(self):
-        """
-        Initializes RobotContainer
-        """
-        # Driver Controller
-        driver1 = FalconXboxController( 0 )
-
-        # Declare Subsystems
-        climberSys = Climber(3)
-
-        # Commands
-        # cmdSampleLeft = SampleCommand(sysSample, driver1.getLeftX )
-        # cmdSampleRight = SampleCommand(sysSample, driver1.getRightX )
 
         # Idle while the robot is disabled. This ensures the configured
         # neutral mode is applied to the drive motors while disabled.
@@ -119,50 +109,38 @@ class RobotContainer:
             self.drivetrain.apply_request(lambda: idle).ignoringDisable(True)
         )
 
-        self._joystick.a().whileTrue(self.drivetrain.apply_request(lambda: self._brake))
-        self._joystick.b().whileTrue(
+        self.controller1.a().whileTrue(self.drivetrain.apply_request(lambda: self._brake))
+        self.controller1.b().whileTrue(
             self.drivetrain.apply_request(
                 lambda: self._point.with_module_direction(
-                    Rotation2d(-self._joystick.getLeftY(), -self._joystick.getLeftX())
+                    Rotation2d(-self.controller1.getLeftY(), -self.controller1.getLeftX())
                 )
             )
         )
 
         # Run SysId routines when holding back/start and X/Y.
         # Note that each routine should be run exactly once in a single log.
-        (self._joystick.back() & self._joystick.y()).whileTrue(
+        (self.controller1.back() & self.controller1.y()).whileTrue(
             self.drivetrain.sys_id_dynamic(SysIdRoutine.Direction.kForward)
         )
-        (self._joystick.back() & self._joystick.x()).whileTrue(
+        (self.controller1.back() & self.controller1.x()).whileTrue(
             self.drivetrain.sys_id_dynamic(SysIdRoutine.Direction.kReverse)
         )
-        (self._joystick.start() & self._joystick.y()).whileTrue(
+        (self.controller1.start() & self.controller1.y()).whileTrue(
             self.drivetrain.sys_id_quasistatic(SysIdRoutine.Direction.kForward)
         )
-        (self._joystick.start() & self._joystick.x()).whileTrue(
+        (self.controller1.start() & self.controller1.x()).whileTrue(
             self.drivetrain.sys_id_quasistatic(SysIdRoutine.Direction.kReverse)
         )
 
         # reset the field-centric heading on left bumper press
-        self._joystick.leftBumper().onTrue(
+        self.controller1.leftBumper().onTrue(
             self.drivetrain.runOnce(self.drivetrain.seed_field_centric)
         )
 
         self.drivetrain.register_telemetry(
             lambda state: self._logger.telemeterize(state)
         )
-
-    def getAutonomousCommand(self) -> commands2.Command:
-        pass
-        # Autonomous Chooser
-        # self.__autoChooser.setDefaultOption( "1 - None", cmd.none() )
-        # SmartDashboard.putData( "Autonomous Mode", self.__autoChooser )
-
-        # Default Commands
-        # sysSample.setDefaultCommand( cmdSampleLeft )
-
-        # Driver Controller Button Binding
-        # driver1.a().whileTrue( cmdSampleRight )
 
     # Get Autonomous Command
     def getAutonomousCommand(self) -> Command:
@@ -171,7 +149,7 @@ class RobotContainer:
 
         :returns: the command to run in autonomous
         """
-        # Simple drive forward auton
+        # Simple drive forward auton (Auto built by phoenix)
         idle = swerve.requests.Idle()
         return cmd.sequence(
             # Reset our field centric heading to match the robot
@@ -182,7 +160,7 @@ class RobotContainer:
             # Then slowly drive forward (away from us) for 5 seconds.
             self.drivetrain.apply_request(
                 lambda: (
-                    self._drive.with_velocity_x(0.5)
+                    self._drive_req.with_velocity_x(0.5)
                     .with_velocity_y(0)
                     .with_rotational_rate(0)
                 )
