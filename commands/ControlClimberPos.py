@@ -9,7 +9,9 @@ class ControlClimberPos(Command):
     # Variable Declaration
     climber_sys:Climber = None
 
-    input_mult = ntproperty("/Settings/ControlClimberPos/input mult", 1.0, persistent=True)
+    # a value of 1 would change desired height by 50 inches per second, thats too fast
+    # 1/50 is 1 inch per second, thats alright
+    input_mult = ntproperty("/Settings/ControlClimberPos/input mult", 1/50, persistent=True)
     
     # Initialization
     def __init__( self,
@@ -29,8 +31,8 @@ class ControlClimberPos(Command):
     def execute(self) -> None:
         self.climber_sys.setDesiredPosition(
             # this is techically unsafe for not including range restriction, but that restriction is applied in the subsystem
-            (self.climber_sys.getDesiredPosition() + (self.stick_input() * self.input_mult))
-            )
+            self.climber_sys.getDesiredPosition() + (self.stick_input() * self.input_mult)
+        )
 
     def end(self, interrupted:bool) -> None:
         pass

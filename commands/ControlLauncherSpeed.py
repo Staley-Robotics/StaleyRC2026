@@ -3,11 +3,11 @@ import typing
 from commands2 import Command, Subsystem
 from wpimath.units import percent
 
-from subsystems import Launcher, LauncherConstants
+from subsystems import Flywheel, LauncherConstants
 
 class ControlLauncherSpeed(Command):
     # Variable Declaration
-    launcher_sys:Launcher = None
+    launcher_sys:Flywheel = None
     
     # Initialization
     def __init__( self,
@@ -15,7 +15,7 @@ class ControlLauncherSpeed(Command):
                   speedInput:typing.Callable[[], percent]=lambda:0.0
                 ) -> None:
         # Command Attributes
-        self.launcher_sys:Launcher = launcherSys
+        self.launcher_sys:Flywheel = launcherSys
         self.speedInput:typing.Callable[[], percent] = speedInput
 
         self.setName( f"ControlLauncherSpeed" )

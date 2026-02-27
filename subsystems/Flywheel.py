@@ -19,7 +19,7 @@ class LauncherConstants:
 
     kMaxExpectedSpeed:rotations_per_second = 50 # 6000rpm is max free speed on specs
 
-class Launcher(Subsystem):
+class Flywheel(Subsystem):
 
     class LauncherSpeeds:
         WAIT:rotations_per_second = 5 # default speed for lower power consumption but faster acceleration when needed

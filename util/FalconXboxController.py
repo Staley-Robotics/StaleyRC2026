@@ -2,6 +2,14 @@
 from wpimath import applyDeadband
 from commands2.button import CommandXboxController
 
+from enum import Enum, auto
+
+class ControlMode(Enum):
+    PRACTICE = auto()
+    TEST = auto()
+    COMP = auto()
+    DEMO = auto()
+
 class FalconXboxController(CommandXboxController):
     def __init__(self, port:int, deadband:float = 0.04, squaredInputs:bool = True):
         super().__init__(port)
