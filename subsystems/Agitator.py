@@ -8,13 +8,37 @@ from wpimath.units import *
 from phoenix6.units import *
 
 from phoenix6.hardware import TalonFX
-from phoenix6.configs import TalonFXConfiguration, MotorOutputConfigs, Slot0Configs
+from phoenix6.configs import TalonFXConfiguration, MotorOutputConfigs, Slot0Configs, ClosedLoopGeneralConfigs
 from phoenix6.signals import InvertedValue, NeutralModeValue
-from phoenix6.controls import VoltageOut
+from phoenix6.controls import VelocityVoltage
 
 from util.FalconLogger import FalconLogger
 
 class Agitator(Subsystem):
+    '''This is functionally quite similar (if not the same) as Agitator, but for now they are kept seperate for simplicity's sake'''
+    class AgitatorSpeeds:
+        WAIT:rotations_per_second = 5 # default speed for lower power consumption but faster acceleration when needed
+        SPEED_AT_ZERO_DIST: 20 # total guess, speed at minimum distance TODO: measure
+        SPEED_AT__DIST: 50 # total guess, speed at some arbitrary larger distance TODO: measure
+
+    class Constants:
+        k_P:float=0.0
+        k_I:float=0.0
+        k_D:float=0.0
+        k_S:float=0.0
+        k_V:float=0.0
+
+        kAtSpeedTolerance:rotations_per_second = ntproperty("/Agitator/At speed tolerance (rps)", 2.0, persistent=True) #total guess
+
+        '''
+        kraken free speed max: 6000 rpm = 100 rps
+        cut to 70 for safety (and because free speed is gonna be higher than max in our mechanism)
+
+        NOTE: actual flywheel speed will be double the motor speed because of gearing
+        '''
+        kMaxExpectedSpeed:rotations_per_second = ntproperty("/Agitator/Max configured speed (rps)", 50.0, persistent=True)
+
+
     def __init__(self, motorID:int) -> None:
         ### Motor Setup
         ## Launch Motor
@@ -26,11 +50,18 @@ class Agitator(Subsystem):
             MotorOutputConfigs()
             .with_neutral_mode(NeutralModeValue.COAST)
             .with_inverted(InvertedValue.CLOCKWISE_POSITIVE)
+        ).with_slot0(
+            Slot0Configs()\
+                .with_k_p(self.Constants.k_P)\
+                .with_k_i(self.Constants.k_I)\
+                .with_k_d(self.Constants.k_D)\
+                .with_k_s(self.Constants.k_S)\
+                .with_k_v(self.Constants.k_V)
         )
         self.motor.configurator.apply(motor_config)
 
         ### Functionality Setup
-        self.motor_volt_req = VoltageOut(0.0)
+        self.velocity_req = VelocityVoltage(0.0)
 
         # Logging
         FalconLogger.addLoggedObject("Agitator/Inputs/motor", self.motor)
@@ -45,17 +76,20 @@ class Agitator(Subsystem):
             self.run()
         
         # Logging: Write Post Operation Information
-        FalconLogger.logOutput("/Agitator/Outputs/Setpoint", self.getSetSpeed())
+        FalconLogger.logOutput("/Agitator/Outputs/Setpoint", self.getDesiredSpeed())
 
     def run(self) -> None:
         # control velocity
-        self.motor.set_control(self.motor_volt_req)
+        self.motor.set_control(self.velocity_req)
 
     def stop(self) -> None:
-        self.motor_volt_req.output = 0.0
+        self.velocity_req.velocity = 0.0
 
-    def setSpeed(self, speed:percent) -> None:
-        self.motor_volt_req.output = speed * 12
+    def setDesiredSpeed(self, speed:rotations_per_second) -> None:
+        self.velocity_req.velocity = speed
 
-    def getSetSpeed(self) -> percent:
-        return self.motor_volt_req.output / 12
+    def getDesiredSpeed(self) -> rotations_per_second:
+        return self.velocity_req.velocity
+    
+    def isAtSpeed(self) -> bool:
+        return abs(self.motor.get_closed_loop_error().value) < self.Constants.kAtSpeedTolerance

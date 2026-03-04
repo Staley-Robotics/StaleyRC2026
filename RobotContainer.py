@@ -14,7 +14,7 @@ from phoenix6 import swerve
 
 ## Local Imports
 from commands import *
-from subsystems import TunerConstants, Climber, Intake, Flywheel, Agitator
+from subsystems import TunerConstants, Climber, Intake, Launcher, Agitator
 
 from util import FalconXboxController, Telemetry, ControlMode
 
@@ -30,20 +30,20 @@ class RobotContainer:
 
         ### Subsystems
         ## Climber
-        self.climbSys = Climber( 0 ) #TODO: Real device id's
+        self.climbSys = Climber( 0 ) #TODO: Real device ids
 
         ## Intake
-        self.intakeSys = Intake( 0, 0, 0 ) #TODO: Real device id's
+        self.intakeSys = Intake( 0, 0, 0 ) #TODO: Real device ids
 
         ## Agitator
-        self.agitatorSys = Agitator( 0 ) #TODO: Real device id's
+        self.agitatorSys = Agitator( 0 ) #TODO: Real device ids
 
         ## Launcher
-        self.launcherSys = Flywheel( 0 ) #TODO: Real device id's
+        self.launcherSys = Launcher( 0 ) #TODO: Real device ids
 
         ## Drive
-        self.swerveSys = TunerConstants.create_drivetrain()
-        self._logger = Telemetry(self._max_speed)
+        self.swerveSys = TunerConstants.create_drivetrain() 
+        self._logger = Telemetry(TunerConstants.speed_at_12_volts)
 
         # Auto TODO: re-implement
         # self.__autoChooser.setDefaultOption( "1 - None", cmd.none() )
@@ -87,19 +87,29 @@ class RobotContainer:
         ### Driver 2 (Operator)
     def configureTestBindings(self) -> None:
         """
-        configures controls for the robot while testing
+        configures controls for the robot to test subsystems' functionality
+        not for testing final bindings, put those in comp
         """
         #NOTE: drive bindings handled in configureDriveBindings
         ## Climbing
         self.controller1.y().toggleOnTrue(ControlClimberPos(self.climbSys, self.controller1.getRightUpDown))
 
         ## Intaking
-        # self.controller1.a().toggleOnTrue(ControlIntakePos(self.climbSys, self.controller1.getRightUpDown)) # TODO: Implement
-        self.controller1.b().toggleOnTrue(SetIntakeSpeed(self.intakeSys, Intake.IntakeSpeeds.IN))
+        # Pivot
+        # self.controller1.a().toggleOnTrue(ControlPivotPos(self.climbSys, self.controller1.getRightUpDown))
+        #OR
+        self.controller1.a().onTrue(PivotToPosition(self.intakeSys, Intake.IntakePositions.OUT))
+        self.controller1.b().onTrue(PivotToPosition(self.intakeSys, Intake.IntakePositions.IN))
+
+        # bawlz
+        self.controller1.x().toggleOnTrue(SetIntakeSpeed(self.intakeSys, Intake.IntakeSpeeds.IN))
 
         ## Launching
-        self.controller1.rightTrigger().whileTrue(RunLauncherByDist(self.launcherSys))
-        # self.controller1.rightBumper().whileTrue(RunAgitator(self.agitatorSys)) # TODO: Implement
+        # self.controller1.rightTrigger().whileTrue(RunLauncherByDist(self.launcherSys))
+        # self.controller1.rightBumper().whileTrue(ControlFlywheelSpeed(self.agitatorSys, lambda: 3000))
+        # this is a stupid way to do waht its doing:
+        self.controller1.rightTrigger(0.01).whileTrue(ControlFlywheelSpeed(self.launcherSys, self.controller1.getRightTriggerAxis))
+        self.controller1.leftTrigger(0.01).whileTrue(ControlFlywheelSpeed(self.agitatorSys, self.controller1.getLeftTriggerAxis))
 
     def configureDriveBindings(self) -> None:
         """

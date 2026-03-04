@@ -67,11 +67,11 @@ class Climber(Subsystem):
             .positionConversionFactor( convFactor ).velocityConversionFactor( convFactor / 60)
 
         #NOTE: motor forwards = claw down
-        lsConfig = LimitSwitchConfig()\
-            .reverseLimitSwitchEnabled(True)\
-            .reverseLimitSwitchType(LimitSwitchConfig.Type.kNormallyOpen)\
-            .forwardLimitSwitchEnabled(True)\
-            .forwardLimitSwitchType(LimitSwitchConfig.Type.kNormallyOpen)\
+        # lsConfig = LimitSwitchConfig()\
+        #     .reverseLimitSwitchEnabled(True)\
+        #     .reverseLimitSwitchType(LimitSwitchConfig.Type.kNormallyOpen)\
+        #     .forwardLimitSwitchEnabled(True)\
+        #     .forwardLimitSwitchType(LimitSwitchConfig.Type.kNormallyOpen)\
             
             # .reverseLimitSwitchPosition()\
             # .forwardLimitSwitchPosition()
@@ -79,7 +79,7 @@ class Climber(Subsystem):
         # Apply Configs
         motorCfg.apply(clCfg)
         motorCfg.apply(encConfig)
-        motorCfg.apply(lsConfig)
+        # motorCfg.apply(lsConfig)
 
         self.motor.configure(motorCfg, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters)
 

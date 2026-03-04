@@ -6,5 +6,13 @@
     "properties": {
       "persistent": true
     }
+  },
+  {
+    "name": "/Settings/ControlClimberPos/input mult",
+    "type": "double",
+    "value": 1.0,
+    "properties": {
+      "persistent": true
+    }
   }
 ]

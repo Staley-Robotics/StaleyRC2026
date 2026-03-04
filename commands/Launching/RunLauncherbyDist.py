@@ -3,25 +3,25 @@ import typing
 from commands2 import Command, Subsystem
 from wpimath.units import percent
 
-from subsystems import Flywheel, LauncherConstants
+from subsystems import Launcher
 
-class LauncherDefault(Command):
+class RunLauncherByDist(Command):
     # Variable Declaration
-    launcher_sys:Flywheel = None
+    launcher_sys:Launcher = None
     
     # Initialization
     def __init__( self,
                   launcherSys:Subsystem,
                 ) -> None:
         # Command Attributes
-        self.launcher_sys:Flywheel = launcherSys
+        self.launcher_sys:Launcher = launcherSys
 
-        self.setName( f"LauncherDefault" )
+        self.setName( f"ControlLauncherSpeed" )
         self.addRequirements( launcherSys )
 
     def initialize(self) -> None:
         self.launcher_sys.setDesiredSpeed(
-            self.launcher_sys.LauncherSpeeds.WAIT
+            self.launcher_sys.LauncherSpeeds.SPEED_AT_ZERO_DIST
         )
 
     def execute(self) -> None:
