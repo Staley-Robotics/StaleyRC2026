@@ -27,7 +27,7 @@ class IntakeConstants:
 class Intake(Subsystem):
     class IntakeSpeeds:
         STOP = 0
-        IN = ntproperty("/Settings/Intake/IntakeSpeed", defaultValue=0.8, persistent=True)
+        IN = 0.6
 
     class IntakePositions:
         '''
@@ -97,13 +97,12 @@ class Intake(Subsystem):
         self.pivot_motor.configurator.apply(pivot_motor_config)
 
         ### Functionality Setup
-        self.intake_speed = self.IntakeSpeeds.STOP
-        self.intake_request = 
+        self.intake_request = VoltageOut(0.0)
         self.pivot_request = PositionVoltage(self.getPivotPosition())
 
     def periodic(self) -> None:
         # Logging: Write Current Measured Subsystem State
-        FalconLogger.logInput("/Intake/Inputs/launchMotor/velocity", self.intake_motor.get_velocity())
+        FalconLogger.logInput("/Intake/Inputs/launchMotor/velocity", self.intake_motor.get_velocity().value)
 
         # Run Subsystem: Set New State To Subsystem
         if RobotState.isDisabled():
@@ -117,7 +116,7 @@ class Intake(Subsystem):
     def run(self) -> None:
         ## Intake
         #control speed by percentage
-        self.intake_motor.set_control(self.intake_speed)
+        self.intake_motor.set_control(self.pivot_request)
 
         ## Pivot
         #control position
@@ -126,14 +125,14 @@ class Intake(Subsystem):
         self.pivot_motor.set_control(self.pivot_request)
 
     def stop(self) -> None:
-        self.intake_speed = self.IntakeSpeeds.STOP
+        self.setIntakeSpeed(self.IntakeSpeeds.STOP)
         self.setPivotSetpoint(self.getPivotPosition())
 
-    def setIntakeSpeed(self, speed:IntakeSpeeds) -> None:
-        self.intake_speed = speed
+    def setIntakeSpeed(self, speed:IntakeSpeeds|percent) -> None:
+        self.intake_request = speed * 12
 
-    def getIntakeSpeed(self) -> IntakeSpeeds:
-        return self.intake_speed
+    def getIntakeSpeed(self) -> percent:
+        return self.intake_request.output / 12
     
     def setPivotSetpoint(self, setpoint:IntakePositions|degrees) -> None:
         self.pivot_request.position = min(max(setpoint, self.IntakePositions.MIN), self.IntakePositions.MAX) / 360 # deg to rot

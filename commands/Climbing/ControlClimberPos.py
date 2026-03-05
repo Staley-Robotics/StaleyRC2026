@@ -19,7 +19,7 @@ class ControlClimberPos(Command):
                   stickInput:typing.Callable[[], float]=lambda:0.0
                 ) -> None:
         # Command Attributes
-        self.intake_sys:Climber = climberSys
+        self.climber_sys:Climber = climberSys
         self.stick_input = stickInput
 
         self.setName( f"ControlClimberPos" )
@@ -29,8 +29,8 @@ class ControlClimberPos(Command):
         pass
 
     def execute(self) -> None:
+        # this is techically unsafe for not including range restriction, but that restriction is applied in the subsystem
         self.climber_sys.setDesiredPosition(
-            # this is techically unsafe for not including range restriction, but that restriction is applied in the subsystem
             self.climber_sys.getDesiredPosition() + (self.stick_input() * self.input_mult)
         )
 

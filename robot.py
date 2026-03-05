@@ -40,8 +40,8 @@ class MyRobot(TimedRobot):
         # Write the Log Results
         try:
             self.__logger.writeLog()
-        except:
-            print("WARNING! FalconLogger Cannot Write to Log!")
+        except Exception as err:
+            print(f"WARNING! FalconLogger Cannot Write to Log!: {err}")
 
     # Autonomous Mode
     def autonomousInit(self):
