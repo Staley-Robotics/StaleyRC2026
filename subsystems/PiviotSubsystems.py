@@ -44,7 +44,7 @@ class Piviot(Subsystem,):
         pass
 
 class PiviotPOS():
-    MIN:degrees = -74
+    MIN:degrees = -74 #not correst on all of these btw
     MAX:degrees = 90
     START:degrees = -90
     SOURCE:degrees = 5
