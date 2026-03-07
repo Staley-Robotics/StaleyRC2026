@@ -5,6 +5,7 @@ from phoenix6.controls import PositionVoltage
 from phoenix6.hardware import TalonFX
 from phoenix6.signals import NeutralModeValue
 from wpilib import TimedRobot, XboxController, Mechanism2d, MechanismRoot2d, MechanismLigament2d, SmartDashboard, Color8Bit, Color
+import wpilib
 from wpimath.system.plant import DCMotor
 from wpilib.simulation import ElevatorSim, SingleJointedArmSim;
 from ntcore.util import ntproperty
@@ -26,6 +27,8 @@ class MyRobot(TimedRobot):
     # Approximate mechanism properties (realistic defaults)
     ARM_LENGTH_M = 0.33
     ARM_MASS_KG = 4.0 # actually pretty close to the real weight
+
+    SIM_KP_VOLTS_PER_DEG = .20 # simple proportional voltage for simulation, to be tuned
     
     def __init__(self, period = 0.02):
         super().__init__(period)
@@ -45,7 +48,7 @@ class MyRobot(TimedRobot):
         self.config = TalonFXConfiguration()
         self.config.motor_output.neutral_mode = NeutralModeValue.BRAKE # may change to FLOAT
         # Closed-loop PID gains for PositionVoltage (Slot0)
-        self.config.slot0.k_p = 12.0 # to be tuned
+        self.config.slot0.k_p = 1.0 # to be tuned
         self.config.slot0.k_i = 0.0 # to be tuned
         self.config.slot0.k_d = 0.25 # to be tuned
         self.config.slot0.k_g = 0.0 # to be tuned
@@ -124,12 +127,17 @@ class MyRobot(TimedRobot):
         # Buttons
         a_pressed = self.controller.getAButtonPressed()
         b_pressed = self.controller.getBButtonPressed()
+        dpad_up = self.controller.getPOV() > 340 and self.controller.getPOV() < 20 # 20 degree threshold
+        dpad_down = self.controller.getPOV() > 160 and self.controller.getPOV() < 200 # 20 degree threshold
+        dpad_up_pressed = dpad_up and not #logic tbd a;lkfj as;ldfj 
 
         # Change target angle
         if a_pressed: # increase angle
             self.target_angle_deg = min(self.target_angle_deg + self.stepSize, self.HIGH_ANGLE_DEG)
         if b_pressed: # decrease angle
             self.target_angle_deg = max(self.target_angle_deg - self.stepSize, self.LOW_ANGLE_DEG)
+
+        
 
         # Set target motor rot based on target angle
         self.target_motor_rot = self._angle_deg_to_motor_rot(self.target_angle_deg)
@@ -149,7 +157,22 @@ class MyRobot(TimedRobot):
 
 
     def _simulationPeriodic(self):
-        return super()._simulationPeriodic()
+        # Drive arm simulation toward target angle with a simple proportional voltage.
+        error_deg = self.target_angle_deg - self.arm_sim.getAngleDegrees()
+        applied_voltage = max(-12.0, min(12.0, error_deg * self.SIM_KP_VOLTS_PER_DEG))
+        self.arm_sim.setInputVoltage(applied_voltage)
+        self.arm_sim.update(self.getPeriod())
+
+        sim_angle_deg = self.arm_sim.getAngleDegrees()
+
+        # Update mechanism drawing
+        self.pivot_target_ligament.setAngle(self.target_angle_deg)
+        self.pivot_actual_ligament.setAngle(sim_angle_deg)
+
+        SmartDashboard.putNumber("Pivot/SimAngleDeg", sim_angle_deg)
+        SmartDashboard.putNumber("Pivot/SimVelocityDps", self.arm_sim.getVelocityDps())
+        SmartDashboard.putNumber("Pivot/SimCurrentDrawA", self.arm_sim.getCurrentDraw())
+        SmartDashboard.putNumber("Pivot/SimAppliedVoltage", applied_voltage)
 
     # def teleopPeriodic(self):
     #     # trigger = self.controller.getRightTriggerAxis()
@@ -172,3 +195,8 @@ class MyRobot(TimedRobot):
     @classmethod
     def _motor_rot_to_angle_deg(cls, motor_rot: float) -> float:
         return (motor_rot / cls.GEAR_RATIO) * 360.0
+
+
+if __name__ == "__main__":
+    robot = MyRobot()
+    wpilib.run(robot)
