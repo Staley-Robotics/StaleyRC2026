@@ -3,8 +3,8 @@ from wpilib import SendableChooser, SmartDashboard
 from commands2 import Command, cmd
 
 # Local Imports
-from subsystems import SampleSubsystem, Climber
-from commands import SampleCommand, ClimberDecreasePos, ClimberIncreasePos, ClimberUpdatePos
+from subsystems import Climber
+from commands import ClimberChangePos
 from util import FalconXboxController
 
 class RobotContainer:
@@ -23,13 +23,12 @@ class RobotContainer:
         driver1 = FalconXboxController( 0 )
 
         # Declare Subsystems
-        sysSample = SampleSubsystem( 0 ) 
         climber = Climber(0)
 
         # Commands
-        climberIncPos = ClimberIncreasePos( climber )
-        climberDecPos = ClimberDecreasePos( climber )
-        climberUpdatePos = ClimberUpdatePos( climber )
+        climberIncPos = ClimberChangePos( climber, 1 ) #ClimberIncreasePos( climber )
+        climberDecPos = ClimberChangePos( climber, -1 ) #ClimberDecreasePos( climber )
+
 
 
         # Autonomous Chooser
@@ -40,9 +39,8 @@ class RobotContainer:
        # sysSample.setDefaultCommand( cmdSampleLeft )
 
         # Driver Controller Button Binding
-        driver1.y().onTrue( climberIncPos )
-        driver1.a().onTrue( climberDecPos )
-        driver1.b().whileTrue( climberUpdatePos )
+        driver1.y().whileTrue( climberIncPos )
+        driver1.a().whileTrue( climberDecPos )
 
     # Get Autonomous Command
     def getAutonomousCommand(self) -> Command:
