@@ -18,17 +18,17 @@ class Agitator(Subsystem):
     '''This is functionally quite similar (if not the same) as Agitator, but for now they are kept seperate for simplicity's sake'''
     class AgitatorSpeeds:
         WAIT:rotations_per_second = 5 # default speed for lower power consumption but faster acceleration when needed
-        SPEED_AT_ZERO_DIST: 20 # total guess, speed at minimum distance TODO: measure
-        SPEED_AT__DIST: 50 # total guess, speed at some arbitrary larger distance TODO: measure
+        SPEED_AT_ZERO_DIST: 40 # total guess, speed at minimum distance TODO: measure
+        SPEED_AT__DIST: 40 # total guess, speed at some arbitrary larger distance TODO: measure
 
     class Constants:
         k_P:float=0.0
         k_I:float=0.0
         k_D:float=0.0
-        k_S:float=0.0
-        k_V:float=0.0
+        k_S:float=0.32
+        k_V:float=0.118
 
-        kAtSpeedTolerance:rotations_per_second = ntproperty("/Agitator/At speed tolerance (rps)", 2.0, persistent=True) #total guess
+        kAtSpeedTolerance:rotations_per_second = 3.0 # ntproperty("/Agitator/At speed tolerance (rps)", 2.0, persistent=True) #total guess
 
         '''
         kraken free speed max: 6000 rpm = 100 rps
@@ -36,7 +36,8 @@ class Agitator(Subsystem):
 
         NOTE: actual flywheel speed will be double the motor speed because of gearing
         '''
-        kMaxExpectedSpeed:rotations_per_second = ntproperty("/Agitator/Max configured speed (rps)", 50.0, persistent=True)
+        kMaxAllowedSpeed:rotations_per_second = 60.0
+        kSpeedAt12Volts:rotations_per_second = 90.0
 
 
     def __init__(self, motorID:int) -> None:
@@ -49,7 +50,7 @@ class Agitator(Subsystem):
         motor_config = motor_config.with_motor_output(
             MotorOutputConfigs()
             .with_neutral_mode(NeutralModeValue.COAST)
-            .with_inverted(InvertedValue.CLOCKWISE_POSITIVE)
+            .with_inverted(InvertedValue.COUNTER_CLOCKWISE_POSITIVE)
         ).with_slot0(
             Slot0Configs()\
                 .with_k_p(self.Constants.k_P)\

@@ -26,7 +26,7 @@ class ControlFlywheelSpeed(Command):
 
     def execute(self) -> None:
         self.flywheel_sys.setDesiredSpeed(
-            self.speedInput() * self.flywheel_sys.Constants.kMaxExpectedSpeed
+            self.speedInput() * self.flywheel_sys.Constants.kMaxAllowedSpeed
         )
 
     def end(self, interrupted:bool) -> None:

@@ -4,14 +4,16 @@ from commands2 import Subsystem
 from wpilib import RobotState, DutyCycleEncoder, SmartDashboard
 from wpimath.controller import PIDController, ProfiledPIDControllerRadians
 from wpimath.trajectory import TrapezoidProfileRadians
+from wpilib.simulation import SingleJointedArmSim, LinearSystemSim_2_1_2
+from wpimath.system.plant import DCMotor
 from ntcore.util import ntproperty
 
 from wpimath.units import *
 from phoenix6.units import *
 
-from phoenix6.hardware import TalonFX
-from phoenix6.configs import TalonFXConfiguration, MotorOutputConfigs, Slot0Configs, FeedbackConfigs
-from phoenix6.signals import InvertedValue, NeutralModeValue, FeedbackSensorSourceValue, GravityTypeValue
+from phoenix6.hardware import TalonFX, CANcoder
+from phoenix6.configs import TalonFXConfiguration, MotorOutputConfigs, Slot0Configs, FeedbackConfigs, CANcoderConfiguration, MagnetSensorConfigs
+from phoenix6.signals import InvertedValue, NeutralModeValue, FeedbackSensorSourceValue, GravityTypeValue, SensorDirectionValue
 from phoenix6.controls import PositionVoltage, VoltageOut
 
 # from rev
@@ -24,10 +26,12 @@ class IntakeConstants:
     kD:float=0.0 # differential     The harder it pushes, the less it pushes
     kG:float=0.0 # gravity          Constant force, but accounting for gravity
 
+    gear_ratio:float=16 #total guess
+
 class Intake(Subsystem):
     class IntakeSpeeds:
         STOP = 0
-        IN = 0.6
+        IN = 0.5
 
     class IntakePositions:
         '''
@@ -37,11 +41,12 @@ class Intake(Subsystem):
         '''
         MAX:degrees = 80 #NOTE: currently underestimate for safety in testing
         MIN:degrees = 10 #NOTE: currently underestimate for safety in testing
+        START:degree = MAX
 
         IN:degrees = 80 #NOTE: currently underestimate for safety in testing
         OUT:degrees = 10 #NOTE: currently underestimate for safety in testing
 
-    def __init__(self, intakeMotorID:int, pivotMotorID:int, pivotEncoderID:int) -> None:
+    def __init__(self, intakeMotorID:int, pivotMotorID:int, pivotEncoderID:int, pivotEncoderOffset:rotation) -> None:
         ### Motor Setup
         ## Intake Motor
         self.intake_motor = TalonFX(intakeMotorID, "rio")
@@ -79,6 +84,7 @@ class Intake(Subsystem):
         pivot_motor_config = pivot_motor_config.with_motor_output(
             MotorOutputConfigs()
             .with_neutral_mode(NeutralModeValue.COAST)
+            .with_inverted(InvertedValue.CLOCKWISE_POSITIVE)
         ).with_slot0(
             Slot0Configs()
                 .with_k_p(IntakeConstants.kP)
@@ -96,9 +102,31 @@ class Intake(Subsystem):
         # )
         self.pivot_motor.configurator.apply(pivot_motor_config)
 
+        # Encoder
+        #just for configs - accessed thru motor
+        encoder = CANcoder(pivotEncoderID, "rio")
+        encoder_cfg = CANcoderConfiguration()\
+            .with_magnet_sensor(
+                MagnetSensorConfigs()\
+                .with_magnet_offset(pivotEncoderOffset)
+                .with_sensor_direction(SensorDirectionValue.COUNTER_CLOCKWISE_POSITIVE)
+            )
+
         ### Functionality Setup
         self.intake_request = VoltageOut(0.0)
         self.pivot_request = PositionVoltage(self.getPivotPosition())
+
+        ### Simulation
+        # self.arm_sim = SingleJointedArmSim(
+        #     DCMotor.krakenX60(),
+        #     IntakeConstants.gear_ratio,
+        #     SingleJointedArmSim.estimateMOI( 0.0, 0.0 ),
+        #     0.0,
+        #     degreesToRadians( self.IntakePositions.MIN ),
+        #     degreesToRadians( self.IntakePositions.MAX ),
+        #     True, # Gravity
+        #     degreesToRadians( self.IntakePositions.START )
+        # )
 
     def periodic(self) -> None:
         # Logging: Write Current Measured Subsystem State
@@ -116,7 +144,7 @@ class Intake(Subsystem):
     def run(self) -> None:
         ## Intake
         #control speed by percentage
-        self.intake_motor.set_control(self.pivot_request)
+        self.intake_motor.set_control(self.intake_request)
 
         ## Pivot
         #control position
@@ -129,7 +157,7 @@ class Intake(Subsystem):
         self.setPivotSetpoint(self.getPivotPosition())
 
     def setIntakeSpeed(self, speed:IntakeSpeeds|percent) -> None:
-        self.intake_request = speed * 12
+        self.intake_request.output = speed * 12
 
     def getIntakeSpeed(self) -> percent:
         return self.intake_request.output / 12

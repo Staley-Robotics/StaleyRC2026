@@ -1,5 +1,21 @@
 [
   {
+    "name": "/Settings/ControlIntakePos/input mult",
+    "type": "double",
+    "value": 0.04,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Settings/ControlClimberPos/input mult",
+    "type": "double",
+    "value": 1.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
     "name": "/Agitator/At speed tolerance (rps)",
     "type": "double",
     "value": 2.0,
@@ -27,22 +43,6 @@
     "name": "/Launcher/Max configured speed (rps)",
     "type": "double",
     "value": 50.0,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Settings/ControlIntakePos/input mult",
-    "type": "double",
-    "value": 0.04,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Settings/ControlClimberPos/input mult",
-    "type": "double",
-    "value": 1.0,
     "properties": {
       "persistent": true
     }

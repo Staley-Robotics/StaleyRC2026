@@ -1,7 +1,7 @@
 import typing
 
 from commands2 import Command, Subsystem
-from subsystems import Intake
+from subsystems import Intake, percent
 
 class SetIntakeSpeed(Command):
     # Variable Declaration
@@ -9,12 +9,12 @@ class SetIntakeSpeed(Command):
     
     # Initialization
     def __init__( self,
-                  intakeSys:Subsystem,
-                  speed:Intake.IntakeSpeeds
+                  intakeSys:Intake,
+                  speed:Intake.IntakeSpeeds|percent
                 ) -> None:
         # Command Attributes
         self.intake_sys:Intake = intakeSys
-        self.set_speed:Intake.IntakeSpeeds = speed
+        self.set_speed:Intake.IntakeSpeeds|percent = speed
 
         self.setName( f"SetIntakeSpeed: {speed}%" )
         self.addRequirements( intakeSys )
