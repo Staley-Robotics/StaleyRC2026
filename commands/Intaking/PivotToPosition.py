@@ -29,7 +29,8 @@ class PivotToPosition(Command):
         pass
 
     def end(self, interrupted:bool) -> None:
-        pass
+        if interrupted:
+            self.intake_sys.setPivotSetpoint(self.intake_sys.getPivotPosition())
 
     def isFinished(self) -> bool:
         return False

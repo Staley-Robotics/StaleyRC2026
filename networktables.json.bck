@@ -8,6 +8,14 @@
     }
   },
   {
+    "name": "/Settings/RunFlywheelByNT/speed (rps: 0-70)",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
     "name": "/Settings/ControlClimberPos/input mult",
     "type": "double",
     "value": 1.0,

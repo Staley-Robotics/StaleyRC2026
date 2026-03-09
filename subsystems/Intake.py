@@ -111,6 +111,8 @@ class Intake(Subsystem):
                 .with_magnet_offset(pivotEncoderOffset)
                 .with_sensor_direction(SensorDirectionValue.COUNTER_CLOCKWISE_POSITIVE)
             )
+        #Apply
+        encoder.configurator.apply(encoder_cfg)
 
         ### Functionality Setup
         self.intake_request = VoltageOut(0.0)

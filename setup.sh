@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# To run, use "./setup.sh" in the terminal and follow the instructions
+
 # coloring setup
 col_print () {
   echo -e "$2$1\033[0m"

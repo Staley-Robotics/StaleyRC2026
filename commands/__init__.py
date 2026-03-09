@@ -2,6 +2,7 @@ from .Intaking.ControlPivotPos import *
 from .Intaking.SetIntakeSpeed import *
 from .Intaking.PivotToPosition import *
 from .Launching.RunLauncherbyDist import *
+from .Launching.RunAgitatorByNT import *
 from .Launching.LauncherDefault import *
 from .Launching.RunFlyWheelByNT import *
 from .Launching.ControlFlywheelSpeed import *

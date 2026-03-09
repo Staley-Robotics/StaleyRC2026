@@ -61,7 +61,7 @@ class Agitator(Subsystem):
         )
         self.motor.configurator.apply(motor_config)
 
-        ### Functionality Setup
+        ### Functionality Setup (velocity request)
         self.velocity_req = VelocityVoltage(0.0)
 
         # Logging

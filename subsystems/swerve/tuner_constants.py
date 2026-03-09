@@ -75,7 +75,7 @@ class TunerConstants:
 
     # CAN bus that the devices are located on;
     # All swerve devices must share the same CAN bus
-    canbus = CANBus("", "./logs/example.hoot")
+    canbus = CANBus("canivore1", "./logs/example.hoot")
 
     # Theoretical free speed (m/s) at 12 V applied output;
     # This needs to be tuned to your individual robot
@@ -170,11 +170,11 @@ class TunerConstants:
     _back_left_x_pos: units.meter = inchesToMeters(-11)
     _back_left_y_pos: units.meter = inchesToMeters(11)
 
-    # Back Right
+    # Back Right - had magnet issues (3-9-26)
     _back_right_drive_motor_id = 5
     _back_right_steer_motor_id = 6
     _back_right_encoder_id = 3
-    _back_right_encoder_offset: units.rotation = 0.03955078125
+    _back_right_encoder_offset: units.rotation = 0.327393
     _back_right_steer_motor_inverted = False
     _back_right_encoder_inverted = False
 

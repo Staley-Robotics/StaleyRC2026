@@ -22,11 +22,11 @@ class Launcher(Subsystem):
         SPEED_AT__DIST: 70 # total guess, speed at some arbitrary larger distance TODO: measure
 
     class Constants:
-        k_P:float=0.3
+        k_P:float=0.2
         k_I:float=0.0
-        k_D:float=0.1
-        k_S:float=0.32
-        k_V:float=0.122
+        k_D:float=0.005
+        k_S:float=0.25
+        k_V:float=0.07
 
         kAtSpeedTolerance:rotations_per_second = 3.0 # ntproperty("/Launcher/At speed tolerance (rps)", 2.0, persistent=True) #total guess
 
@@ -82,7 +82,7 @@ class Launcher(Subsystem):
     def run(self) -> None:
         # control velocity
         if self.getDesiredSpeed() == 0:
-            self.motor.set(0) # allows to coast down to 0 vel rather than hard stopping
+            self.motor.set(0)
         else:
             self.motor.set_control(self.velocity_req)
 

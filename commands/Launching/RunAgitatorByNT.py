@@ -4,20 +4,20 @@ from commands2 import Command, Subsystem
 from wpimath.units import percent
 from ntcore.util import ntproperty
 
-from subsystems import Launcher
+from subsystems import Agitator
 
-class RunFlyWheelByNT(Command):
+class RunAgitatorByNT(Command):
     # Variable Declaration
-    flywheel_sys:Launcher = None
+    flywheel_sys:Agitator = None
 
-    speed = ntproperty("/Settings/RunFlywheelByNT/speed (rps: 0-70)", 0.0, persistent=True)
+    speed = ntproperty("/Settings/RunAgitatorByNT/speed (rps: 0-70)", 0.0, persistent=True)
     
     # Initialization
     def __init__( self,
-                  flywheelSys:Launcher,
+                  flywheelSys:Agitator,
                 ) -> None:
         # Command Attributes
-        self.flywheel_sys:Launcher = flywheelSys
+        self.flywheel_sys:Agitator = flywheelSys
 
         self.setName( f"RunFlywheelByNT - {flywheelSys.__class__.__name__}" )
         self.addRequirements( flywheelSys )
