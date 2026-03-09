@@ -22,11 +22,20 @@ class Launcher(Subsystem):
         SPEED_AT__DIST: 70 # total guess, speed at some arbitrary larger distance TODO: measure
 
     class Constants:
-        k_P:float=0.3
+        # PID constants were tuned with a setSpeed of 30 rots/sec
+        """
+        Extra notes:
+        kV was around .1, but as kP was increased to decrease time from rest to targetSpeed,
+        kV was decreased to prevent overshoot. This is because the controller is using a velocity feedforward,
+        so if kP is too low, it will rely on the feedforward to get to speed, but if kP is high enough,
+        it will rely more on feedback to get to speed,
+        so the feedforward needs to be less aggressive to prevent overshooting.
+        """
+        k_P:float=0.2
         k_I:float=0.0
-        k_D:float=0.1
-        k_S:float=0.32
-        k_V:float=0.122
+        k_D:float=0.005
+        k_S:float=0.25
+        k_V:float=0.07
 
         kAtSpeedTolerance:rotations_per_second = 3.0 # ntproperty("/Launcher/At speed tolerance (rps)", 2.0, persistent=True) #total guess
 
