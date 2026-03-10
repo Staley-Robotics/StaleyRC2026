@@ -139,7 +139,9 @@ class Climber(Subsystem):
         self.motorOutput = self.elevatorSim.getOutput()
 
     def changeDesiredPos(self, pos:float):
-        self.setPos = pos
+        #Add min max thing
+
+        self.setPos = max(min(pos, ClimberPositions.TOP), ClimberPositions.BOTTOM)
 
     def getSetPos(self):
         return self.setPos

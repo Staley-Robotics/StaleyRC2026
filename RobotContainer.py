@@ -26,8 +26,8 @@ class RobotContainer:
         climber = Climber(0)
 
         # Commands
-        climberIncPos = ClimberChangePos( climber, 1 ) #ClimberIncreasePos( climber )
-        climberDecPos = ClimberChangePos( climber, -1 ) #ClimberDecreasePos( climber )
+        climberIncPos = ClimberChangePos( climber, +1 )
+        climberDecPos = ClimberChangePos( climber, -1 )
 
 
 

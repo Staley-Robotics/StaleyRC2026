@@ -14,24 +14,23 @@ class ClimberChangePos(Command):
     def __init__( self,
                   ClimberSys:Subsystem,
                 #   joystick: typing.Callable[[], float] = lambda: 0.0
+                  ChangeAmount:float
                 ) -> None:
         # Command Attributes
         self.climber_Sys:Climber = ClimberSys
         # self.m_getValue = joystick
         self.setName( "ClimberChangePos" )
         self.addRequirements( ClimberSys )
-        self.bottomChange = ...
-        self.topchange = ...
+        self.changeAmount = ChangeAmount
     # On Start
     def initialize(self) -> None:
         pass
 
     # Periodic
     def execute(self) -> None:
-        bottomTargetPos = min(self.climber_Sys.getCurPos() + 1, ClimberPositions.BOTTOM)
-        self.climber_Sys.changeDesiredPos(bottomTargetPos)
-        topTargetPos = min(self.climber_Sys.getCurPos() - 1, ClimberPositions.BOTTOM)
-        self.climber_Sys.changeDesiredPos(topTargetPos)
+        climberPos = (self.climber_Sys.getSetPos() + self.changeAmount)
+        self.climber_Sys.changeDesiredPos(climberPos)
+
 
     
     # On End
