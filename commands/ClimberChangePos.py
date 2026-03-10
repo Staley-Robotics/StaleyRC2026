@@ -4,7 +4,7 @@ from commands2 import Command, Subsystem
 from subsystems import Climber, ClimberPositions
 from ntcore.util import ntproperty
 
-class ClimberUpdatePos(Command):
+class ClimberChangePos(Command):
     # Variable Declaration
     climber_Sys:Climber = None
     # m_getValue:typing.Callable[[],float] = lambda: 0.0
@@ -18,16 +18,22 @@ class ClimberUpdatePos(Command):
         # Command Attributes
         self.climber_Sys:Climber = ClimberSys
         # self.m_getValue = joystick
-        self.setName( "ClimberUpdatePos" )
+        self.setName( "ClimberChangePos" )
         self.addRequirements( ClimberSys )
-
+        self.bottomChange = ...
+        self.topchange = ...
     # On Start
     def initialize(self) -> None:
         pass
 
     # Periodic
     def execute(self) -> None:
-        self.climber_Sys.updateSetpoint()
+        bottomTargetPos = min(self.climber_Sys.getCurPos() + 1, ClimberPositions.BOTTOM)
+        self.climber_Sys.changeDesiredPos(bottomTargetPos)
+        topTargetPos = min(self.climber_Sys.getCurPos() - 1, ClimberPositions.BOTTOM)
+        self.climber_Sys.changeDesiredPos(topTargetPos)
+
+    
     # On End
     def end(self, interrupted:bool) -> None:
         pass

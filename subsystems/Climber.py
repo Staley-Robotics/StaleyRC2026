@@ -16,7 +16,7 @@ class ClimberConstants:
     _kV = 0.0 # Apply __ voltage for target velocity
     _kFF = 0.0#0.001 # Feed Forward
 
-    _kAtSetpointTolerence:inches = 1.0
+    _kAtsetPosTolerence:inches = 1.0
     _pulleyRadius:inches = 0.440
     _pulleyDiameter:inches = _pulleyRadius *2
     _gearRatio = 100.0
@@ -41,7 +41,6 @@ class Climber(Subsystem):
 
         self.leadEncoder.setPosition(ClimberPositions.BOTTOM)
         self.setPos = 0.0
-        self.setPoint = 0.0
         self.__pidController = self.climbMotor.getClosedLoopController()
 
         convFactor = ClimberConstants._motorRotsPerHeightInches
@@ -125,7 +124,7 @@ class Climber(Subsystem):
 
     def run(self) -> None:
         self.__pidController.setReference(
-            self.setPoint,
+            self.setPos,
             SparkBase.ControlType.kPosition, 
             ClosedLoopSlot.kSlot0
         )
@@ -145,11 +144,11 @@ class Climber(Subsystem):
     def getSetPos(self):
         return self.setPos
     
-    def updateSetpoint(self):
-        self.setPoint = self.setPos
+    def updatesetPos(self):
+        self.setPos = self.setPos
 
-    def getSetPointAtSetPos(self):
-        return self.setPoint == self.setPos
+    def getsetPosAtSetPos(self):
+        return self.setPos == self.setPos
 
     def getCurPos(self)->inches:
         self.curPos = self.climbMotor.get_position().value
@@ -166,7 +165,7 @@ class Climber(Subsystem):
             self.run()
         
         # Logging: Write Post Operation Information
-        self.m_logging.putNumber( "Setpoint", self.getSetpoint() )
+        self.m_logging.putNumber( "setPos", self.getsetPos() )
         self.m_logging.putNumber( "Measured", self.m_system )
 
     # Stop the Subsystem
@@ -174,5 +173,4 @@ class Climber(Subsystem):
         pass
 
     def getAtPosition(self) -> bool:
-        return abs(self.getCurPos() - self.setPos )< ClimberConstants._kAtSetpointTolerence
-    # 6 6+1 saver
+        return abs(self.getCurPos() - self.setPos )< ClimberConstants._kAtsetPosTolerence
