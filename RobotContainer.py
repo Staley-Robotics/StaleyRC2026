@@ -39,7 +39,7 @@ class RobotContainer:
         self.launcherSys = Launcher( 13 )
 
         ## Climber
-        self.climbSys = Climber( 14 )
+        # self.climbSys = Climber( 14 )
 
         ## Drive
         self.swerveSys = TunerConstants.create_drivetrain() # TODO: Check configs
@@ -52,7 +52,7 @@ class RobotContainer:
         SmartDashboard.putData("Subsystems/Intake", self.intakeSys)
         SmartDashboard.putData("Subsystems/Agitator", self.agitatorSys)
         SmartDashboard.putData("Subsystems/Launcher", self.launcherSys)
-        SmartDashboard.putData("Subsystems/Climber", self.climbSys)
+        # SmartDashboard.putData("Subsystems/Climber", self.climbSys)
 
         ### Configure the button bindings
         self.configureDriveBindings()

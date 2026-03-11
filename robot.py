@@ -2,8 +2,10 @@
 from pathlib import Path
 
 # FRC Imports
-from wpilib import DriverStation, DataLogManager, RobotBase, TimedRobot
+from wpilib import DriverStation, DataLogManager, RobotBase, TimedRobot, XboxController
 from commands2 import Command, CommandScheduler
+from rev import SparkMax
+from ntcore.util import ntproperty
 
 # Local Imports
 from RobotContainer import RobotContainer
@@ -14,6 +16,10 @@ class MyRobot(TimedRobot):
     __robotContainer:RobotContainer = None
     __autoCmd:Command = None
     __logger:FalconLogger = None
+
+    climberSpeed = ntproperty("/climberSpeed", defaultValue=0.0, persistent=True)
+
+    controller = XboxController(0)
 
     # Initialization
     def robotInit(self):
@@ -28,6 +34,9 @@ class MyRobot(TimedRobot):
         # Built The Robot
         self.__robotContainer = RobotContainer()
         self.__logger = FalconLogger(False)
+
+        # and a test climb motor
+        self.iMotor = SparkMax(14, SparkMax.MotorType.kBrushless)
 
     # Periodic Loop / All Modes
     def robotPeriodic(self):
@@ -62,7 +71,21 @@ class MyRobot(TimedRobot):
 
     # Teleop Mode
     def teleopInit(self): pass
-    def teleopPeriodic(self): pass
+    def teleopPeriodic(self): # stuff here for climber
+        # Buttons
+        # a_pressed = self.controller.getAButtonPressed()
+        # b_pressed = self.controller.getBButtonPressed()
+        # back_pressed = self.controller.getBackButtonPressed()
+        l_bumper_pressed = self.controller.getLeftBumperButtonPressed()
+        r_bumper_pressed = self.controller.getRightBumperButtonPressed()
+
+        if (r_bumper_pressed):
+            self.climberSpeed = min(1, max(self.climberSpeed + 0.1, -1)) # 
+        if (l_bumper_pressed):
+            self.climberSpeed = min(1, max(self.climberSpeed - 0.1, -1)) #
+
+        self.iMotor.set(self.climberSpeed)
+
     def teleopExit(self): pass
 
     # Test Mode
