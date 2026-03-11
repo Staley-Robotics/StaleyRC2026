@@ -19,14 +19,14 @@ class PivotToPosition(Command):
         self.intake_sys:Intake = intakeSys
         self.setPos = setPos
 
-        self.setName( f"ControlPivotPos: {setPos} degrees" )
+        self.setName( f"PivotToPosition: {setPos} degrees" )
         self.addRequirements( intakeSys )
 
     def initialize(self) -> None:
         self.intake_sys.setPivotSetpoint(self.setPos)
 
     def execute(self) -> None:
-        pass
+        self.intake_sys.setPivotSetpoint(self.setPos)
 
     def end(self, interrupted:bool) -> None:
         if interrupted:

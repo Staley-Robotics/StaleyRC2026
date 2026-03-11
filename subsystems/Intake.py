@@ -39,12 +39,13 @@ class Intake(Subsystem):
         0 is (should be) the horizontal/outward/deployed position
         90 is (should be) straight up
         '''
-        MAX:degrees = 80 #NOTE: currently underestimate for safety in testing
-        MIN:degrees = 10 #NOTE: currently underestimate for safety in testing
+        MAX:degrees = 131.4 # 0.403809 rot measured -(arbitrarily)-> 0.365 rot for safety
+        MIN:degrees = 10    # 0 (by definition)
         START:degree = MAX
 
-        IN:degrees = 80 #NOTE: currently underestimate for safety in testing
-        OUT:degrees = 10 #NOTE: currently underestimate for safety in testing
+        STORED:degrees =  120
+        INTAKING:degrees = 5
+        BOUNCE_UP:degrees = 30
 
     def __init__(self, intakeMotorID:int, pivotMotorID:int, pivotEncoderID:int, pivotEncoderOffset:rotation) -> None:
         ### Motor Setup
@@ -97,6 +98,8 @@ class Intake(Subsystem):
             FeedbackConfigs()
                 .with_feedback_remote_sensor_id(pivotEncoderID)
                 .with_feedback_sensor_source(FeedbackSensorSourceValue.REMOTE_CANCODER)
+                .with_rotor_to_sensor_ratio(11/60) #rotor tooth count / pivot tooth count?
+                .with_sensor_to_mechanism_ratio(1)
         )
         # pivot_motor_config = pivot_motor_config.with_closed_loop_general(
         # )
@@ -104,7 +107,7 @@ class Intake(Subsystem):
 
         # Encoder
         #just for configs - accessed thru motor
-        encoder = CANcoder(pivotEncoderID, "rio")
+        self.pivot_encoder = CANcoder(pivotEncoderID, "rio")
         encoder_cfg = CANcoderConfiguration()\
             .with_magnet_sensor(
                 MagnetSensorConfigs()\
@@ -112,11 +115,16 @@ class Intake(Subsystem):
                 .with_sensor_direction(SensorDirectionValue.COUNTER_CLOCKWISE_POSITIVE)
             )
         #Apply
-        encoder.configurator.apply(encoder_cfg)
+        self.pivot_encoder.configurator.apply(encoder_cfg)
+        self.pivot_encoder.set_position(0)
 
         ### Functionality Setup
         self.intake_request = VoltageOut(0.0)
         self.pivot_request = PositionVoltage(self.getPivotPosition())
+
+        ## Logging
+        FalconLogger.addLoggedObject("/Intake/PivotMotor", self.pivot_motor)
+        FalconLogger.addLoggedObject("/Intake/IntakeMotor", self.intake_motor)
 
         ### Simulation
         # self.arm_sim = SingleJointedArmSim(
@@ -141,7 +149,10 @@ class Intake(Subsystem):
             self.run()
         
         # Logging: Write Post Operation Information
-        FalconLogger.logOutput("/Intake/Outputs/Setpoint", self.getPivotPosition())
+        FalconLogger.logOutput("/Intake/Outputs/Setpoint", self.getPivotSetpoint())
+        FalconLogger.logOutput("/Intake/Outputs/Error", self.pivot_motor.get_closed_loop_error().value)
+        FalconLogger.logOutput("/Intake/Outputs/closed loop reference * 360", self.pivot_motor.get_closed_loop_reference().value * 360)
+        FalconLogger.logOutput("/Intake/Outputs/Position", self.getPivotPosition())
 
     def run(self) -> None:
         ## Intake
@@ -168,7 +179,7 @@ class Intake(Subsystem):
         self.pivot_request.position = min(max(setpoint, self.IntakePositions.MIN), self.IntakePositions.MAX) / 360 # deg to rot
     
     def getPivotSetpoint(self) -> degrees:
-        return self.pivot_request.position / 360
+        return self.pivot_request.position * 360
     
     def getPivotPosition(self) -> degrees:
-        return self.pivot_motor.get_position().value * 360 # rot to deg
+        return self.pivot_encoder.get_absolute_position().value * 360 # rot to deg

@@ -30,7 +30,7 @@ class RobotContainer:
 
         ### Subsystems
         ## Intake
-        self.intakeSys = Intake( 10, 11, 0, -0.335205 )
+        self.intakeSys = Intake( 10, 11, 0, 0.3362426 )
 
         ## Agitator
         self.agitatorSys = Agitator( 12 )
@@ -103,9 +103,9 @@ class RobotContainer:
         # Pivot
         # self.controller1.a().toggleOnTrue(ControlPivotPos(self.climbSys, self.controller1.getRightUpDown))
         # #OR
-        # self.controller1.a().onTrue(PivotToPosition(self.intakeSys, 15 ))
-        # self.controller1.b().onTrue(PivotToPosition(self.intakeSys, 45 ))
-        # self.controller1.y().onTrue(PivotToPosition(self.intakeSys, 90 ))
+        self.controller1.povDown().onTrue(PivotToPosition(self.intakeSys, 10 ))
+        self.controller1.povLeft().onTrue(PivotToPosition(self.intakeSys, 45 ))
+        self.controller1.povUp().onTrue(PivotToPosition(self.intakeSys, 90 ))
 
         # Bawlz
         self.controller1.x().toggleOnTrue(SetIntakeSpeed(self.intakeSys, Intake.IntakeSpeeds.IN))
@@ -113,11 +113,11 @@ class RobotContainer:
         ## Launching
         # self.controller1.rightTrigger().whileTrue(RunLauncherByDist(self.launcherSys))
         # self.controller1.rightBumper().whileTrue(ControlFlywheelSpeed(self.agitatorSys, lambda: 3000))
-        self.controller1.a().toggleOnTrue(RunFlyWheelByNT(self.launcherSys))
-        self.controller1.b().toggleOnTrue(RunAgitatorByNT(self.agitatorSys))
+        # self.controller1.a().toggleOnTrue(RunFlyWheelByNT(self.launcherSys))
+        # self.controller1.b().toggleOnTrue(RunAgitatorByNT(self.agitatorSys))
         # this is a stupid way to do waht its doing:
         # self.controller1.rightTrigger(0.01).whileTrue(ControlFlywheelSpeed(self.launcherSys, self.controller1.getRightTriggerAxis))
-        self.controller1.leftTrigger(0.01).whileTrue(ControlFlywheelSpeed(self.agitatorSys, self.controller1.getLeftTriggerAxis))
+        # self.controller1.leftTrigger(0.01).whileTrue(ControlFlywheelSpeed(self.agitatorSys, self.controller1.getLeftTriggerAxis))
 
     def configureDriveBindings(self) -> None:
         """

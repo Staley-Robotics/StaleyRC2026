@@ -5,6 +5,7 @@ from pathlib import Path
 from wpilib import DriverStation, DataLogManager, RobotBase, TimedRobot, XboxController
 from commands2 import Command, CommandScheduler
 from rev import SparkMax
+from phoenix6.signal_logger import SignalLogger
 from ntcore.util import ntproperty
 
 # Local Imports
@@ -30,6 +31,10 @@ class MyRobot(TimedRobot):
         logDir = '/U/logs' if RobotBase.isReal() else '.logs'
         DataLogManager.start( dir=(logDir if Path(logDir).is_dir() else ''), period=1.0 )
         DriverStation.startDataLog( DataLogManager.getLog() )
+
+        # handle phoenix logs
+        if RobotBase.isSimulation():
+            SignalLogger.set_path('.logs/ctre')
         
         # Built The Robot
         self.__robotContainer = RobotContainer()

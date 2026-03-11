@@ -26,7 +26,15 @@
   {
     "name": "/Settings/ControlClimberPos/input mult",
     "type": "double",
-    "value": 0.02,
+    "value": 1.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/climberSpeed",
+    "type": "double",
+    "value": 0.0,
     "properties": {
       "persistent": true
     }
@@ -43,6 +51,46 @@
     "name": "/stepSize",
     "type": "double",
     "value": 0.1,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Agitator/At speed tolerance (rps)",
+    "type": "double",
+    "value": 2.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Agitator/Max configured speed (rps)",
+    "type": "double",
+    "value": 50.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Launcher/At speed tolerance (rps)",
+    "type": "double",
+    "value": 2.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Launcher/Max configured speed (rps)",
+    "type": "double",
+    "value": 50.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Settings/Intake/IntakeSpeed",
+    "type": "double",
+    "value": 0.8,
     "properties": {
       "persistent": true
     }
