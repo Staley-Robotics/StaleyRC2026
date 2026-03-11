@@ -23,7 +23,8 @@ class RobotContainer:
         driver1 = FalconXboxController( 0 )
 
         # Declare Subsystems
-        climber = Climber(0)
+        climber = Climber(14)
+        SmartDashboard.putData("ClimberSys", climber)
 
         # Commands
         climberIncPos = ClimberChangePos( climber, +1 )

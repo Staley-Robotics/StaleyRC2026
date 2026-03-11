@@ -3,22 +3,11 @@ from wpilib import  SmartDashboard, Mechanism2d, Color8Bit, Color, RobotState
 from wpimath.system.plant import DCMotor
 from wpilib.simulation import ElevatorSim
 from wpimath.units import *
-from rev import EncoderConfig, SparkMax, SparkMaxConfig,ClosedLoopConfig, ClosedLoopSlot, SparkMaxSim, SparkBase, LimitSwitchConfig, PersistMode, ResetMode
+from rev import EncoderConfig, SparkMax, SparkMaxConfig, SparkMaxSim, SparkBase, LimitSwitchConfig, PersistMode, ResetMode, SparkSim
 from phoenix6.units import *
 
-from util import FalconLogger
-
 class ClimberConstants:
-    
-    _kP = 0.0#0.15 Proportional/Present
-    _kI = 0.0#      Integral/Past
-    _kD = 0.0#0.01  Derivative/Future
-    _kG = 0.0 # force to overcome gravity
-    _kS = 0.0 # force to overcome friction
-    _kV = 0.0 # Apply __ voltage for target velocity
-    _kFF = 0.0#0.001 # Feed Forward
 
-    _kAtsetPosTolerence:inches = 1.0
     _pulleyRadius:inches = 0.440
     _pulleyDiameter:inches = _pulleyRadius *2
     _gearRatio = 100.0
@@ -37,7 +26,7 @@ class Climber(Subsystem):
 
     # Initialization
     def __init__(self, sysId:int) -> None:
-        self.climbMotor = SparkMax(sysId, SparkMax.MotorType.kBrushless)
+        self.climbMotor = SparkMax(2, SparkMax.MotorType.kBrushless)
         # self.position_request = controls.PositionVoltage(0.0)
         self.leadEncoder = self.climbMotor.getEncoder()
 
@@ -48,9 +37,9 @@ class Climber(Subsystem):
         convFactor = ClimberConstants._motorRotsPerHeightInches
         encConfig = EncoderConfig()
         encConfig = encConfig.positionConversionFactor( convFactor ).velocityConversionFactor( convFactor / 60)
-        # SmartDashboard.putString("RobotStatus", "Initialized")
-        # SmartDashboard.putNumber("Climber/BOTTOMPosition", ClimberPositions.BOTTOM)
-        # SmartDashboard.putNumber("Climber/TOPPosition", ClimberPositions.TOP)
+        SmartDashboard.putString("RobotStatus", "Initialized")
+        SmartDashboard.putNumber("Climber/BOTTOMPosition", ClimberPositions.BOTTOM)
+        SmartDashboard.putNumber("Climber/TOPPosition", ClimberPositions.TOP)
 
         # configuration
         MotorCfg = SparkMaxConfig()
@@ -58,15 +47,6 @@ class Climber(Subsystem):
         MotorCfg = MotorCfg.inverted( True )
 
 
-        clCfg = ClosedLoopConfig()
-        clCfg = clCfg.pidf(
-            ClimberConstants._kP,
-            ClimberConstants._kI,
-            ClimberConstants._kD,
-            ClimberConstants._kFF,
-            ClosedLoopSlot.kSlot0
-        )
-        clCfg = clCfg.positionWrappingEnabled( False )
 
         convFactor = ClimberConstants._motorRotsPerHeightInches
         encConfig = EncoderConfig()
@@ -79,7 +59,6 @@ class Climber(Subsystem):
         # lsConfig = lsConfig.reverseLimitSwitchEnabled(True)
 
         # Apply Configs
-        MotorCfg.apply(clCfg)
         MotorCfg.apply(encConfig)
         # MotorCfg.apply(lsConfig)
 
@@ -118,30 +97,16 @@ class Climber(Subsystem):
         # self.slot0_configs.k_d = ClimberConstants._kD
         # self.climbMotor.configurator.apply(self.slot0_configs)
 
-        SmartDashboard.putData("ClimberSim", self.mech)
+        SmartDashboard.putData("ElevatorSim", self.mech)
 
         self.__simMotor = SparkMaxSim(self.climbMotor, DCMotor.NEO() )
         self.__simMotor.setPosition( ClimberPositions.BOTTOM )
         
-    def periodic(self) -> None:
-        # Logging: Write Current Subsystem State
-
-        # Run Subsystem: Set New State To Subsystem
-        if RobotState.isDisabled():
-            self.stop()
-        else:
-            self.run()
-        
-        # Logging: Write Post Operation Information
-        FalconLogger.logOutput("Climber/position", self.getCurPos())
-        FalconLogger.logOutput("Climber/Desired position", self.getSetPos())
 
     def run(self) -> None:
-        self.__pidController.setReference(
-            self.setPos,
-            SparkBase.ControlType.kPosition, 
-            ClosedLoopSlot.kSlot0
-        )
+        
+        current_position = self.climbMotor.get_position().value_as_double()
+        SmartDashboard.putNumber("Climber/PositionRot", current_position)
 
     def _simulationPeriodic(self):  
         self.motorOutput = self.elevatorSim.getOutput()
@@ -151,15 +116,31 @@ class Climber(Subsystem):
 
     def getSetPos(self):
         return self.setPos
+    
+    def updatesetPos(self):
+        self.setPos = self.setPos
 
-    def getCurPos(self) -> inches:
-        return self.leadEncoder.getPosition()
+    def getsetPosAtSetPos(self):
+        return self.setPos == self.setPos
+
+    def getCurPos(self)->inches:
+        self.curPos = self.leadEncoder.getPosition()
 
     # Periodic Loop
+    def periodic(self) -> None:
+        # Logging: Write Current Subsystem State
+        # self.m_logging.putNumber( "SubsystemData", 0.0 )
 
+        # Run Subsystem: Set New State To Subsystem
+        if RobotState.isDisabled():
+            self.stop()
+        else:
+            self.run()
+        
+        # Logging: Write Post Operation Information
+    def DigitalInputs():
+        pass
+        
     # Stop the Subsystem
     def stop(self) -> None:
         pass
-
-    def getAtPosition(self) -> bool:
-        return abs(self.getCurPos() - self.setPos ) < ClimberConstants._kAtsetPosTolerence

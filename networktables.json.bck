@@ -1,0 +1,18 @@
+[
+  {
+    "name": "/Settings/climber/controlmult",
+    "type": "double",
+    "value": 0.08,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Settings/Elevator/ControlSpeed",
+    "type": "int",
+    "value": 1,
+    "properties": {
+      "persistent": true
+    }
+  }
+]

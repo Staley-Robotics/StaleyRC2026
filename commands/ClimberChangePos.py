@@ -8,7 +8,8 @@ class ClimberChangePos(Command):
     # Variable Declaration
     climber_Sys:Climber = None
     # m_getValue:typing.Callable[[],float] = lambda: 0.0
-    # controlSpeed = ntproperty('/Settings/Elevator/ControlSpeed', 1, persistent=True)
+    controlSpeed = ntproperty('/Settings/climber/controlmult', 0.08, persistent=True)
+
     
     # Initialization
     def __init__( self,
@@ -28,9 +29,8 @@ class ClimberChangePos(Command):
 
     # Periodic
     def execute(self) -> None:
-        climberPos = (self.climber_Sys.getSetPos() + self.changeAmount)
+        climberPos = (self.climber_Sys.getSetPos() + (self.changeAmount* self.controlSpeed))
         self.climber_Sys.changeDesiredPos(climberPos)
-
 
     
     # On End

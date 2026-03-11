@@ -1,7 +1,8 @@
 # Imports
-from .SampleCommand import *
+from .ClimberChangePos import *
+from .ControlClimberPosition import *
 
 # Classes to Import
-__all__ = [
-    "SampleCommand"
-]
+# __all__ = [
+#     "SampleCommand"
+# ]
