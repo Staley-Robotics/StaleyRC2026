@@ -14,7 +14,7 @@ from phoenix6 import swerve
 
 ## Local Imports
 from commands import *
-from subsystems import TunerConstants, Climber, Intake, Launcher, Agitator
+from subsystems import TunerConstants, ClimberClosedLoop, Intake, Launcher, Agitator, Vision
 
 from util import FalconXboxController, Telemetry, ControlMode
 
@@ -39,11 +39,14 @@ class RobotContainer:
         self.launcherSys = Launcher( 13 )
 
         ## Climber
-        # self.climbSys = Climber( 14 )
+        self.climbSys = ClimberOpenLoop( 14 )
 
         ## Drive
         self.swerveSys = TunerConstants.create_drivetrain() # TODO: Check configs
         self._logger = Telemetry(TunerConstants.speed_at_12_volts)
+
+        ## Vision
+        self.visionSys = Vision( self.swerveSys.add_vision_measurement )
 
         # Auto TODO: re-implement
         # self.__autoChooser.setDefaultOption( "1 - None", cmd.none() )
@@ -113,11 +116,17 @@ class RobotContainer:
         ## Launching
         # self.controller1.rightTrigger().whileTrue(RunLauncherByDist(self.launcherSys))
         # self.controller1.rightBumper().whileTrue(ControlFlywheelSpeed(self.agitatorSys, lambda: 3000))
-        # self.controller1.a().toggleOnTrue(RunFlyWheelByNT(self.launcherSys))
-        # self.controller1.b().toggleOnTrue(RunAgitatorByNT(self.agitatorSys))
+        self.controller1.a().toggleOnTrue(RunFlyWheelByNT(self.launcherSys))
+        self.controller1.b().toggleOnTrue(RunAgitatorByNT(self.agitatorSys))
         # this is a stupid way to do waht its doing:
         # self.controller1.rightTrigger(0.01).whileTrue(ControlFlywheelSpeed(self.launcherSys, self.controller1.getRightTriggerAxis))
         # self.controller1.leftTrigger(0.01).whileTrue(ControlFlywheelSpeed(self.agitatorSys, self.controller1.getLeftTriggerAxis))
+
+        ## Climbing
+        self.climbSys.setDefaultCommand(ControlClimberSpeed( self.climbSys,
+                                                             self.controller1.y().getAsBoolean,
+                                                             self.controller1.rightBumper().getAsBoolean, 
+                                                             self.controller1.leftBumper().getAsBoolean))
 
     def configureDriveBindings(self) -> None:
         """

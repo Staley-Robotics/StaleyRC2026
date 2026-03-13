@@ -7,5 +7,7 @@ from .Launching.LauncherDefault import *
 from .Launching.RunFlyWheelByNT import *
 from .Launching.ControlFlywheelSpeed import *
 from .Climbing.ControlClimberPos import *
+from .Climbing.ControlClimberSpeed import *
+from .Climbing.ControlClimberOpenLoop import *
 from .SampleCommand import *
 from .Drive.DriveByStick import *

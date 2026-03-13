@@ -163,7 +163,7 @@ cython_debug/
 networktables*.json
 simgui*.json
 ctre_sim/
-.logs/*.wpilog
+.logs/*
 logs/*
 
 # vscode config

@@ -12,15 +12,6 @@ from rev import SparkMax, SparkBase, SparkMaxConfig, ClosedLoopConfig, ClosedLoo
 from util.FalconLogger import FalconLogger
 
 class ClimberConstants:
-    _kP = 0.0
-    _kI = 0.0
-    _kD = 0.0
-    _kG = 0.0   # force to overcome gravity
-    _kS = 0.0   # force to overcome friction
-    _kV = 0.0   # Apply __ voltage for target velocity
-    _kFF = 0.0  # Feed Forward
-
-    _kOffset = 0.0
     _kAtSetpointTolerance:inches = 1.0
 
     _pulleyDiameter:inches = 0.880
@@ -32,11 +23,20 @@ class ClimberConstants:
     _motorRotsPerHeightInches =  1 / _gearRatio * (_pulleyDiameter * math.pi) # rotations / height
 
 
-class Climber(Subsystem):
+class ClimberOpenLoop(Subsystem):
 
     class ClimberPositions:
+        '''only estimates, atm'''
         MAX:inches = 8.0
         MIN:inches = 0.0
+    
+    class ClimberSpeeds:
+        '''
+        NOTE: positive = hook up relative to the robot
+        '''
+        DEPLOY:percent  = -0.5
+        CLIMB:percent   = 0.5
+        UNCLIMB:percent = -0.3
 
     def __init__(self, motorID:int) -> None:
         ### Motor Setup
@@ -45,26 +45,15 @@ class Climber(Subsystem):
 
         # retrieve motor objs
         self.motor_encoder = self.motor.getAbsoluteEncoder()
-        self.pid_controller = self.motor.getClosedLoopController()
 
         # Config
         motorCfg = SparkMaxConfig()\
             .setIdleMode( SparkMaxConfig.IdleMode.kBrake )\
             .inverted( True )
 
-        clCfg = ClosedLoopConfig()\
-            .pidf(
-                ClimberConstants._kP,
-                ClimberConstants._kI,
-                ClimberConstants._kD,
-                ClimberConstants._kFF,
-                ClosedLoopSlot.kSlot0
-            )\
-            .positionWrappingEnabled( False )
-
         convFactor = ClimberConstants._motorRotsPerHeightInches
         encConfig = EncoderConfig()\
-            .positionConversionFactor( convFactor ).velocityConversionFactor( convFactor / 60)
+            .positionConversionFactor( convFactor )#.velocityConversionFactor( convFactor / 60) # - velocity deliberately left out
 
         #NOTE: motor forwards = claw down
         # lsConfig = LimitSwitchConfig()\
@@ -77,16 +66,15 @@ class Climber(Subsystem):
             # .forwardLimitSwitchPosition()
 
         # Apply Configs
-        motorCfg.apply(clCfg)
         motorCfg.apply(encConfig)
         # motorCfg.apply(lsConfig)
 
         self.motor.configure(motorCfg, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters)
 
         ### Functionality Setup
-        self.desired_position: inches = self.ClimberPositions.MIN
+        self.set_speed:percent = 0.0
 
-        ### Logging Setup
+        ### Logging
         FalconLogger.addLoggedObject("/Climber/motor", self.motor)
 
     def periodic(self) -> None:
@@ -100,32 +88,28 @@ class Climber(Subsystem):
             self.run()
         
         # Logging: Write Post Operation Information
-        FalconLogger.logOutput("/Climber/Outputs/desired position", self.desired_position)
+        FalconLogger.logOutput("/Climber/Outputs/set speed (percent)", self.getSetSpeed())
 
     def run(self) -> None:
-        # update desired position
-        self.pid_controller.setReference(
-            self.desired_position,
-            SparkBase.ControlType.kPosition,
-            ClosedLoopSlot.kSlot0
-        )
+        # apply motor control
+        self.motor.set(self.set_speed)
 
     def stop(self) -> None:
-        self.setDesiredPosition(self.getHeight())
+        self.setSpeed(0.0)
 
     ## External Funcs
-    def setDesiredPosition(self, pos:inches) -> None:
+    def setSpeed(self, speed:ClimberSpeeds|percent) -> None:
         '''
-        Sets the setpoint sent to the pid controll to the `pos` param
-        restricts inputs to min/max of the climber mechanism
+        Sets the duty cycle (percent) output of the motor
+        restricts inputs to [-1,+1]
         '''
-        self.desired_position = (max(min(pos, self.ClimberPositions.MAX), self.ClimberPositions.MIN))
+        self.set_speed = (max(min(speed, 1), -1))
 
-    def getDesiredPosition(self) -> inches:
-        return self.desired_position
+    def getSetSpeed(self) -> inches:
+        return self.set_speed
     
     def getHeight(self) -> inches:
         return self.motor_encoder.getPosition()
-    
-    def isAtDesiredPosition(self) -> bool:
-        return abs(self.getHeight() - self.getDesiredPosition()) < ClimberConstants._kAtSetpointTolerance
+
+    def getVelocity(self) -> rotations_per_second:
+        return self.motor_encoder.getVelocity()

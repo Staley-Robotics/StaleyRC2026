@@ -41,7 +41,7 @@ class MyRobot(TimedRobot):
         self.__logger = FalconLogger(False)
 
         # and a test climb motor
-        self.iMotor = SparkMax(14, SparkMax.MotorType.kBrushless)
+        # self.iMotor = SparkMax(14, SparkMax.MotorType.kBrushless)
 
     # Periodic Loop / All Modes
     def robotPeriodic(self):
@@ -76,20 +76,20 @@ class MyRobot(TimedRobot):
 
     # Teleop Mode
     def teleopInit(self): pass
-    def teleopPeriodic(self): # stuff here for climber
+    def teleopPeriodic(self): pass# stuff here for climber
         # Buttons
         # a_pressed = self.controller.getAButtonPressed()
         # b_pressed = self.controller.getBButtonPressed()
         # back_pressed = self.controller.getBackButtonPressed()
-        l_bumper_pressed = self.controller.getLeftBumperButtonPressed()
-        r_bumper_pressed = self.controller.getRightBumperButtonPressed()
+        # l_bumper_pressed = self.controller.getLeftBumperButtonPressed()
+        # r_bumper_pressed = self.controller.getRightBumperButtonPressed()
 
-        if (r_bumper_pressed):
-            self.climberSpeed = min(1, max(self.climberSpeed + 0.1, -1)) # 
-        if (l_bumper_pressed):
-            self.climberSpeed = min(1, max(self.climberSpeed - 0.1, -1)) #
+        # if (r_bumper_pressed):
+        #     self.climberSpeed = min(1, max(self.climberSpeed + 0.1, -1)) # 
+        # if (l_bumper_pressed):
+        #     self.climberSpeed = min(1, max(self.climberSpeed - 0.1, -1)) #
 
-        self.iMotor.set(self.climberSpeed)
+        # self.iMotor.set(self.climberSpeed)
 
     def teleopExit(self): pass
 

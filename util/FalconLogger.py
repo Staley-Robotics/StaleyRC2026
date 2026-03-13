@@ -33,6 +33,7 @@ class FalconLogger:
     
     def __updateLoggedObjects(self) -> None:
         #HEY: if you're implementing a new object type in here, please remember to update the type metedata around this file
+        # Objects to add: phoenix6 CANCoder
         for logged_obj in self.__loggedObjects:
             match logged_obj.obj:
                 case SparkMax():
