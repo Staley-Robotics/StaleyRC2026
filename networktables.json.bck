@@ -32,9 +32,57 @@
     }
   },
   {
+    "name": "/Settings/ControlClimberSpeed/speed control increment",
+    "type": "double",
+    "value": 0.1,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
     "name": "/Settings/ControlClimberOpenLoop/input mult",
     "type": "double",
     "value": 0.3,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "Settings/drive/max speed %",
+    "type": "double",
+    "value": 0.5,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "Settings/drive/max rot speed (rots/sec)",
+    "type": "double",
+    "value": 0.65,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "Settings/drive/pid/kP",
+    "type": "double",
+    "value": 30.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "Settings/drive/pid/kI",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "Settings/drive/pid/kD",
+    "type": "double",
+    "value": 1.0,
     "properties": {
       "persistent": true
     }

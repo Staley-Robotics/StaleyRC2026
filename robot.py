@@ -57,6 +57,8 @@ class MyRobot(TimedRobot):
         except Exception as err:
             print(f"WARNING! FalconLogger Cannot Write to Log!: {err}")
 
+        self.__robotContainer.gameCalc.debugLog()
+
     # Autonomous Mode
     def autonomousInit(self):
         # Start the Autonomous Package
