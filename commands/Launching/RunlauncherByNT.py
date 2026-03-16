@@ -6,11 +6,11 @@ from ntcore.util import ntproperty
 
 from subsystems import Launcher
 
-class RunFlyWheelByNT(Command):
+class RunLauncherByNT(Command):
     # Variable Declaration
     flywheel_sys:Launcher = None
 
-    speed = ntproperty("/Settings/RunFlywheelByNT/speed (rps: 0-70)", 0.0, persistent=True)
+    speed = ntproperty("/Settings/RunLauncherByNT/speed (rps: 0-70)", 0.0, persistent=True)
     
     # Initialization
     def __init__( self,
@@ -19,7 +19,7 @@ class RunFlyWheelByNT(Command):
         # Command Attributes
         self.flywheel_sys:Launcher = flywheelSys
 
-        self.setName( f"RunFlywheelByNT - {flywheelSys.__class__.__name__}" )
+        self.setName( f"RunLauncherByNT" )
         self.addRequirements( flywheelSys )
 
     def initialize(self) -> None:

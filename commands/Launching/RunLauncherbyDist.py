@@ -3,11 +3,17 @@ import typing
 from commands2 import Command
 from wpimath.units import percent
 
+from ntcore.util import ntproperty
+
 from subsystems import Launcher
+from util import RebuiltCalc
 
 class RunLauncherByDist(Command):
     # Variable Declaration
     launcher_sys:Launcher = None
+
+    a = ntproperty("Settings/RunLauncherByDist/mult a (dist)", 1.0, persistent=True)
+    b = ntproperty("Settings/RunLauncherByDist/mult b (dist^2)", 0.0, persistent=True)
     
     # Initialization
     def __init__( self,
@@ -16,7 +22,7 @@ class RunLauncherByDist(Command):
         # Command Attributes
         self.launcher_sys:Launcher = launcherSys
 
-        self.setName( f"ControlLauncherSpeed" )
+        self.setName( f"RunLauncherByDist" )
         self.addRequirements( launcherSys )
 
     def initialize(self) -> None:
@@ -24,13 +30,13 @@ class RunLauncherByDist(Command):
 
     def execute(self) -> None:
         # get dist from center of launcher to center of fuel place
-        dist = None
+        dist = RebuiltCalc.getDistToTarget()
 
         # scale dist to percent between min dist and max dist
-        dist = None
+        # pct_of_dist = (dist-Launcher.LauncherDistances.MIN)/(Launcher.LauncherDistances.MAX-Launcher.LauncherDistances.MIN) # scales to percentage between
 
         # apply scale between speed at min dist and max dist, by some math magic
-        speed = self.launcher_sys.LauncherSpeeds.SPEED_AT_ZERO_DIST
+        speed = (self.a*dist) + (self.b*(dist*dist))
 
         # apply speed
         self.launcher_sys.setDesiredSpeed(

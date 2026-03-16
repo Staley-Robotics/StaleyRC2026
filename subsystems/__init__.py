@@ -1,6 +1,5 @@
 from .Intake import *
 from .ClimberClosedLoop import *
-from .SampleSubsystem import *
 from .LimelightVision import *
 from .ClimberOpenLoop import *
 from .swerve.tuner_constants import *

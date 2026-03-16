@@ -15,11 +15,25 @@ from phoenix6.controls import VelocityVoltage
 from util.FalconLogger import FalconLogger
 
 class Launcher(Subsystem):
-    '''This is functionally quite similar (if not the same) as Agitator, but for now they are kept seperate for simplicity's sake'''
+    '''This is functionally quite similar (if not the same) as Agitator, but for now they are kept seperate for a variety of annoyances' sake'''
     class LauncherSpeeds:
         WAIT:rotations_per_second = 5 # default speed for lower power consumption but faster acceleration when needed
-        SPEED_AT_ZERO_DIST: 20 # total guess, speed at minimum distance TODO: measure
-        SPEED_AT__DIST: 70 # total guess, speed at some arbitrary larger distance TODO: measure
+        SPEED_AT_ZERO_DIST:rotations_per_second = 20 # total guess, speed at minimum distance TODO: measure
+        SPEED_AT__DIST:rotations_per_second = 70 # total guess, speed at some arbitrary larger distance TODO: measure
+
+        '''
+        kraken free speed max: 6000 rpm = 100 rps
+        measured mechanism speed at 12 volts = ~83
+        cut to 75 for safety (and because free speed is gonna be higher than max in our mechanism)
+
+        NOTE: actual flywheel speed will be double the motor speed because of gearing
+        '''
+        kMaxAllowedSpeed:rotations_per_second = 75.0
+        kSpeedAt12Volts:rotations_per_second = 83.0
+    
+    class LauncherDistances:
+        MIN:meters=1
+        MAX:meters=10
 
     class Constants:
         k_P:float=0.2
@@ -28,17 +42,7 @@ class Launcher(Subsystem):
         k_S:float=0.25
         k_V:float=0.07
 
-        kAtSpeedTolerance:rotations_per_second = 3.0 # ntproperty("/Launcher/At speed tolerance (rps)", 2.0, persistent=True) #total guess
-
-        '''
-        kraken free speed max: 6000 rpm = 100 rps
-        cut to 70 for safety (and because free speed is gonna be higher than max in our mechanism)
-
-        NOTE: actual flywheel speed will be double the motor speed because of gearing
-        '''
-        kMaxAllowedSpeed:rotations_per_second = 70.0
-        kSpeedAt12Volts:rotations_per_second = 83.0
-
+        kAtSpeedTolerance:rotations_per_second = 3.0
 
     def __init__(self, motorID:int) -> None:
         ### Motor Setup
@@ -90,7 +94,7 @@ class Launcher(Subsystem):
         self.velocity_req.velocity = 0.0
 
     def setDesiredSpeed(self, speed:rotations_per_second) -> None:
-        self.velocity_req.velocity = speed
+        self.velocity_req.velocity = min(speed, self.LauncherSpeeds.kMaxAllowedSpeed)
 
     def getDesiredSpeed(self) -> rotations_per_second:
         return self.velocity_req.velocity

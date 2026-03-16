@@ -6,6 +6,9 @@ from wpimath.units import percent
 from subsystems import Launcher
 
 class LauncherDefault(Command):
+    '''
+    Keeps the launcher spinning at its 'wait' speed to reduce acceleration times when needed
+    '''
     # Variable Declaration
     launcher_sys:Launcher = None
     

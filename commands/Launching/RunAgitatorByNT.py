@@ -19,7 +19,7 @@ class RunAgitatorByNT(Command):
         # Command Attributes
         self.flywheel_sys:Agitator = flywheelSys
 
-        self.setName( f"RunFlywheelByNT - {flywheelSys.__class__.__name__}" )
+        self.setName( f"RunAgitatorByNT" )
         self.addRequirements( flywheelSys )
 
     def initialize(self) -> None:

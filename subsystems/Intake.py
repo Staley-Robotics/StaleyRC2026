@@ -31,7 +31,7 @@ class IntakeConstants:
 class Intake(Subsystem):
     class IntakeSpeeds:
         STOP = 0
-        IN = 0.5
+        IN = 0.6
 
     class IntakePositions:
         '''

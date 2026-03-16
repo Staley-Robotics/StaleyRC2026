@@ -49,9 +49,15 @@ class FieldBoundaries:
     centerLineY:meters=inchesToMeters(158.84) #TODO: check if correct
 
 class RebuiltCalc:
+    # variable definitions
     getRobotPose:typing.Callable[[], Pose2d] = lambda:Pose2d()
 
     desiredRelayPoint:TargetPoints|None = None
+
+    '''
+    defining all variables here in the class definition rather than __init__ means their values will be updated and accessible through the class
+    this means if you define a RebuiltCalc() object in one place, referencing the RebuiltCalc class should provide the same data
+    '''
 
     def __init__(self, getRobotPose:typing.Callable[[], Pose2d]):
         self.getRobotPose = getRobotPose

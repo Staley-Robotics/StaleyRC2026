@@ -8,6 +8,22 @@
     }
   },
   {
+    "name": "Settings/RunLauncherByDist/mult a (dist)",
+    "type": "double",
+    "value": 1.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "Settings/RunLauncherByDist/mult b (dist^2)",
+    "type": "double",
+    "value": 1.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
     "name": "/Settings/RunAgitatorByNT/speed (rps: 0-70)",
     "type": "double",
     "value": 0.0,
@@ -16,7 +32,7 @@
     }
   },
   {
-    "name": "/Settings/RunFlywheelByNT/speed (rps: 0-70)",
+    "name": "/Settings/RunLauncherByNT/speed (rps: 0-70)",
     "type": "double",
     "value": 0.0,
     "properties": {
@@ -82,13 +98,21 @@
   {
     "name": "Settings/drive/pid/kD",
     "type": "double",
-    "value": 1.0,
+    "value": 0.0,
     "properties": {
       "persistent": true
     }
   },
   {
     "name": "/climberSpeed",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Settings/RunFlywheelByNT/speed (rps: 0-70)",
     "type": "double",
     "value": 0.0,
     "properties": {
