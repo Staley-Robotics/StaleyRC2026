@@ -1,7 +1,7 @@
 from enum import Enum
 
 from commands2 import Subsystem
-from wpilib import RobotState, DutyCycleEncoder, SmartDashboard
+from wpilib import RobotState, DutyCycleEncoder, SmartDashboard, RobotBase, RobotController
 from wpimath.controller import PIDController, ProfiledPIDControllerRadians
 from wpimath.trajectory import TrapezoidProfileRadians
 from wpilib.simulation import SingleJointedArmSim, LinearSystemSim_2_1_2
@@ -12,7 +12,7 @@ from wpimath.units import *
 from phoenix6.units import *
 
 from phoenix6.hardware import TalonFX, CANcoder
-from phoenix6.configs import TalonFXConfiguration, MotorOutputConfigs, Slot0Configs, FeedbackConfigs, CANcoderConfiguration, MagnetSensorConfigs
+from phoenix6.configs import TalonFXConfiguration, MotorOutputConfigs, Slot0Configs, FeedbackConfigs, CANcoderConfiguration, MagnetSensorConfigs, ClosedLoopGeneralConfigs
 from phoenix6.signals import InvertedValue, NeutralModeValue, FeedbackSensorSourceValue, GravityTypeValue, SensorDirectionValue
 from phoenix6.controls import PositionVoltage, VoltageOut
 
@@ -26,7 +26,7 @@ class IntakeConstants:
     kD:float=0.0 # differential     The harder it pushes, the less it pushes
     kG:float=0.0 # gravity          Constant force, but accounting for gravity
 
-    gear_ratio:float=16 #total guess
+    gear_ratio:float=11/60 #total guess
 
 class Intake(Subsystem):
     class IntakeSpeeds:
@@ -63,22 +63,6 @@ class Intake(Subsystem):
 
         ## Pivot Motor
         self.pivot_motor = TalonFX(pivotMotorID, "rio")
-        # Encoder
-        # self.pivot_encoder = DutyCycleEncoder( pivotEncoderID )
-        # self.controller = PIDController(
-        #     IntakeConstants.kP,
-        #     IntakeConstants.kI,
-        #     IntakeConstants.kD,
-        # )
-        # self.controller = ProfiledPIDControllerRadians(
-        #     IntakeConstants.kP,
-        #     IntakeConstants.kI,
-        #     IntakeConstants.kD,   
-        #     TrapezoidProfileRadians.Constraints(
-
-        #     )
-        # )
-        # SmartDashboard.putData("/Intake/PID", self.controller)
 
         # Config
         pivot_motor_config = TalonFXConfiguration()
@@ -93,16 +77,14 @@ class Intake(Subsystem):
                 .with_k_d(IntakeConstants.kD)
                 .with_k_g(IntakeConstants.kG)
                 .with_gravity_type(GravityTypeValue.ARM_COSINE)
-                .with_gravity_arm_position_offset(0.0)
+                .with_gravity_arm_position_offset(-0.08) # total guess
         ).with_feedback(
             FeedbackConfigs()
                 .with_feedback_remote_sensor_id(pivotEncoderID)
                 .with_feedback_sensor_source(FeedbackSensorSourceValue.REMOTE_CANCODER)
-                .with_rotor_to_sensor_ratio(11/60) #rotor tooth count / pivot tooth count?
+                .with_rotor_to_sensor_ratio(IntakeConstants.gear_ratio) #rotor tooth count / pivot tooth count?
                 .with_sensor_to_mechanism_ratio(1)
         )
-        # pivot_motor_config = pivot_motor_config.with_closed_loop_general(
-        # )
         self.pivot_motor.configurator.apply(pivot_motor_config)
 
         # Encoder
@@ -127,16 +109,24 @@ class Intake(Subsystem):
         FalconLogger.addLoggedObject("/Intake/IntakeMotor", self.intake_motor)
 
         ### Simulation
-        # self.arm_sim = SingleJointedArmSim(
-        #     DCMotor.krakenX60(),
-        #     IntakeConstants.gear_ratio,
-        #     SingleJointedArmSim.estimateMOI( 0.0, 0.0 ),
-        #     0.0,
-        #     degreesToRadians( self.IntakePositions.MIN ),
-        #     degreesToRadians( self.IntakePositions.MAX ),
-        #     True, # Gravity
-        #     degreesToRadians( self.IntakePositions.START )
-        # )
+        if RobotBase.isSimulation():
+
+            self.pivot_motor_sim = self.pivot_motor.sim_state
+            self.pivot_encoder_sim = self.pivot_encoder.sim_state
+
+            self.pivot_motor_sim.set_motor_type(self.pivot_motor_sim.MotorType.KRAKEN_X60)
+
+            self.arm_sim = SingleJointedArmSim(
+                DCMotor.krakenX60(),
+                IntakeConstants.gear_ratio,
+                SingleJointedArmSim.estimateMOI( 0.3, 1.36 ),
+                1.36,
+                degreesToRadians( self.IntakePositions.MIN ),
+                degreesToRadians( self.IntakePositions.MAX ),
+                True, # Gravity
+                degreesToRadians( self.IntakePositions.START )
+            )
+            self.arm_sim.setState( degreesToRadians( self.getPivotPosition() ) , 0.0 )
 
     def periodic(self) -> None:
         # Logging: Write Current Measured Subsystem State
@@ -153,6 +143,31 @@ class Intake(Subsystem):
         FalconLogger.logOutput("/Intake/Outputs/Error", self.pivot_motor.get_closed_loop_error().value)
         FalconLogger.logOutput("/Intake/Outputs/closed loop reference * 360", self.pivot_motor.get_closed_loop_reference().value * 360)
         FalconLogger.logOutput("/Intake/Outputs/Position", self.getPivotPosition())
+    
+    def simulationPeriodic(self):
+        # set the supply voltage of the TalonFX
+        self.pivot_motor_sim.set_supply_voltage(RobotController.getBatteryVoltage())
+
+        # get the motor voltage of the TalonFX
+        motor_voltage = self.pivot_motor_sim.motor_voltage
+
+        # use the motor voltage to calculate new position and velocity
+        # using WPILib's DCMotorSim class for physics simulation
+        self.arm_sim.setInputVoltage(motor_voltage)
+        self.arm_sim.setInputVoltage(motor_voltage)
+        self.arm_sim.update(0.020) # assume 20 ms loop time
+
+        # apply the new rotor position and velocity to the TalonFX;
+        # note that this is rotor position/velocity (before gear ratio), but
+        # DCMotorSim returns mechanism position/velocity (after gear ratio)
+        self.pivot_motor_sim.set_raw_rotor_position(
+            IntakeConstants.gear_ratio
+            * radiansToRotations(self.arm_sim.getAngle())
+        )
+        self.pivot_motor_sim.set_rotor_velocity(
+            IntakeConstants.gear_ratio
+            * radiansToRotations(self.arm_sim.getVelocity())
+        )
 
     def run(self) -> None:
         ## Intake
@@ -161,8 +176,6 @@ class Intake(Subsystem):
 
         ## Pivot
         #control position
-        # calc = self.controller.calculate(self.getPivotPosition(), self.getPivotSetpoint()) # pid calc
-        # calc += cos(self.getPivotPosition()) # Rotational FF
         self.pivot_motor.set_control(self.pivot_request)
 
     def stop(self) -> None:

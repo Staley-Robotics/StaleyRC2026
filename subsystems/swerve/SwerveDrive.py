@@ -1,12 +1,17 @@
+from typing import Callable, overload
+import math
 
 from commands2 import Command, Subsystem
 from commands2.sysid import SysIdRoutine
-import math
-from phoenix6 import SignalLogger, swerve, units, utils
-from typing import Callable, overload
 from wpilib import DriverStation, Notifier, RobotController, Field2d, SmartDashboard
 from wpilib.sysid import SysIdRoutineLog
 from wpimath.geometry import Pose2d, Rotation2d
+
+from phoenix6 import SignalLogger, swerve, units, utils
+
+from pathplannerlib.auto import AutoBuilder
+from pathplannerlib.controller import PPHolonomicDriveController
+from pathplannerlib.config import RobotConfig, PIDConstants
 
 from .tuner_constants import TunerSwerveDrivetrain
 
@@ -142,6 +147,22 @@ class SwerveDrive(Subsystem, TunerSwerveDrivetrain):
 
         self._has_applied_operator_perspective = False
         """Keep track if we've ever applied the operator perspective before or not"""
+
+        # Path Planner
+        robotConfig = RobotConfig.fromGUISettings()
+        AutoBuilder.configure(
+            pose_supplier = lambda: self.get_state().pose,
+            reset_pose = self.reset_pose,
+            robot_relative_speeds_supplier = self.get_state().speeds,
+            output = lambda speeds, feedforwards: self.apply_request(swerve.requests.ApplyRobotSpeeds().with_speeds(speeds)).schedule(), #how??
+            controller = PPHolonomicDriveController(
+                PIDConstants(0.8, 0.0, 0.0),
+                PIDConstants(5.0, 0.0, 0.0)
+            ),
+            robot_config = robotConfig,
+            should_flip_path = lambda: DriverStation.getAlliance() == DriverStation.Alliance.kRed,
+            drive_subsystem = self
+        )
 
         # Swerve requests to apply during SysId characterization
         self._translation_characterization = swerve.requests.SysIdSwerveTranslation()

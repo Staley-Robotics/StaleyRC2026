@@ -23,14 +23,16 @@ class PivotToPosition(Command):
         self.addRequirements( intakeSys )
 
     def initialize(self) -> None:
-        self.intake_sys.setPivotSetpoint(self.setPos)
+        pass
+        # self.intake_sys.setPivotSetpoint(self.setPos)
 
     def execute(self) -> None:
         self.intake_sys.setPivotSetpoint(self.setPos)
 
     def end(self, interrupted:bool) -> None:
-        if interrupted:
-            self.intake_sys.setPivotSetpoint(self.intake_sys.getPivotPosition())
+        pass
+        # if interrupted:
+        # self.intake_sys.setPivotSetpoint(self.intake_sys.getPivotPosition())
 
     def isFinished(self) -> bool:
         return False
