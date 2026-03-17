@@ -15,18 +15,17 @@ from phoenix6.hardware import TalonFX, CANcoder
 from phoenix6.configs import TalonFXConfiguration, MotorOutputConfigs, Slot0Configs, FeedbackConfigs, CANcoderConfiguration, MagnetSensorConfigs, ClosedLoopGeneralConfigs
 from phoenix6.signals import InvertedValue, NeutralModeValue, FeedbackSensorSourceValue, GravityTypeValue, SensorDirectionValue
 from phoenix6.controls import PositionVoltage, VoltageOut
-
-# from rev
+from phoenix6.sim import ChassisReference
 
 from util.FalconLogger import FalconLogger
 
 class IntakeConstants:
-    kP:float=0.0 # proportion       The farther away, the harder it pushes
-    kI:float=0.0 # integral         The longer it's been off, the harder it pushes
-    kD:float=0.0 # differential     The harder it pushes, the less it pushes
-    kG:float=0.0 # gravity          Constant force, but accounting for gravity
+    kP:float=3.0   # proportion       The farther away, the harder it pushes
+    kI:float=0.0    # integral         The longer it's been off, the harder it pushes
+    kD:float=0.0    # differential     The harder it pushes, the less it pushes
+    kG:float=1.7    # gravity          Constant force, but accounting for gravity
 
-    gear_ratio:float=11/60 #total guess
+    gear_ratio:float=11/60 # rotor/mechanism
 
 class Intake(Subsystem):
     class IntakeSpeeds:
@@ -36,15 +35,15 @@ class Intake(Subsystem):
     class IntakePositions:
         '''
         Position setpoints for the intake in degrees
-        0 is (should be) the horizontal/outward/deployed position
-        90 is (should be) straight up
+        0 should be the horizontal/outward/deployed position
+        90 should be straight up
         '''
         MAX:degrees = 131.4 # 0.403809 rot measured -(arbitrarily)-> 0.365 rot for safety
-        MIN:degrees = 10    # 0 (by definition)
-        START:degree = MAX
+        MIN:degrees = 0    # 0 (by definition)
+        START:degree = MAX-1
 
         STORED:degrees =  120
-        INTAKING:degrees = 5
+        INTAKING:degrees = 0
         BOUNCE_UP:degrees = 30
 
     def __init__(self, intakeMotorID:int, pivotMotorID:int, pivotEncoderID:int, pivotEncoderOffset:rotation) -> None:
@@ -77,7 +76,7 @@ class Intake(Subsystem):
                 .with_k_d(IntakeConstants.kD)
                 .with_k_g(IntakeConstants.kG)
                 .with_gravity_type(GravityTypeValue.ARM_COSINE)
-                .with_gravity_arm_position_offset(-0.08) # total guess
+                .with_gravity_arm_position_offset(-0.03) # total guess
         ).with_feedback(
             FeedbackConfigs()
                 .with_feedback_remote_sensor_id(pivotEncoderID)
@@ -98,7 +97,6 @@ class Intake(Subsystem):
             )
         #Apply
         self.pivot_encoder.configurator.apply(encoder_cfg)
-        self.pivot_encoder.set_position(0)
 
         ### Functionality Setup
         self.intake_request = VoltageOut(0.0)
@@ -109,12 +107,13 @@ class Intake(Subsystem):
         FalconLogger.addLoggedObject("/Intake/IntakeMotor", self.intake_motor)
 
         ## Mech2d
-        mech = Mechanism2d( 12, 12, Color8Bit(50,50,70) )
-        mechRoot = mech.getRoot( 'CoralPivot', 0.5, 0 )
-        ligRobBase = mechRoot.appendLigament('robBase', 6, 90, color=Color8Bit( Color.kGray ) )
-        self.mechArmTarget = ligRobBase.appendLigament( 'intakePivotTarget', 4, 180, color=Color8Bit(Color.kYellow), lineWidth=4 )
-        self.mechArmActual = ligRobBase.appendLigament( 'intakePivotActual', 8, 180, color=Color8Bit(Color.kGreen) )
-        if RobotBase.isSimulation(): self.mechArmSim = ligRobBase.appendLigament('intakePivotSSim', 6, 180, color=Color8Bit(Color.kRed) )
+        mech = Mechanism2d( 100, 100, Color8Bit(50,50,70) )
+        mechRoot = mech.getRoot( 'CoralPivot', 90, 10 )
+        ligRobBase = mechRoot.appendLigament('robBase', 50, 180, color=Color8Bit( Color.kGray ) )
+        # ligRobBase.appendLigament( 'test', 40, -131, color=Color8Bit(Color.kBlanchedAlmond), lineWidth=4 )
+        self.mechArmTarget = ligRobBase.appendLigament( 'intakePivotTarget', 40, 0, color=Color8Bit(Color.kYellow), lineWidth=4 )
+        self.mechArmActual = ligRobBase.appendLigament( 'intakePivotActual', 80, 0, color=Color8Bit(Color.kGreen) )
+        if RobotBase.isSimulation(): self.mechArmSim = ligRobBase.appendLigament('intakePivotSSim', 60, 0, color=Color8Bit(Color.kRed) )
 
         SmartDashboard.putData('/Mechanisms/IntakePivot', mech)
 
@@ -125,12 +124,14 @@ class Intake(Subsystem):
             self.pivot_encoder_sim = self.pivot_encoder.sim_state
 
             self.pivot_motor_sim.set_motor_type(self.pivot_motor_sim.MotorType.KRAKEN_X60)
+            self.pivot_motor_sim.orientation = ChassisReference.COUNTER_CLOCKWISE_POSITIVE
+            self.pivot_encoder_sim.set_raw_position(degreesToRotations(self.IntakePositions.START))
 
             self.arm_sim = SingleJointedArmSim(
                 DCMotor.krakenX60(),
                 IntakeConstants.gear_ratio,
-                SingleJointedArmSim.estimateMOI( 0.3, 1.36 ),
-                1.36,
+                SingleJointedArmSim.estimateMOI( 0.3, 0.1 ),
+                0.1,
                 degreesToRadians( self.IntakePositions.MIN ),
                 degreesToRadians( self.IntakePositions.MAX ),
                 True, # Gravity
@@ -149,26 +150,28 @@ class Intake(Subsystem):
             self.run()
 
         # Mech2d
-        self.mechArmActual.setAngle( self.getPivotPosition() )
-        self.mechArmTarget.setAngle( self.getPivotSetpoint() )
+        self.mechArmActual.setAngle( -self.getPivotPosition() )
+        self.mechArmTarget.setAngle( -self.getPivotSetpoint() )
         
         # Logging: Write Post Operation Information
-        FalconLogger.logOutput("/Intake/Outputs/Setpoint", self.getPivotSetpoint())
-        FalconLogger.logOutput("/Intake/Outputs/Error", self.pivot_motor.get_closed_loop_error().value)
-        FalconLogger.logOutput("/Intake/Outputs/closed loop reference * 360", self.pivot_motor.get_closed_loop_reference().value * 360)
-        FalconLogger.logOutput("/Intake/Outputs/Position", self.getPivotPosition())
+        FalconLogger.logOutput("/Intake/Outputs/Setpoint (deg)", self.getPivotSetpoint())
+        FalconLogger.logOutput("/Intake/Outputs/Error (deg)", self.pivot_motor.get_closed_loop_error().value * 360)
+        FalconLogger.logOutput("/Intake/Outputs/closed loop reference (deg)", self.pivot_motor.get_closed_loop_reference().value * 360)
+        FalconLogger.logOutput("/Intake/Outputs/Position (deg)", self.getPivotPosition())
     
     def simulationPeriodic(self):
         ## Simulation Physics
         # set the supply voltage of the TalonFX
         self.pivot_motor_sim.set_supply_voltage(RobotController.getBatteryVoltage())
+        self.pivot_encoder_sim.set_supply_voltage(RobotController.getBatteryVoltage())
 
         # get the motor voltage of the TalonFX
         motor_voltage = self.pivot_motor_sim.motor_voltage
+        FalconLogger.logOutput('/Intake/sim motor voltage', motor_voltage)
+
 
         # use the motor voltage to calculate new position and velocity
         # using WPILib's DCMotorSim class for physics simulation
-        self.arm_sim.setInputVoltage(motor_voltage)
         self.arm_sim.setInputVoltage(motor_voltage)
         self.arm_sim.update(0.020) # assume 20 ms loop time
 
@@ -183,9 +186,15 @@ class Intake(Subsystem):
             IntakeConstants.gear_ratio
             * radiansToRotations(self.arm_sim.getVelocity())
         )
+        self.pivot_encoder_sim.set_raw_position(
+            radiansToRotations(self.arm_sim.getVelocity())
+        )
+        self.pivot_encoder_sim.set_velocity(
+            radiansToRotations(self.arm_sim.getVelocity())
+        )
 
         ## Logging and stuff
-        self.mechArmSim.setAngle( radiansToDegrees( self.arm_sim.getAngle() ) )
+        self.mechArmSim.setAngle( radiansToDegrees( -self.arm_sim.getAngle() ) )
 
     def run(self) -> None:
         ## Intake

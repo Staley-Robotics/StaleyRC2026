@@ -18,8 +18,9 @@ class Agitator(Subsystem):
     '''This is functionally quite similar (if not the same) as Agitator, but for now they are kept seperate for simplicity's sake'''
     class AgitatorSpeeds:
         WAIT:rotations_per_second = 5 # default speed for lower power consumption but faster acceleration when needed
-        SPEED_AT_ZERO_DIST: 40 # total guess, speed at minimum distance TODO: measure
-        SPEED_AT__DIST: 40 # total guess, speed at some arbitrary larger distance TODO: measure
+        SPEED_LOW:rotations_per_second = 40
+        SPEED_MED:rotations_per_second = 40
+        SPEED_HIGH:rotations_per_second = 40
 
     class Constants:
         k_P:float=0.0

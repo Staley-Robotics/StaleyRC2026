@@ -12,6 +12,7 @@ from phoenix6 import SignalLogger, swerve, units, utils
 from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.controller import PPHolonomicDriveController
 from pathplannerlib.config import RobotConfig, PIDConstants
+from pathplannerlib.logging import PathPlannerLogging
 
 from .tuner_constants import TunerSwerveDrivetrain
 
@@ -149,12 +150,16 @@ class SwerveDrive(Subsystem, TunerSwerveDrivetrain):
         """Keep track if we've ever applied the operator perspective before or not"""
 
         # Path Planner
+        def fuck(speeds, feedforwards) -> None:
+            self.set_control( swerve.requests.ApplyRobotSpeeds().with_speeds(speeds))
+            print('fuck')
+            
         robotConfig = RobotConfig.fromGUISettings()
         AutoBuilder.configure(
             pose_supplier = lambda: self.get_state().pose,
             reset_pose = self.reset_pose,
             robot_relative_speeds_supplier = self.get_state().speeds,
-            output = lambda speeds, feedforwards: self.apply_request(swerve.requests.ApplyRobotSpeeds().with_speeds(speeds)).schedule(), #how??
+            output = fuck,
             controller = PPHolonomicDriveController(
                 PIDConstants(0.8, 0.0, 0.0),
                 PIDConstants(5.0, 0.0, 0.0)

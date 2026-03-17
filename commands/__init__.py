@@ -4,6 +4,7 @@ from .Intaking.PivotToPosition import *
 from .Launching.RunLauncherbyDist import *
 from .Launching.RunAgitatorByNT import *
 from .Launching.LauncherDefault import *
+from .Launching.SetFlywheelSpeed import *
 from .Launching.RunlauncherByNT import *
 from .Launching.ControlFlywheelSpeed import *
 from .Climbing.ControlClimberPos import *
