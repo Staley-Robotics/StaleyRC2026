@@ -12,6 +12,8 @@ from ntcore.util import ntproperty
 # Hardware Lib Imports
 from phoenix6 import swerve
 
+from pathplannerlib.auto import AutoBuilder
+
 ## Local Imports
 from commands import *
 from subsystems import TunerConstants, ClimberClosedLoop, Intake, Launcher, Agitator, Vision
@@ -60,8 +62,8 @@ class RobotContainer:
         self.gameCalc = RebuiltCalc(lambda: self.swerveSys.get_state().pose)
 
         ## Auto TODO: re-implement
-        self.__autoChooser.setDefaultOption( "1 - None", cmd.none() )
-        SmartDashboard.putData( "Autonomous Mode", self.__autoChooser )
+        self.autoChooser = AutoBuilder.buildAutoChooser("Just Move")
+        SmartDashboard.putData("AutoChooser", self.autoChooser)
 
         ### Logging
         SmartDashboard.putData("Subsystems/Intake", self.intakeSys)

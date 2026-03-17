@@ -1,7 +1,7 @@
 from enum import Enum
 
 from commands2 import Subsystem
-from wpilib import RobotState, DutyCycleEncoder, SmartDashboard, RobotBase, RobotController
+from wpilib import RobotState, DutyCycleEncoder, SmartDashboard, RobotBase, RobotController, Mechanism2d, Color8Bit, Color
 from wpimath.controller import PIDController, ProfiledPIDControllerRadians
 from wpimath.trajectory import TrapezoidProfileRadians
 from wpilib.simulation import SingleJointedArmSim, LinearSystemSim_2_1_2
@@ -108,6 +108,16 @@ class Intake(Subsystem):
         FalconLogger.addLoggedObject("/Intake/PivotMotor", self.pivot_motor)
         FalconLogger.addLoggedObject("/Intake/IntakeMotor", self.intake_motor)
 
+        ## Mech2d
+        mech = Mechanism2d( 12, 12, Color8Bit(50,50,70) )
+        mechRoot = mech.getRoot( 'CoralPivot', 0.5, 0 )
+        ligRobBase = mechRoot.appendLigament('robBase', 6, 90, color=Color8Bit( Color.kGray ) )
+        self.mechArmTarget = ligRobBase.appendLigament( 'intakePivotTarget', 4, 180, color=Color8Bit(Color.kYellow), lineWidth=4 )
+        self.mechArmActual = ligRobBase.appendLigament( 'intakePivotActual', 8, 180, color=Color8Bit(Color.kGreen) )
+        if RobotBase.isSimulation(): self.mechArmSim = ligRobBase.appendLigament('intakePivotSSim', 6, 180, color=Color8Bit(Color.kRed) )
+
+        SmartDashboard.putData('/Mechanisms/IntakePivot', mech)
+
         ### Simulation
         if RobotBase.isSimulation():
 
@@ -137,6 +147,10 @@ class Intake(Subsystem):
             self.stop()
         else:
             self.run()
+
+        # Mech2d
+        self.mechArmActual.setAngle( self.getPivotPosition() )
+        self.mechArmTarget.setAngle( self.getPivotSetpoint() )
         
         # Logging: Write Post Operation Information
         FalconLogger.logOutput("/Intake/Outputs/Setpoint", self.getPivotSetpoint())
@@ -145,6 +159,7 @@ class Intake(Subsystem):
         FalconLogger.logOutput("/Intake/Outputs/Position", self.getPivotPosition())
     
     def simulationPeriodic(self):
+        ## Simulation Physics
         # set the supply voltage of the TalonFX
         self.pivot_motor_sim.set_supply_voltage(RobotController.getBatteryVoltage())
 
@@ -168,6 +183,9 @@ class Intake(Subsystem):
             IntakeConstants.gear_ratio
             * radiansToRotations(self.arm_sim.getVelocity())
         )
+
+        ## Logging and stuff
+        self.mechArmSim.setAngle( radiansToDegrees( self.arm_sim.getAngle() ) )
 
     def run(self) -> None:
         ## Intake
