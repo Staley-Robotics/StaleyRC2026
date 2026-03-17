@@ -6,18 +6,15 @@
 [tool.robotpy]
 
 # Version of robotpy this project depends on
-robotpy_version = "2026.2.1.1"
+robotpy_version = "2026.2.2"
 
 # Which extra RobotPy components should be installed
 components = [
-    "commands2",
-#    "phoenix6",
-#    "robotpy-pathplannerlib",
-#    "robotpy-rev"
+    "commands2"
 ]
 
 requires = [
-    "phoenix6==26.1.1",
+    "phoenix6==26.1.2",
     "robotpy-pathplannerlib==2026.1.2",
-    "robotpy-rev==2026.0.3.1"
+    "robotpy-rev==2026.0.4"
 ]
