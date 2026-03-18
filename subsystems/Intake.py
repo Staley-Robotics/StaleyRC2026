@@ -20,10 +20,10 @@ from phoenix6.sim import ChassisReference
 from util.FalconLogger import FalconLogger
 
 class IntakeConstants:
-    kP:float=3.0   # proportion       The farther away, the harder it pushes
-    kI:float=0.0    # integral         The longer it's been off, the harder it pushes
-    kD:float=0.0    # differential     The harder it pushes, the less it pushes
-    kG:float=1.7    # gravity          Constant force, but accounting for gravity
+    kP:float=7.0   # proportion       The farther away, the harder it pushes
+    kI:float=2.0    # integral         The longer it's been off, the harder it pushes
+    kD:float=4.0    # differential     The harder it pushes, the less it pushes
+    kG:float=1.0    # gravity          Constant force, but accounting for gravity
 
     gear_ratio:float=11/60 # rotor/mechanism
 
@@ -55,7 +55,7 @@ class Intake(Subsystem):
         intake_motor_config = TalonFXConfiguration()
         intake_motor_config = intake_motor_config.with_motor_output(
             MotorOutputConfigs()
-            .with_neutral_mode(NeutralModeValue.BRAKE)
+            .with_neutral_mode(NeutralModeValue.COAST)
             .with_inverted(InvertedValue.CLOCKWISE_POSITIVE)
         )
         self.intake_motor.configurator.apply(intake_motor_config)
@@ -67,7 +67,7 @@ class Intake(Subsystem):
         pivot_motor_config = TalonFXConfiguration()
         pivot_motor_config = pivot_motor_config.with_motor_output(
             MotorOutputConfigs()
-            .with_neutral_mode(NeutralModeValue.COAST)
+            .with_neutral_mode(NeutralModeValue.BRAKE)
             .with_inverted(InvertedValue.CLOCKWISE_POSITIVE)
         ).with_slot0(
             Slot0Configs()
@@ -101,7 +101,7 @@ class Intake(Subsystem):
         ### Functionality Setup
         self.intake_request = VoltageOut(0.0)
         self.pivot_request = PositionVoltage(self.getPivotPosition())
-
+ 
         ## Logging
         FalconLogger.addLoggedObject("/Intake/PivotMotor", self.pivot_motor)
         FalconLogger.addLoggedObject("/Intake/IntakeMotor", self.intake_motor)

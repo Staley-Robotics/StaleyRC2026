@@ -36,11 +36,11 @@ class RobotContainer:
         self.controller1 = FalconXboxController( 0 )
         self.controller2 = FalconXboxController( 1 )
         self.controlBoard = RebuiltControlBoard( 2, 3 )
-        self.control_mode = ControlMode.TEST
+        self.control_mode = ControlMode.COMP
 
         ### Subsystems
         ## Intake
-        self.intakeSys = Intake( 10, 11, 0, 0.3362426 )
+        self.intakeSys = Intake( 10, 11, 0, -0.4973)
 
         ## Agitator
         self.agitatorSys = Agitator( 12 )
@@ -60,7 +60,8 @@ class RobotContainer:
         self.visionSys = Vision( self.swerveSys.add_vision_measurement )
 
         ## Initialize RebuiltCalc
-        self.gameCalc = RebuiltCalc(lambda: self.swerveSys.get_state().pose)
+        self.gameCalc = RebuiltCalc.getInst()
+        self.gameCalc.setGetRobotPose(lambda: self.swerveSys.get_state().pose)
 
         ## Auto TODO: re-implement
         self.autoChooser = AutoBuilder.buildAutoChooser("Just Moo")
@@ -93,13 +94,13 @@ class RobotContainer:
         """
         #NOTE: drive bindings handled in configureDriveBindings
         ## Climbing
-        self.controller1.y().toggleOnTrue(ControlClimberOpenLoop(self.climbSys, self.controller1.getRightUpDown))
+        self.controller1.y().toggleOnTrue(ControlClimberOpenLoop(self.climbSys, self.controller1.getTriggers))
 
         ## Intaking
         # Pivot
         self.controller1.povDown().toggleOnTrue(PivotToPosition(self.intakeSys, Intake.IntakePositions.INTAKING))
+        self.controller1.povLeft().toggleOnTrue(PivotToPosition(self.intakeSys, Intake.IntakePositions.BOUNCE_UP))
         self.controller1.povUp().toggleOnTrue(PivotToPosition(self.intakeSys, Intake.IntakePositions.STORED))
-        self.controller1.povUp().toggleOnTrue(PivotToPosition(self.intakeSys, Intake.IntakePositions.BOUNCE_UP))
 
         # Bawlz
         # allow controller 1 or 2 to toggle on a()
@@ -185,8 +186,8 @@ class RobotContainer:
         ## Launching
         # self.controller1.rightTrigger().whileTrue(RunLauncherByDist(self.launcherSys))
         # self.controller1.rightBumper().whileTrue(ControlFlywheelSpeed(self.agitatorSys, lambda: 3000))
-        self.controller1.a().toggleOnTrue(RunLauncherByNT(self.launcherSys))
-        self.controller1.b().toggleOnTrue(RunAgitatorByNT(self.agitatorSys))
+        # self.controller1.a().toggleOnTrue(RunLauncherByNT(self.launcherSys))
+        # self.controller1.b().toggleOnTrue(RunAgitatorByNT(self.agitatorSys))
         # this is a stupid way to do waht its doing:
         # self.controller1.rightTrigger(0.01).whileTrue(ControlFlywheelSpeed(self.launcherSys, self.controller1.getRightTriggerAxis))
         # self.controller1.leftTrigger(0.01).whileTrue(ControlFlywheelSpeed(self.agitatorSys, self.controller1.getLeftTriggerAxis))
@@ -241,7 +242,7 @@ class RobotContainer:
                 lambda: (
                     self.drive_fc.with_velocity_x( -self.controller1.getLeftY() * self._max_speed )
                                  .with_velocity_y( -self.controller1.getLeftX() * self._max_speed )
-                                 .with_rotational_rate( -self.controller1.getTriggers() * self._max_angular_rate )
+                                 .with_rotational_rate( -self.controller1.getRightX() * self._max_angular_rate )
                 )
             ).withName('Drive Field Centric')
         )

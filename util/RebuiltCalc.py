@@ -49,6 +49,8 @@ class FieldBoundaries:
     centerLineY:meters=inchesToMeters(158.84) #TODO: check if correct
 
 class RebuiltCalc:
+    _instance:typing.Self=None
+
     # variable definitions
     getRobotPose:typing.Callable[[], Pose2d] = lambda:Pose2d()
 
@@ -58,44 +60,55 @@ class RebuiltCalc:
     defining all variables here in the class definition rather than __init__ means their values will be updated and accessible through the class
     this means if you define a RebuiltCalc() object in one place, referencing the RebuiltCalc class should provide the same data
     '''
-
-    def __init__(self, getRobotPose:typing.Callable[[], Pose2d]):
-        self.getRobotPose = getRobotPose
     
-    def debugLog(self) -> None:
-        FalconLogger.logOutput("/RebuiltCalc/gotPose", self.getRobotPose())
-        FalconLogger.logOutput("/RebuiltCalc/inScoreZone", self.botInScoreZone())
-        FalconLogger.logOutput("/RebuiltCalc/isLeft", self.botIsLeft())
-        FalconLogger.logOutput("/RebuiltCalc/currentTarget", self.getCurrentTargetPoint())
-        FalconLogger.logOutput("/RebuiltCalc/2dDistToTarget", self.getDistToTarget())
-        FalconLogger.logOutput("/RebuiltCalc/rotToTarget", self.getRotToTarget().degrees())
+    @classmethod
+    def getInst(cls):
+        if cls._instance is None:
+            cls._instance = RebuiltCalc()
+        return cls._instance
     
-    def botInScoreZone(self) -> bool:
+    @classmethod
+    def setGetRobotPose(cls, getRobotPose:typing.Callable[[], Pose2d]):
+        cls.getRobotPose = getRobotPose
+    
+    @classmethod
+    def debugLog(cls) -> None:
+        FalconLogger.logOutput("/RebuiltCalc/gotPose", cls.getRobotPose())
+        FalconLogger.logOutput("/RebuiltCalc/inScoreZone", cls.botInScoreZone())
+        FalconLogger.logOutput("/RebuiltCalc/isLeft", cls.botIsLeft())
+        FalconLogger.logOutput("/RebuiltCalc/currentTarget", cls.getCurrentTargetPoint())
+        FalconLogger.logOutput("/RebuiltCalc/2dDistToTarget", cls.getDistToTarget())
+        FalconLogger.logOutput("/RebuiltCalc/rotToTarget", cls.getRotToTarget().degrees())
+    
+    @classmethod
+    def botInScoreZone(cls) -> bool:
         if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
-            return self.getRobotPose().x < FieldBoundaries.blueScoreZoneX
+            return cls.getRobotPose().x < FieldBoundaries.blueScoreZoneX
         else:
-            return self.getRobotPose().x > FieldBoundaries.redScoreZoneX
+            return cls.getRobotPose().x > FieldBoundaries.redScoreZoneX
     
-    def botIsLeft(self) -> bool:
+    @classmethod
+    def botIsLeft(cls) -> bool:
         if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
-            return self.getRobotPose().y > FieldBoundaries.centerLineY
+            return cls.getRobotPose().y > FieldBoundaries.centerLineY
         else:
-            return self.getRobotPose().y < FieldBoundaries.centerLineY
-        
-    def getCurrentTargetPoint(self) -> Translation2d:
+            return cls.getRobotPose().y < FieldBoundaries.centerLineY
+    
+    @classmethod
+    def getCurrentTargetPoint(cls) -> Translation2d:
         """
         gets the Translation2d (point on the field) of the current target
         """
-        if self.botInScoreZone():
+        if cls.botInScoreZone():
             if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
                 return TargetPoints.blueHub
             else:
                 return TargetPoints.redHub
         
-        if not (self.desiredRelayPoint is None):
-            return self.desiredRelayPoint
+        if not (cls.desiredRelayPoint is None):
+            return cls.desiredRelayPoint
         else:
-            if self.botIsLeft():
+            if cls.botIsLeft():
                 if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
                     return TargetPoints.relayLeftBlue
                 else:
@@ -106,20 +119,21 @@ class RebuiltCalc:
                 else:
                     return TargetPoints.relayRightRed
                 
-    
-    def getDistToTarget(self) -> meters:
+    @classmethod
+    def getDistToTarget(cls) -> meters:
         """
         returns the 2-dimensional distance from the robot to the currentTarget
         """
-        # crnt_pose = Translation3d(self.getRobotPose().x, self.getRobotPose().y, 0.0) # assume robot is on ground
-        return self.getRobotPose().translation().distance(self.getCurrentTargetPoint())
+        # crnt_pose = Translation3d(cls.getRobotPose().x, cls.getRobotPose().y, 0.0) # assume robot is on ground
+        return cls.getRobotPose().translation().distance(cls.getCurrentTargetPoint())
 
-    def getRotToTarget(self) -> Rotation2d:
-        target = self.getCurrentTargetPoint()
+    @classmethod
+    def getRotToTarget(cls) -> Rotation2d:
+        target = cls.getCurrentTargetPoint()
 
         #this probably works idk
-        dX = target.x - self.getRobotPose().x
-        dY = target.y - self.getRobotPose().y
+        dX = target.x - cls.getRobotPose().x
+        dY = target.y - cls.getRobotPose().y
         goalAngle = Rotation2d( x = -dX, y = -dY )
 
         return goalAngle

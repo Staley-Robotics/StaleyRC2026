@@ -17,7 +17,7 @@ class SetIntakeSpeed(Command):
         self.set_speed:Intake.IntakeSpeeds|percent = speed
 
         self.setName( f"SetIntakeSpeed: {speed}%" )
-        self.addRequirements( intakeSys )
+        # self.addRequirements( intakeSys ) # doesnt require so pivot commands function uninterupted
 
     def initialize(self) -> None:
         self.intake_sys.setIntakeSpeed(self.set_speed)

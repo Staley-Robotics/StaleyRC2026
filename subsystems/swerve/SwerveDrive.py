@@ -15,6 +15,7 @@ from pathplannerlib.config import RobotConfig, PIDConstants
 from pathplannerlib.logging import PathPlannerLogging
 
 from .tuner_constants import TunerSwerveDrivetrain
+from util import FalconLogger
 
 
 class SwerveDrive(Subsystem, TunerSwerveDrivetrain):
@@ -152,8 +153,8 @@ class SwerveDrive(Subsystem, TunerSwerveDrivetrain):
         # Path Planner
         def fuck(speeds, feedforwards) -> None:
             self.set_control( swerve.requests.ApplyRobotSpeeds().with_speeds(speeds))
-            print('fuck')
-            
+            print('please work auto')
+
         robotConfig = RobotConfig.fromGUISettings()
         AutoBuilder.configure(
             pose_supplier = lambda: self.get_state().pose,
@@ -168,6 +169,9 @@ class SwerveDrive(Subsystem, TunerSwerveDrivetrain):
             should_flip_path = lambda: DriverStation.getAlliance() == DriverStation.Alliance.kRed,
             drive_subsystem = self
         )
+
+        # PP Logger
+        
 
         # Swerve requests to apply during SysId characterization
         self._translation_characterization = swerve.requests.SysIdSwerveTranslation()
@@ -298,8 +302,6 @@ class SwerveDrive(Subsystem, TunerSwerveDrivetrain):
         # This allows us to correct the perspective in case the robot code restarts mid-match.
         # Otherwise, only check and apply the operator perspective if the DS is disabled.
         # This ensures driving behavior doesn't change until an explicit disable event occurs during testing.
-        self.field.setRobotPose( self.get_state().pose )
-
         if not self._has_applied_operator_perspective or DriverStation.isDisabled():
             alliance_color = DriverStation.getAlliance()
             if alliance_color is not None:
@@ -309,6 +311,10 @@ class SwerveDrive(Subsystem, TunerSwerveDrivetrain):
                     else self._BLUE_ALLIANCE_PERSPECTIVE_ROTATION
                 )
                 self._has_applied_operator_perspective = True
+        
+        ## Logging
+        self.field.setRobotPose( self.get_state().pose )
+        FalconLogger.logOutput("swerve/pose", self.get_state().pose)
 
     def _start_sim_thread(self):
         def _sim_periodic():
