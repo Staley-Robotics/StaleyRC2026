@@ -7,6 +7,7 @@ from .Launching.LauncherDefault import *
 from .Launching.SetFlywheelSpeed import *
 from .Launching.RunlauncherByNT import *
 from .Launching.ControlFlywheelSpeed import *
+from .Vision.ChangeVisionPipelines import *
 from .Climbing.ControlClimberPos import *
 from .Climbing.ControlClimberSpeed import *
 from .Climbing.ControlClimberOpenLoop import *

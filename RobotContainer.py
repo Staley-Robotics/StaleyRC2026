@@ -18,7 +18,7 @@ from pathplannerlib.auto import AutoBuilder
 from commands import *
 from subsystems import TunerConstants, ClimberClosedLoop, Intake, Launcher, Agitator, Vision
 
-from util import FalconXboxController, Telemetry, ControlMode, RebuiltCalc, RebuiltControlBoard
+from util import * #FalconXboxController, Telemetry, ControlMode, RebuiltCalc, RebuiltControlBoard
 
 class RobotContainer:
     # Variable Declaration
@@ -98,16 +98,16 @@ class RobotContainer:
 
         ## Intaking
         # Pivot
-        self.controller1.povDown().toggleOnTrue(PivotToPosition(self.intakeSys, Intake.IntakePositions.INTAKING))
-        self.controller1.povLeft().toggleOnTrue(PivotToPosition(self.intakeSys, Intake.IntakePositions.BOUNCE_UP))
-        self.controller1.povUp().toggleOnTrue(PivotToPosition(self.intakeSys, Intake.IntakePositions.STORED))
+        self.controller1.povDown().onTrue(PivotToPosition(self.intakeSys, Intake.IntakePositions.INTAKING))
+        self.controller1.povLeft().onTrue(PivotToPosition(self.intakeSys, Intake.IntakePositions.BOUNCE_UP))
+        self.controller1.povUp().onTrue(PivotToPosition(self.intakeSys, Intake.IntakePositions.STORED))
 
         # Bawlz
         # allow controller 1 or 2 to toggle on a()
         (self.controller1.a() | self.controller2.a()).toggleOnTrue(SetIntakeSpeed(self.intakeSys, Intake.IntakeSpeeds.IN))
 
         ## Launching
-        self.controller1.rightBumper().onTrue(RunLauncherByDist(self.launcherSys)) # will trigger alongside auto-aim
+        self.controller1.rightBumper().toggleOnTrue(RunLauncherByDist(self.launcherSys)) # will trigger alongside auto-aim
 
         self.controlBoard.launchLow()\
             .onTrue(SetFlywheelSpeed(self.launcherSys, Launcher.LauncherSpeeds.SPEED_LOW)
@@ -119,20 +119,23 @@ class RobotContainer:
             .onTrue(SetFlywheelSpeed(self.launcherSys, Launcher.LauncherSpeeds.SPEED_HIGH)
             .alongWith(SetFlywheelSpeed(self.agitatorSys, Agitator.AgitatorSpeeds.SPEED_HIGH)))
 
-        self.controller2.x().onTrue(RunLauncherByDist(self.launcherSys))
+        self.controller2.x().toggleOnTrue(
+            RunLauncherByDist(self.launcherSys).alongWith(SetFlywheelSpeed(self.agitatorSys, Agitator.AgitatorSpeeds.SPEED_HIGH))
+        )
 
         ## Misc
         # self.controlBoard.bigRed().whileTrue( Panic() ) # TODO: implement Panic()
         ## Additional Drive Controls
         self.drive_fc_outpost = swerve.requests.RobotCentricFacingAngle()
         self.drive_fc_bump = swerve.requests.RobotCentricFacingAngle()
+        self.drive_fc_tower = swerve.requests.RobotCentricFacingAngle()
         self.controlBoard.outpost().onTrue(
             self.swerveSys.apply_request(
                 lambda: (
                     self.drive_fc_outpost
                         .with_velocity_x( -self.controller1.getLeftY() * self._max_speed )
                         .with_velocity_y( -self.controller1.getLeftX() * self._max_speed )
-                        .with_target_direction( Rotation2d(0) )
+                        .with_target_direction( Rotation2d(-90) )
                 )
             ).withName('Drive Field Centric for Outpost')
         )
@@ -146,6 +149,24 @@ class RobotContainer:
                 )
             ).withName('Drive Field Centric for Bump')
         )
+        self.controlBoard.tower().onTrue(
+            self.swerveSys.apply_request(
+                lambda: (
+                    self.drive_fc_tower
+                        .with_velocity_x( -self.controller1.getLeftY() * self._max_speed )
+                        .with_velocity_y( -self.controller1.getLeftX() * self._max_speed )
+                        .with_target_direction( Rotation2d(180) ) # TODO: normalize to closest proper mult of 45
+                )
+            ).withName('Drive Field Centric for Tower')
+        )
+
+        SmartDashboard.putData(ChangeVisionPipelines(self.visionSys, 0))
+        SmartDashboard.putData(ChangeVisionPipelines(self.visionSys, 1))
+
+        ## Targeting
+        self.controlBoard.relayLeft().onTrue(cmd.runOnce(self.gameCalc.setDesiredRelay(RelayTarget.LEFT)))
+        self.controlBoard.relayRight().onTrue(cmd.runOnce(self.gameCalc.setDesiredRelay(RelayTarget.RIGHT)))
+        self.controlBoard.relayAuto().onTrue(cmd.runOnce(self.gameCalc.setDesiredRelay(RelayTarget.AUTO)))
 
     def configurePracticeBindings(self) -> None:
         """

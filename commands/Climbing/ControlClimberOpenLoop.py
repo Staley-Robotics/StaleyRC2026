@@ -9,9 +9,7 @@ class ControlClimberOpenLoop(Command):
     # Variable Declaration
     climber_sys:ClimberOpenLoop = None
 
-    # a value of 1 would change desired height by 50 inches per second, thats too fast
-    # 1/50 is 1 inch per second, thats alright
-    input_mult = ntproperty("/Settings/ControlClimberOpenLoop/input mult", 0.3, persistent=True)
+    input_mult = ntproperty("/Settings/ControlClimberOpenLoop/input mult", 0.5, persistent=True)
     
     # Initialization
     def __init__( self,

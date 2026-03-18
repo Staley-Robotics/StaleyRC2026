@@ -35,7 +35,7 @@ class PivotToPosition(Command):
         # self.intake_sys.setPivotSetpoint(self.intake_sys.getPivotPosition())
 
     def isFinished(self) -> bool:
-        return False
+        return self.intake_sys.getAtSetpoint()
 
     def runsWhenDisabled(self) -> bool:
         return False

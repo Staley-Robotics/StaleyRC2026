@@ -5,6 +5,8 @@ robotpy-installer==2026.0.2
 robotpy==2026.2.2
 robotpy[commands2]
 
+### Non-RobotPy
 phoenix6==26.1.2
 robotpy-rev==2026.0.4
 robotpy-pathplannerlib==2026.1.2
+limelightlib-python

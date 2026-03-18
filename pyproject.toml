@@ -16,5 +16,6 @@ components = [
 requires = [
     "phoenix6==26.1.2",
     "robotpy-pathplannerlib==2026.1.2",
-    "robotpy-rev==2026.0.4"
+    "robotpy-rev==2026.0.4",
+    "limelightlib-python"
 ]

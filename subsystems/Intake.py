@@ -2,8 +2,6 @@ from enum import Enum
 
 from commands2 import Subsystem
 from wpilib import RobotState, DutyCycleEncoder, SmartDashboard, RobotBase, RobotController, Mechanism2d, Color8Bit, Color
-from wpimath.controller import PIDController, ProfiledPIDControllerRadians
-from wpimath.trajectory import TrapezoidProfileRadians
 from wpilib.simulation import SingleJointedArmSim, LinearSystemSim_2_1_2
 from wpimath.system.plant import DCMotor
 from ntcore.util import ntproperty
@@ -13,19 +11,21 @@ from phoenix6.units import *
 
 from phoenix6.hardware import TalonFX, CANcoder
 from phoenix6.configs import TalonFXConfiguration, MotorOutputConfigs, Slot0Configs, FeedbackConfigs, CANcoderConfiguration, MagnetSensorConfigs, ClosedLoopGeneralConfigs
-from phoenix6.signals import InvertedValue, NeutralModeValue, FeedbackSensorSourceValue, GravityTypeValue, SensorDirectionValue
+from phoenix6.signals import InvertedValue, NeutralModeValue, FeedbackSensorSourceValue, GravityTypeValue, SensorDirectionValue, StaticFeedforwardSignValue
 from phoenix6.controls import PositionVoltage, VoltageOut
 from phoenix6.sim import ChassisReference
 
 from util.FalconLogger import FalconLogger
 
 class IntakeConstants:
-    kP:float=7.0   # proportion       The farther away, the harder it pushes
+    kP:float=7.0    # proportion       The farther away, the harder it pushes
     kI:float=2.0    # integral         The longer it's been off, the harder it pushes
     kD:float=4.0    # differential     The harder it pushes, the less it pushes
     kG:float=1.0    # gravity          Constant force, but accounting for gravity
 
     gear_ratio:float=11/60 # rotor/mechanism
+
+    tolerance:degrees = 10
 
 class Intake(Subsystem):
     class IntakeSpeeds:
@@ -38,13 +38,13 @@ class Intake(Subsystem):
         0 should be the horizontal/outward/deployed position
         90 should be straight up
         '''
-        MAX:degrees = 131.4 # 0.403809 rot measured -(arbitrarily)-> 0.365 rot for safety
+        MAX:degrees = (0.354004 * 360) - 5 # -5 degrees
         MIN:degrees = 0    # 0 (by definition)
         START:degree = MAX-1
 
         STORED:degrees =  120
         INTAKING:degrees = 0
-        BOUNCE_UP:degrees = 30
+        BOUNCE_UP:degrees = 70
 
     def __init__(self, intakeMotorID:int, pivotMotorID:int, pivotEncoderID:int, pivotEncoderOffset:rotation) -> None:
         ### Motor Setup
@@ -76,7 +76,8 @@ class Intake(Subsystem):
                 .with_k_d(IntakeConstants.kD)
                 .with_k_g(IntakeConstants.kG)
                 .with_gravity_type(GravityTypeValue.ARM_COSINE)
-                .with_gravity_arm_position_offset(-0.03) # total guess
+                .with_gravity_arm_position_offset(-0.03)
+                .with_static_feedforward_sign(StaticFeedforwardSignValue.USE_CLOSED_LOOP_SIGN)
         ).with_feedback(
             FeedbackConfigs()
                 .with_feedback_remote_sensor_id(pivotEncoderID)
@@ -223,3 +224,6 @@ class Intake(Subsystem):
     
     def getPivotPosition(self) -> degrees:
         return self.pivot_encoder.get_absolute_position().value * 360 # rot to deg
+    
+    def getAtSetpoint(self) -> bool:
+        return self.pivot_motor.get_closed_loop_error().value * 360 < IntakeConstants.tolerance

@@ -1,5 +1,5 @@
 import typing
-from enum import Enum
+from enum import Enum, auto
 
 from wpilib import DriverStation
 from wpimath.geometry import Pose2d, Translation2d, Translation3d, Rotation2d
@@ -38,6 +38,11 @@ class TargetPoints:
     
     redHub:Translation2d=Translation2d(inchesToMeters(469.11), inchesToMeters(148.84))#TODO: check if correct
     blueHub:Translation2d=Translation2d(inchesToMeters(182.11), inchesToMeters(148.84))#TODO: check if correct
+
+class RelayTarget(Enum):
+    LEFT=auto()
+    RIGHT=auto()
+    AUTO=auto()
 
 class FieldBoundaries:
     """
@@ -82,17 +87,19 @@ class RebuiltCalc:
     
     @classmethod
     def botInScoreZone(cls) -> bool:
+        pose = cls.getRobotPose()
         if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
-            return cls.getRobotPose().x < FieldBoundaries.blueScoreZoneX
+            return pose.x < FieldBoundaries.blueScoreZoneX
         else:
-            return cls.getRobotPose().x > FieldBoundaries.redScoreZoneX
+            return pose.x > FieldBoundaries.redScoreZoneX
     
     @classmethod
     def botIsLeft(cls) -> bool:
+        pose = cls.getRobotPose()
         if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
-            return cls.getRobotPose().y > FieldBoundaries.centerLineY
+            return pose.y > FieldBoundaries.centerLineY
         else:
-            return cls.getRobotPose().y < FieldBoundaries.centerLineY
+            return pose.y < FieldBoundaries.centerLineY
     
     @classmethod
     def getCurrentTargetPoint(cls) -> Translation2d:
@@ -137,6 +144,23 @@ class RebuiltCalc:
         goalAngle = Rotation2d( x = -dX, y = -dY )
 
         return goalAngle
+    
+    @classmethod
+    def setDesiredRelay(cls, relay:RelayTarget) -> None:
+        if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
+            if relay == RelayTarget.AUTO:
+                cls.desiredRelayPoint = None
+            elif relay == RelayTarget.LEFT:
+                cls.desiredRelayPoint = TargetPoints.relayLeftBlue
+            else:
+                cls.desiredRelayPoint = TargetPoints.relayRightBlue
+        else:
+            if relay == RelayTarget.AUTO:
+                cls.desiredRelayPoint = None
+            elif relay == RelayTarget.LEFT:
+                cls.desiredRelayPoint = TargetPoints.relayLeftRed
+            else:
+                cls.desiredRelayPoint = TargetPoints.relayRightRed
 
 
 '''
