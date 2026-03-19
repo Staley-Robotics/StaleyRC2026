@@ -8,16 +8,16 @@ from wpimath.estimator import SwerveDrive4PoseEstimator
 from wpimath.geometry import Pose2d
 from wpimath.units import degreesToRadians, seconds
 
-import limelight
+# import limelight
 
 from util import FalconLogger
 
 class FalconLimelight:
-    def __init__(self, sysID:str, visionApplier:typing.Callable[[Pose2d, seconds, tuple[float]], None], ll_ip:str):
+    def __init__(self, sysID:str, visionApplier:typing.Callable[[Pose2d, seconds, tuple[float]], None], ll_ip:str|None):
         ## Subsystem setup
         self.sysID = sysID
         self.apply_measurement = visionApplier
-        self.ll = limelight.Limelight(ll_ip)
+        # self.ll = limelight.Limelight(ll_ip)
 
         ## Networktable setup
         table = NetworkTableInstance.getDefault().getTable(sysID)
@@ -25,8 +25,8 @@ class FalconLimelight:
 
         self.rotation_stddev = 1.0
     
-    def set_pipeline(self, pipeline_index:int):
-        self.ll.pipeline_switch(pipeline_index)
+    # def set_pipeline(self, pipeline_index:int):
+    #     self.ll.pipeline_switch(pipeline_index)
 
     def array2d_to_botpose(self, data:list[float]) -> Pose2d:
         '''
@@ -34,15 +34,15 @@ class FalconLimelight:
         '''
         return Pose2d( data[0], data[1], degreesToRadians(data[5]) )
 
-    def log_data(self) -> None:
-        FalconLogger.logInput(f'/Vision/Camera-{self.sysID}/temp', self.ll.get_temp())
+    # def log_data(self) -> None:
+    #     FalconLogger.logInput(f'/Vision/Camera-{self.sysID}/temp', self.ll.get_temp())
 
     def update_botpose(self) -> Pose2d | None:
         '''
         adds all new vision data on this camera to SS's odometry class
         :returns Pose2d: returns current pose if there was new data, else None
         '''
-        self.log_data()
+        # self.log_data()
         data = self.poseSub.readQueue()
 
         for pose_data in data:

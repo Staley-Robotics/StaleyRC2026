@@ -28,11 +28,11 @@ class IntakeConstants:
     tolerance:degrees = 10
 
 class Intake(Subsystem):
-    class IntakeSpeeds:
+    class Speeds:
         STOP = 0
         IN = 0.6
 
-    class IntakePositions:
+    class Positions:
         '''
         Position setpoints for the intake in degrees
         0 should be the horizontal/outward/deployed position
@@ -126,17 +126,17 @@ class Intake(Subsystem):
 
             self.pivot_motor_sim.set_motor_type(self.pivot_motor_sim.MotorType.KRAKEN_X60)
             self.pivot_motor_sim.orientation = ChassisReference.COUNTER_CLOCKWISE_POSITIVE
-            self.pivot_encoder_sim.set_raw_position(degreesToRotations(self.IntakePositions.START))
+            self.pivot_encoder_sim.set_raw_position(degreesToRotations(self.Positions.START))
 
             self.arm_sim = SingleJointedArmSim(
                 DCMotor.krakenX60(),
                 IntakeConstants.gear_ratio,
                 SingleJointedArmSim.estimateMOI( 0.3, 0.1 ),
                 0.1,
-                degreesToRadians( self.IntakePositions.MIN ),
-                degreesToRadians( self.IntakePositions.MAX ),
+                degreesToRadians( self.Positions.MIN ),
+                degreesToRadians( self.Positions.MAX ),
                 True, # Gravity
-                degreesToRadians( self.IntakePositions.START )
+                degreesToRadians( self.Positions.START )
             )
             self.arm_sim.setState( degreesToRadians( self.getPivotPosition() ) , 0.0 )
 
@@ -207,17 +207,17 @@ class Intake(Subsystem):
         self.pivot_motor.set_control(self.pivot_request)
 
     def stop(self) -> None:
-        self.setIntakeSpeed(self.IntakeSpeeds.STOP)
+        self.setIntakeSpeed(self.Speeds.STOP)
         self.setPivotSetpoint(self.getPivotPosition())
 
-    def setIntakeSpeed(self, speed:IntakeSpeeds|percent) -> None:
+    def setIntakeSpeed(self, speed:Speeds|percent) -> None:
         self.intake_request.output = speed * 12
 
     def getIntakeSpeed(self) -> percent:
         return self.intake_request.output / 12
     
-    def setPivotSetpoint(self, setpoint:IntakePositions|degrees) -> None:
-        self.pivot_request.position = min(max(setpoint, self.IntakePositions.MIN), self.IntakePositions.MAX) / 360 # deg to rot
+    def setPivotSetpoint(self, setpoint:Positions|degrees) -> None:
+        self.pivot_request.position = min(max(setpoint, self.Positions.MIN), self.Positions.MAX) / 360 # deg to rot
     
     def getPivotSetpoint(self) -> degrees:
         return self.pivot_request.position * 360

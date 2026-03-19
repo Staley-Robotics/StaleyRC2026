@@ -8,7 +8,6 @@ from subsystems import Launcher, Agitator
 
 class SetFlywheelSpeed(Command):
     # Variable Declaration
-    flywheel_sys:Launcher = None
     
     # Initialization
     def __init__( self,
@@ -16,7 +15,7 @@ class SetFlywheelSpeed(Command):
                   speed:rotations_per_second
                 ) -> None:
         # Command Attributes
-        self.flywheel_sys:Launcher = flywheelSys
+        self.flywheel_sys:Launcher | Agitator = flywheelSys
         self.speed:rotations_per_second = speed
 
         self.setName( f"SetFlywheelSpeed: {flywheelSys.__class__.__name__} @ {speed} rps" )

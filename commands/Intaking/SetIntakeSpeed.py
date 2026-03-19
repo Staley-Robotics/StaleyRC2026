@@ -10,11 +10,11 @@ class SetIntakeSpeed(Command):
     # Initialization
     def __init__( self,
                   intakeSys:Intake,
-                  speed:Intake.IntakeSpeeds|percent
+                  speed:Intake.Speeds|percent
                 ) -> None:
         # Command Attributes
         self.intake_sys:Intake = intakeSys
-        self.set_speed:Intake.IntakeSpeeds|percent = speed
+        self.set_speed:Intake.Speeds|percent = speed
 
         self.setName( f"SetIntakeSpeed: {speed}%" )
         # self.addRequirements( intakeSys ) # doesnt require so pivot commands function uninterupted
@@ -26,7 +26,7 @@ class SetIntakeSpeed(Command):
         pass
 
     def end(self, interrupted:bool) -> None:
-        self.intake_sys.setIntakeSpeed(Intake.IntakeSpeeds.STOP)
+        self.intake_sys.setIntakeSpeed(Intake.Speeds.STOP)
 
     def isFinished(self) -> bool:
         return False

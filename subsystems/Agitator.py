@@ -16,11 +16,12 @@ from util.FalconLogger import FalconLogger
 
 class Agitator(Subsystem):
     '''This is functionally quite similar (if not the same) as Agitator, but for now they are kept seperate for simplicity's sake'''
-    class AgitatorSpeeds:
+    class Speeds:
         WAIT:rotations_per_second = 5 # default speed for lower power consumption but faster acceleration when needed
         SPEED_LOW:rotations_per_second = 40
         SPEED_MED:rotations_per_second = 40
         SPEED_HIGH:rotations_per_second = 40
+        EJECT:rotations_per_second = -20
 
     class Constants:
         k_P:float=0.0

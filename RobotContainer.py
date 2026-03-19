@@ -12,7 +12,7 @@ from ntcore.util import ntproperty
 # Hardware Lib Imports
 from phoenix6 import swerve
 
-from pathplannerlib.auto import AutoBuilder
+from pathplannerlib.auto import AutoBuilder, NamedCommands
 
 ## Local Imports
 from commands import *
@@ -64,18 +64,18 @@ class RobotContainer:
         self.gameCalc.setGetRobotPose(lambda: self.swerveSys.get_state().pose)
 
         ## Auto TODO: re-implement
-        self.autoChooser = AutoBuilder.buildAutoChooser("Just Moo")
+        self.autoChooser = AutoBuilder.buildAutoChooser("Just Move")
         SmartDashboard.putData("AutoChooser", self.autoChooser)
 
         ### Logging
-        SmartDashboard.putData("Subsystems/Intake", self.intakeSys)
+        # SmartDashboard.putData("Subsystems/Intake", self.intakeSys)
         SmartDashboard.putData("Subsystems/Agitator", self.agitatorSys)
         SmartDashboard.putData("Subsystems/Launcher", self.launcherSys)
         SmartDashboard.putData("Subsystems/Climber", self.climbSys)
         SmartDashboard.putData("Subsystems/Swerve", self.swerveSys)
         SmartDashboard.putData("Subsystems/Vision", self.visionSys)
 
-        ### Configure the button bindings
+        ## Configure the button bindings
         self.configureDriveBindings()
         # self.configureDriveCharacterizationBrindings() # not properly setup
         match self.control_mode:
@@ -98,30 +98,39 @@ class RobotContainer:
 
         ## Intaking
         # Pivot
-        self.controller1.povDown().onTrue(PivotToPosition(self.intakeSys, Intake.IntakePositions.INTAKING))
-        self.controller1.povLeft().onTrue(PivotToPosition(self.intakeSys, Intake.IntakePositions.BOUNCE_UP))
-        self.controller1.povUp().onTrue(PivotToPosition(self.intakeSys, Intake.IntakePositions.STORED))
+        self.controller1.povDown().onTrue(PivotToPosition(self.intakeSys, Intake.Positions.INTAKING))
+        self.controller1.povLeft().onTrue(PivotToPosition(self.intakeSys, Intake.Positions.BOUNCE_UP))
+        self.controller1.povUp().onTrue(PivotToPosition(self.intakeSys, Intake.Positions.STORED))
 
         # Bawlz
         # allow controller 1 or 2 to toggle on a()
-        (self.controller1.a() | self.controller2.a()).toggleOnTrue(SetIntakeSpeed(self.intakeSys, Intake.IntakeSpeeds.IN))
+        (self.controller1.a() | self.controller2.a()).toggleOnTrue(SetIntakeSpeed(self.intakeSys, Intake.Speeds.IN))
 
         ## Launching
-        self.controller1.rightBumper().toggleOnTrue(RunLauncherByDist(self.launcherSys)) # will trigger alongside auto-aim
+        handleLaunch = RunLauncherByDist(self.launcherSys)\
+                        .alongWith(cmd.select(
+                            {True:SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_MED),
+                             False:SetFlywheelSpeed(self.agitatorSys, 0)},
+                             self.launcherSys.isAtSpeed
+                        ))
+        
+        (self.controller1.rightBumper() | self.controller2.x()).toggleOnTrue(handleLaunch) # will trigger alongside auto-aim
 
         self.controlBoard.launchLow()\
             .onTrue(SetFlywheelSpeed(self.launcherSys, Launcher.LauncherSpeeds.SPEED_LOW)
-            .alongWith(SetFlywheelSpeed(self.agitatorSys, Agitator.AgitatorSpeeds.SPEED_LOW)))
+            .alongWith(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_LOW)))
         self.controlBoard.launchMed()\
             .onTrue(SetFlywheelSpeed(self.launcherSys, Launcher.LauncherSpeeds.SPEED_MED)
-            .alongWith(SetFlywheelSpeed(self.agitatorSys, Agitator.AgitatorSpeeds.SPEED_MED)))
+            .alongWith(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_MED)))
         self.controlBoard.launchMed()\
             .onTrue(SetFlywheelSpeed(self.launcherSys, Launcher.LauncherSpeeds.SPEED_HIGH)
-            .alongWith(SetFlywheelSpeed(self.agitatorSys, Agitator.AgitatorSpeeds.SPEED_HIGH)))
+            .alongWith(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_HIGH)))
+        # NOTE: all these agitator speeds are the same
 
-        self.controller2.x().toggleOnTrue(
-            RunLauncherByDist(self.launcherSys).alongWith(SetFlywheelSpeed(self.agitatorSys, Agitator.AgitatorSpeeds.SPEED_HIGH))
-        )
+        self.controlBoard.bigRed().whileTrue(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.EJECT))
+
+        self.controlBoard.switch3().toggleOnTrue(RunLauncherByNT(self.launcherSys))
+        self.controller1().toggleOnTrue(RunAgitatorByNT(self.agitatorSys))
 
         ## Misc
         # self.controlBoard.bigRed().whileTrue( Panic() ) # TODO: implement Panic()
@@ -167,7 +176,6 @@ class RobotContainer:
         self.controlBoard.relayLeft().onTrue(cmd.runOnce(self.gameCalc.setDesiredRelay(RelayTarget.LEFT)))
         self.controlBoard.relayRight().onTrue(cmd.runOnce(self.gameCalc.setDesiredRelay(RelayTarget.RIGHT)))
         self.controlBoard.relayAuto().onTrue(cmd.runOnce(self.gameCalc.setDesiredRelay(RelayTarget.AUTO)))
-
     def configurePracticeBindings(self) -> None:
         """
         configures controls for the robot in practice
@@ -197,27 +205,29 @@ class RobotContainer:
         # Pivot
         # self.controller1.a().toggleOnTrue(ControlPivotPos(self.climbSys, self.controller1.getRightUpDown))
         # #OR
-        self.controller1.povDown().onTrue(PivotToPosition(self.intakeSys, 10 ))
-        self.controller1.povLeft().onTrue(PivotToPosition(self.intakeSys, 45 ))
-        self.controller1.povUp().onTrue(PivotToPosition(self.intakeSys, 90 ))
+        # self.controller1.povDown().onTrue(PivotToPosition(self.intakeSys, 10 ))
+        # self.controller1.povLeft().onTrue(PivotToPosition(self.intakeSys, 45 ))
+        # self.controller1.povUp().onTrue(PivotToPosition(self.intakeSys, 90 ))
 
-        # Bawlz
-        self.controller1.x().toggleOnTrue(SetIntakeSpeed(self.intakeSys, Intake.IntakeSpeeds.IN))
+        # # Bawlz
+        # self.controller1.x().toggleOnTrue(SetIntakeSpeed(self.intakeSys, Intake.IntakeSpeeds.IN))
 
         ## Launching
         # self.controller1.rightTrigger().whileTrue(RunLauncherByDist(self.launcherSys))
         # self.controller1.rightBumper().whileTrue(ControlFlywheelSpeed(self.agitatorSys, lambda: 3000))
-        # self.controller1.a().toggleOnTrue(RunLauncherByNT(self.launcherSys))
-        # self.controller1.b().toggleOnTrue(RunAgitatorByNT(self.agitatorSys))
+        self.controller1.a().toggleOnTrue(RunLauncherByNT(self.launcherSys))
+        self.controller1.b().toggleOnTrue(RunAgitatorByNT(self.agitatorSys))
         # this is a stupid way to do waht its doing:
         # self.controller1.rightTrigger(0.01).whileTrue(ControlFlywheelSpeed(self.launcherSys, self.controller1.getRightTriggerAxis))
         # self.controller1.leftTrigger(0.01).whileTrue(ControlFlywheelSpeed(self.agitatorSys, self.controller1.getLeftTriggerAxis))
+        
 
         ## Climbing
-        self.climbSys.setDefaultCommand(ControlClimberSpeed( self.climbSys,
-                                                             self.controller1.y().getAsBoolean,
-                                                             self.controller1.rightBumper().getAsBoolean, 
-                                                             self.controller1.leftBumper().getAsBoolean))
+        self.controller1.y().toggleOnTrue(ControlClimberOpenLoop(self.climbSys, self.controller1.getTriggers))
+        # self.climbSys.y().toggle(ControlClimberSpeed( self.climbSys,
+        #                                                      self.controller1.y().getAsBoolean,
+        #                                                      self.controller1.rightBumper().getAsBoolean, 
+        #                                                      self.controller1.leftBumper().getAsBoolean))
 
     def configureDriveBindings(self) -> None:
         """
@@ -335,7 +345,7 @@ class RobotContainer:
 
         current version auto-generated by phoenix6
         """
-        return self.__autoChooser.getSelected()
+        return self.autoChooser.getSelected()
         # # # Phoenix's simple drive forward auton
         # # idle = swerve.requests.Idle()
         # return cmd.sequence(
@@ -356,3 +366,10 @@ class RobotContainer:
         #     # Finally idle for the rest of auton
         #     self.swerveSys.apply_request(lambda: idle)
         # )
+    def initNamedCommands(self):
+        """
+        Initialize Named Commands for PathPlanner
+        """
+        NamedCommands.registerCommand("LaunchBalls", RunLauncherByDist(self.launcherSys).alongWith(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_MED)))
+        NamedCommands.registerCommand("DeployIntake", PivotToPosition(self.intakeSys, Intake.Positions.INTAKING))
+        NamedCommands.registerCommand("RunIntake", SetIntakeSpeed(self.intakeSys, Intake.Speeds.IN))

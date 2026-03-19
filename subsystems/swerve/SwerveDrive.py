@@ -150,17 +150,13 @@ class SwerveDrive(Subsystem, TunerSwerveDrivetrain):
         self._has_applied_operator_perspective = False
         """Keep track if we've ever applied the operator perspective before or not"""
 
-        # Path Planner
-        def fuck(speeds, feedforwards) -> None:
-            self.set_control( swerve.requests.ApplyRobotSpeeds().with_speeds(speeds))
-            print('please work auto')
-
+        # Pathplanner
         robotConfig = RobotConfig.fromGUISettings()
         AutoBuilder.configure(
             pose_supplier = lambda: self.get_state().pose,
             reset_pose = self.reset_pose,
-            robot_relative_speeds_supplier = self.get_state().speeds,
-            output = fuck,
+            robot_relative_speeds_supplier = lambda: self.get_state().speeds,
+            output = lambda speeds, feedforwards: self.set_control( swerve.requests.ApplyRobotSpeeds().with_speeds(speeds)), # nobody knows what feedforwards are for
             controller = PPHolonomicDriveController(
                 PIDConstants(0.8, 0.0, 0.0),
                 PIDConstants(5.0, 0.0, 0.0)

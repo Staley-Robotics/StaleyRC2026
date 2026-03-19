@@ -13,7 +13,7 @@ class PivotToPosition(Command):
     # Initialization
     def __init__( self,
                   intakeSys:Intake,
-                  setPos:Intake.IntakePositions|degrees
+                  setPos:Intake.Positions|degrees
                 ) -> None:
         # Command Attributes
         self.intake_sys:Intake = intakeSys
