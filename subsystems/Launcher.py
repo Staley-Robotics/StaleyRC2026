@@ -8,7 +8,7 @@ from wpimath.units import *
 from phoenix6.units import *
 
 from phoenix6.hardware import TalonFX
-from phoenix6.configs import TalonFXConfiguration, MotorOutputConfigs, Slot0Configs, ClosedLoopGeneralConfigs
+from phoenix6.configs import TalonFXConfiguration, MotorOutputConfigs, Slot0Configs, ClosedLoopGeneralConfigs, CurrentLimitsConfigs
 from phoenix6.signals import InvertedValue, NeutralModeValue
 from phoenix6.controls import VelocityVoltage
 
@@ -39,11 +39,11 @@ class Launcher(Subsystem):
         MAX:meters=10
 
     class Constants:
-        k_P:float=0.2
+        k_P:float=0.0
         k_I:float=0.0
-        k_D:float=0.005
-        k_S:float=0.25
-        k_V:float=0.07
+        k_D:float=0.0
+        k_S:float=0.22
+        k_V:float=0.12
 
         kAtSpeedTolerance:rotations_per_second = 3.0
 
@@ -65,6 +65,12 @@ class Launcher(Subsystem):
                 .with_k_d(self.Constants.k_D)\
                 .with_k_s(self.Constants.k_S)\
                 .with_k_v(self.Constants.k_V)
+        ).with_current_limits(
+            CurrentLimitsConfigs()
+            # Swerve azimuth does not require much torque output, so we can set a relatively low
+            # stator current limit to help avoid brownouts without impacting performance.
+            .with_stator_current_limit(80.0)
+            .with_stator_current_limit_enable(True)
         )
         self.motor.configurator.apply(motor_config)
 

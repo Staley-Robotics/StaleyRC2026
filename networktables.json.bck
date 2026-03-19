@@ -24,6 +24,14 @@
     }
   },
   {
+    "name": "Settings/RunLauncherByDist/const",
+    "type": "double",
+    "value": 20.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
     "name": "/Settings/RunAgitatorByNT/speed (rps: 0-70)",
     "type": "double",
     "value": 0.0,
@@ -66,7 +74,7 @@
   {
     "name": "Settings/drive/max speed %",
     "type": "double",
-    "value": 0.5,
+    "value": 0.75,
     "properties": {
       "persistent": true
     }

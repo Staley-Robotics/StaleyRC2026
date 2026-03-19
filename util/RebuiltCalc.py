@@ -74,16 +74,19 @@ class RebuiltCalc:
     
     @classmethod
     def setGetRobotPose(cls, getRobotPose:typing.Callable[[], Pose2d]):
-        cls.getRobotPose = getRobotPose
+        cls.getRobotPose:typing.Callable[[], Pose2d] = getRobotPose
     
     @classmethod
     def debugLog(cls) -> None:
-        FalconLogger.logOutput("/RebuiltCalc/gotPose", cls.getRobotPose())
+        pose:Pose2d = cls.getRobotPose()
+        FalconLogger.logOutput("/RebuiltCalc/gotPose", pose)
         FalconLogger.logOutput("/RebuiltCalc/inScoreZone", cls.botInScoreZone())
         FalconLogger.logOutput("/RebuiltCalc/isLeft", cls.botIsLeft())
-        FalconLogger.logOutput("/RebuiltCalc/currentTarget", cls.getCurrentTargetPoint())
+        FalconLogger.logOutput("/RebuiltCalc/currentTargetPoint", cls.getCurrentTargetPoint())
+        FalconLogger.logOutput("/RebuiltCalc/currentTarget", cls.getCurrentTarget())
         FalconLogger.logOutput("/RebuiltCalc/2dDistToTarget", cls.getDistToTarget())
-        FalconLogger.logOutput("/RebuiltCalc/rotToTarget", cls.getRotToTarget().degrees())
+        FalconLogger.logOutput("/RebuiltCalc/targetRotation", cls.getRotToTarget().degrees())
+        FalconLogger.logOutput("/RebuiltCalc/rotToTarget", cls.getRotToTarget().degrees() - pose.rotation().degrees() - 180)
     
     @classmethod
     def botInScoreZone(cls) -> bool:
@@ -125,6 +128,31 @@ class RebuiltCalc:
                     return TargetPoints.relayRightBlue
                 else:
                     return TargetPoints.relayRightRed
+    
+    @classmethod
+    def getCurrentTarget(cls) -> str:
+        """
+        gets the Translation2d (point on the field) of the current target
+        """
+        if cls.botInScoreZone():
+            if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
+                return "blueHub"
+            else:
+                return "redHub"
+        
+        if not (cls.desiredRelayPoint is None):
+            return "desiredRelayPoint"
+        else:
+            if cls.botIsLeft():
+                if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
+                    return "relayLeftBlue"
+                else:
+                    return "relayLeftRed"
+            else:
+                if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
+                    return "relayRightBlue"
+                else:
+                    return "relayRightRed"
                 
     @classmethod
     def getDistToTarget(cls) -> meters:

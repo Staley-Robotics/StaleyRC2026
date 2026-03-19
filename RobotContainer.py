@@ -24,10 +24,10 @@ class RobotContainer:
     # Variable Declaration
     __autoChooser:SendableChooser = SendableChooser()
 
-    drive_max_speed_pct: percent =  ntproperty("Settings/drive/max speed %", 0.5, persistent=True)
+    drive_max_speed_pct: percent =  ntproperty("Settings/drive/max speed %", 0.75, persistent=True)
     drive_max_rot_speed: percent =  ntproperty("Settings/drive/max rot speed (rots/sec)", 0.65, persistent=True)
 
-    drive_rot_kP: percent =  ntproperty("Settings/drive/pid/kP", 0.00, persistent=True)
+    drive_rot_kP: percent =  ntproperty("Settings/drive/pid/kP", 5.00, persistent=True)
     drive_rot_kI: percent =  ntproperty("Settings/drive/pid/kI", 0.00, persistent=True)
     drive_rot_kD: percent =  ntproperty("Settings/drive/pid/kD", 0.00, persistent=True)
 
@@ -63,7 +63,8 @@ class RobotContainer:
         self.gameCalc = RebuiltCalc.getInst()
         self.gameCalc.setGetRobotPose(lambda: self.swerveSys.get_state().pose)
 
-        ## Auto TODO: re-implement
+        ## Auto
+        self.initNamedCommands()
         self.autoChooser = AutoBuilder.buildAutoChooser("Just Move")
         SmartDashboard.putData("AutoChooser", self.autoChooser)
 
@@ -95,12 +96,13 @@ class RobotContainer:
         #NOTE: drive bindings handled in configureDriveBindings
         ## Climbing
         self.controller1.y().toggleOnTrue(ControlClimberOpenLoop(self.climbSys, self.controller1.getTriggers))
+        self.controlBoard.extra2().whileTrue(ControlClimberOpenLoop(self.climbSys, lambda: -1 if self.controlBoard.switch2().getAsBoolean() else 1))
 
         ## Intaking
         # Pivot
-        self.controller1.povDown().onTrue(PivotToPosition(self.intakeSys, Intake.Positions.INTAKING))
-        self.controller1.povLeft().onTrue(PivotToPosition(self.intakeSys, Intake.Positions.BOUNCE_UP))
-        self.controller1.povUp().onTrue(PivotToPosition(self.intakeSys, Intake.Positions.STORED))
+        (self.controller1.povDown() | self.controller2.povDown()).onTrue(PivotToPosition(self.intakeSys, Intake.Positions.INTAKING))
+        (self.controller1.povLeft() | self.controller2.povLeft()).onTrue(PivotToPosition(self.intakeSys, Intake.Positions.BOUNCE_UP))
+        (self.controller1.povUp() | self.controller2.povUp()).onTrue(PivotToPosition(self.intakeSys, Intake.Positions.STORED))
 
         # Bawlz
         # allow controller 1 or 2 to toggle on a()
@@ -114,23 +116,23 @@ class RobotContainer:
                              self.launcherSys.isAtSpeed
                         ))
         
-        (self.controller1.rightBumper() | self.controller2.x()).toggleOnTrue(handleLaunch) # will trigger alongside auto-aim
+        (self.controller2.x()).toggleOnTrue(handleLaunch) # will trigger launcher (note: player 1 lost this control)
 
         self.controlBoard.launchLow()\
-            .onTrue(SetFlywheelSpeed(self.launcherSys, Launcher.LauncherSpeeds.SPEED_LOW)
+            .toggleOnTrue(SetFlywheelSpeed(self.launcherSys, Launcher.LauncherSpeeds.SPEED_LOW)
             .alongWith(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_LOW)))
         self.controlBoard.launchMed()\
-            .onTrue(SetFlywheelSpeed(self.launcherSys, Launcher.LauncherSpeeds.SPEED_MED)
+            .toggleOnTrue(SetFlywheelSpeed(self.launcherSys, Launcher.LauncherSpeeds.SPEED_MED)
             .alongWith(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_MED)))
         self.controlBoard.launchMed()\
-            .onTrue(SetFlywheelSpeed(self.launcherSys, Launcher.LauncherSpeeds.SPEED_HIGH)
+            .toggleOnTrue(SetFlywheelSpeed(self.launcherSys, Launcher.LauncherSpeeds.SPEED_HIGH)
             .alongWith(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_HIGH)))
         # NOTE: all these agitator speeds are the same
 
         self.controlBoard.bigRed().whileTrue(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.EJECT))
 
-        self.controlBoard.switch3().toggleOnTrue(RunLauncherByNT(self.launcherSys))
-        self.controller1().toggleOnTrue(RunAgitatorByNT(self.agitatorSys))
+        self.controlBoard.switch3().whileTrue(RunLauncherByNT(self.launcherSys))
+        self.controlBoard.extra3().whileTrue(RunAgitatorByNT(self.agitatorSys))
 
         ## Misc
         # self.controlBoard.bigRed().whileTrue( Panic() ) # TODO: implement Panic()
@@ -142,9 +144,9 @@ class RobotContainer:
             self.swerveSys.apply_request(
                 lambda: (
                     self.drive_fc_outpost
-                        .with_velocity_x( -self.controller1.getLeftY() * self._max_speed )
-                        .with_velocity_y( -self.controller1.getLeftX() * self._max_speed )
-                        .with_target_direction( Rotation2d(-90) )
+                        .with_velocity_x( -self.controller1.getLeftY() * self._max_speed() )
+                        .with_velocity_y( -self.controller1.getLeftX() * self._max_speed() )
+                        .with_target_direction( Rotation2d(-90).fromDegrees() )
                 )
             ).withName('Drive Field Centric for Outpost')
         )
@@ -152,9 +154,9 @@ class RobotContainer:
             self.swerveSys.apply_request(
                 lambda: (
                     self.drive_fc_bump
-                        .with_velocity_x( -self.controller1.getLeftY() * self._max_speed )
-                        .with_velocity_y( -self.controller1.getLeftX() * self._max_speed )
-                        .with_target_direction( Rotation2d(45) ) # TODO: normalize to closest proper mult of 45
+                        .with_velocity_x( -self.controller1.getLeftY() * self._max_speed() )
+                        .with_velocity_y( -self.controller1.getLeftX() * self._max_speed() )
+                        .with_target_direction( Rotation2d(45).fromDegrees() ) # TODO: normalize to closest proper mult of 45
                 )
             ).withName('Drive Field Centric for Bump')
         )
@@ -162,9 +164,9 @@ class RobotContainer:
             self.swerveSys.apply_request(
                 lambda: (
                     self.drive_fc_tower
-                        .with_velocity_x( -self.controller1.getLeftY() * self._max_speed )
-                        .with_velocity_y( -self.controller1.getLeftX() * self._max_speed )
-                        .with_target_direction( Rotation2d(180) ) # TODO: normalize to closest proper mult of 45
+                        .with_velocity_x( -self.controller1.getLeftY() * self._max_speed() )
+                        .with_velocity_y( -self.controller1.getLeftX() * self._max_speed() )
+                        .with_target_direction( Rotation2d(180).fromDegrees() ) # TODO: normalize to closest proper mult of 45
                 )
             ).withName('Drive Field Centric for Tower')
         )
@@ -237,12 +239,13 @@ class RobotContainer:
 
         '''--------------------Create drive requests--------------------'''
         ## speed configs
-        self._max_speed = self.drive_max_speed_pct * TunerConstants.speed_at_12_volts
+        self._max_speed = lambda: self.drive_max_speed_pct * TunerConstants.speed_at_12_volts
         self._max_angular_rate = rotationsToRadians(self.drive_max_rot_speed)
+        self.drive_max_speed_pct = 0.75 # always start with "full" speed
         
         self.drive_fc = ( # field centric
             swerve.requests.FieldCentric()
-            .with_deadband(self._max_speed * 0.1)
+            .with_deadband(self._max_speed() * 0.1)
             .with_rotational_deadband(
                 self._max_angular_rate * 0.1  # Add a 10% deadband
             )
@@ -252,7 +255,7 @@ class RobotContainer:
         )
         self.drive_rc = ( # robot centric
             swerve.requests.RobotCentric()
-            .with_deadband(self._max_speed * 0.1)
+            .with_deadband(self._max_speed() * 0.1)
             .with_rotational_deadband(
                 self._max_angular_rate * 0.1  # Add a 10% deadband
             )
@@ -271,8 +274,8 @@ class RobotContainer:
         self.swerveSys.setDefaultCommand(
             self.swerveSys.apply_request(
                 lambda: (
-                    self.drive_fc.with_velocity_x( -self.controller1.getLeftY() * self._max_speed )
-                                 .with_velocity_y( -self.controller1.getLeftX() * self._max_speed )
+                    self.drive_fc.with_velocity_x( -self.controller1.getLeftY() * self._max_speed() )
+                                 .with_velocity_y( -self.controller1.getLeftX() * self._max_speed() )
                                  .with_rotational_rate( -self.controller1.getRightX() * self._max_angular_rate )
                 )
             ).withName('Drive Field Centric')
@@ -284,14 +287,19 @@ class RobotContainer:
         )
 
         ## Controls
+        # Toggle halfspeed
+        def toggleHalfSpeed():
+            self.drive_max_speed_pct = 0.25 if self.drive_max_speed_pct > 0.5 else 0.75
+        self.controller1.leftStick().onTrue(cmd.runOnce(toggleHalfSpeed))
+
         # Brake
         self.controller1.b().toggleOnTrue(self.swerveSys.apply_request(lambda: self.drive_brake).withName('Brake'))
 
         # Drive + auto rotate
         self.controller1.rightBumper().toggleOnTrue(
             self.swerveSys.apply_request(
-                lambda: self.drive_fc_with_rot.with_velocity_x( -self.controller1.getLeftY() * self._max_speed ) #Rotation2d(-self.controller1.getLeftY(), -self.controller1.getLeftX())
-                                              .with_velocity_y( -self.controller1.getLeftX() * self._max_speed )
+                lambda: self.drive_fc_with_rot.with_velocity_x( -self.controller1.getLeftY() * self._max_speed() ) #Rotation2d(-self.controller1.getLeftY(), -self.controller1.getLeftX())
+                                              .with_velocity_y( -self.controller1.getLeftX() * self._max_speed() )
                                               .with_target_direction( self.gameCalc.getRotToTarget() )
                                               .with_heading_pid( self.drive_rot_kP, self.drive_rot_kI, self.drive_rot_kD )
             ).withName('FC + Auto Rotate')
@@ -301,13 +309,13 @@ class RobotContainer:
         self.controller1.leftBumper().toggleOnTrue(
             self.swerveSys.apply_request(
                 lambda: (
-                    self.drive_rc.with_velocity_x( -self.controller1.getLeftY() * self._max_speed )
-                                 .with_velocity_y( -self.controller1.getLeftX() * self._max_speed )
+                    self.drive_rc.with_velocity_x( -self.controller1.getLeftY() * self._max_speed() )
+                                 .with_velocity_y( -self.controller1.getLeftX() * self._max_speed() )
                                  .with_rotational_rate( -self.controller1.getRightX() * self._max_angular_rate )
                 )
             ).withName('Drive Robot Centric')
         )
-    def configureDriveCharacterizationBrindings(self):
+    def configureDriveCharacterizationBindings(self):
         '''
         Setup controls to run Characterization (aka SystemIdentification) on the swervedrive
         these are meant to get data to configure the drive system

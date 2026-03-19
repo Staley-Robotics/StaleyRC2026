@@ -12,8 +12,9 @@ class RunLauncherByDist(Command):
     # Variable Declaration
     launcher_sys:Launcher = None
 
-    a = ntproperty("Settings/RunLauncherByDist/mult a (dist)", 1.0, persistent=True)
-    b = ntproperty("Settings/RunLauncherByDist/mult b (dist^2)", 0.0, persistent=True)
+    a = ntproperty("Settings/RunLauncherByDist/mult a (dist)", 5.0, persistent=True)
+    b = ntproperty("Settings/RunLauncherByDist/mult b (dist^2)", 0.75, persistent=True)
+    c = ntproperty("Settings/RunLauncherByDist/const", 14.0, persistent=True)
     
     # Initialization
     def __init__( self,
@@ -36,7 +37,7 @@ class RunLauncherByDist(Command):
         # pct_of_dist = (dist-Launcher.LauncherDistances.MIN)/(Launcher.LauncherDistances.MAX-Launcher.LauncherDistances.MIN) # scales to percentage between
 
         # apply scale between speed at min dist and max dist, by some math magic
-        speed = (self.a*dist) + (self.b*(dist*dist))
+        speed = (self.a*dist) + (self.b*(dist*dist)) + self.c
 
         # apply speed
         self.launcher_sys.setDesiredSpeed(

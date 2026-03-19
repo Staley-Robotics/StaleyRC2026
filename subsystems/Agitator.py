@@ -8,7 +8,7 @@ from wpimath.units import *
 from phoenix6.units import *
 
 from phoenix6.hardware import TalonFX
-from phoenix6.configs import TalonFXConfiguration, MotorOutputConfigs, Slot0Configs, ClosedLoopGeneralConfigs
+from phoenix6.configs import TalonFXConfiguration, MotorOutputConfigs, Slot0Configs, ClosedLoopGeneralConfigs, CurrentLimitsConfigs
 from phoenix6.signals import InvertedValue, NeutralModeValue
 from phoenix6.controls import VelocityVoltage
 
@@ -27,8 +27,8 @@ class Agitator(Subsystem):
         k_P:float=0.0
         k_I:float=0.0
         k_D:float=0.0
-        k_S:float=0.32
-        k_V:float=0.118
+        k_S:float=0.22
+        k_V:float=0.112
 
         kAtSpeedTolerance:rotations_per_second = 3.0 # ntproperty("/Agitator/At speed tolerance (rps)", 2.0, persistent=True) #total guess
 
@@ -52,7 +52,7 @@ class Agitator(Subsystem):
         motor_config = motor_config.with_motor_output(
             MotorOutputConfigs()
             .with_neutral_mode(NeutralModeValue.COAST)
-            .with_inverted(InvertedValue.COUNTER_CLOCKWISE_POSITIVE)
+            .with_inverted(InvertedValue.CLOCKWISE_POSITIVE)
         ).with_slot0(
             Slot0Configs()\
                 .with_k_p(self.Constants.k_P)\
@@ -60,6 +60,12 @@ class Agitator(Subsystem):
                 .with_k_d(self.Constants.k_D)\
                 .with_k_s(self.Constants.k_S)\
                 .with_k_v(self.Constants.k_V)
+        ).with_current_limits(
+            CurrentLimitsConfigs()
+            # Swerve azimuth does not require much torque output, so we can set a relatively low
+            # stator current limit to help avoid brownouts without impacting performance.
+            .with_stator_current_limit(80.0)
+            .with_stator_current_limit_enable(True)
         )
         self.motor.configurator.apply(motor_config)
 
