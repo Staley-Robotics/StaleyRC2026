@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, overload
 from phoenix6 import CANBus, configs, hardware, signals, swerve, units
 from wpimath.units import inchesToMeters
+from wpilib import RobotBase
 
 if TYPE_CHECKING:
     from .SwerveDrive import SwerveDrive
@@ -75,7 +76,10 @@ class TunerConstants:
 
     # CAN bus that the devices are located on;
     # All swerve devices must share the same CAN bus
-    canbus = CANBus("canivore1", "./logs/example.hoot")
+    if RobotBase.isSimulation():
+        canbus = CANBus("rio", "./logs/example.hoot")
+    else:
+        canbus = CANBus("canivore1", "./logs/example.hoot")
 
     # Theoretical free speed (m/s) at 12 V applied output;
     # This needs to be tuned to your individual robot
