@@ -109,12 +109,13 @@ class RobotContainer:
         (self.controller1.a() | self.controller2.a()).toggleOnTrue(SetIntakeSpeed(self.intakeSys, Intake.Speeds.IN))
 
         ## Launching
-        handleLaunch = RunLauncherByDist(self.launcherSys)\
-                        .alongWith(cmd.select(
-                            {True:SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_MED),
-                             False:SetFlywheelSpeed(self.agitatorSys, 0)},
-                             self.launcherSys.isAtSpeed
-                        ))
+        # handleLaunch = RunLauncherByDist(self.launcherSys)\
+        #                 .alongWith(cmd.select(
+        #                     {True:SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_MED),
+        #                      False:SetFlywheelSpeed(self.agitatorSys, 0)},
+        #                      self.launcherSys.isAtSpeed
+        #                 ))
+        handleLaunch = LaunchBalls(self.launcherSys, self.agitatorSys)
         
         (self.controller2.x()).toggleOnTrue(handleLaunch) # will trigger launcher (note: player 1 lost this control)
 

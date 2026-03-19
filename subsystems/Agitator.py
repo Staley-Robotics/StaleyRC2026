@@ -60,13 +60,12 @@ class Agitator(Subsystem):
                 .with_k_d(self.Constants.k_D)\
                 .with_k_s(self.Constants.k_S)\
                 .with_k_v(self.Constants.k_V)
-        ).with_current_limits(
-            CurrentLimitsConfigs()
-            # Swerve azimuth does not require much torque output, so we can set a relatively low
-            # stator current limit to help avoid brownouts without impacting performance.
-            .with_stator_current_limit(80.0)
-            .with_stator_current_limit_enable(True)
         )
+        # .with_current_limits(
+        #     CurrentLimitsConfigs()
+        #     .with_stator_current_limit(80.0)
+        #     .with_stator_current_limit_enable(True)
+        # ) # hitting limit caused continual crash without error
         self.motor.configurator.apply(motor_config)
 
         ### Functionality Setup (velocity request)

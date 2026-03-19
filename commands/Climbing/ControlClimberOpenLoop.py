@@ -9,7 +9,7 @@ class ControlClimberOpenLoop(Command):
     # Variable Declaration
     climber_sys:ClimberOpenLoop = None
 
-    input_mult = ntproperty("/Settings/ControlClimberOpenLoop/input mult", 0.5, persistent=True)
+    input_mult = ntproperty("/Settings/ControlClimberOpenLoop/input mult", 0.6, persistent=True)
     
     # Initialization
     def __init__( self,
@@ -35,7 +35,9 @@ class ControlClimberOpenLoop(Command):
         )
 
     def end(self, interrupted:bool) -> None:
-        pass
+        self.climber_sys.setSpeed(
+            0
+        )
 
     def isFinished(self) -> bool:
         return False
