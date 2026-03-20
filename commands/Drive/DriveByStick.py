@@ -1,39 +1,58 @@
-# import typing
+import typing
 
-# from commands2 import Command, Subsystem
+from commands2 import Command, Subsystem
+from wpimath.geometry import Rotation2d
 
-# class SampleCommand(Command):
-#     # Variable Declaration
-#     m_subsystem:SampleSubsystem = None
-#     m_getValue:typing.Callable[[],float] = lambda: 0.0
+from phoenix6.units import *
+
+from subsystems import SwerveDrive
+
+class DriveByStick(Command):
+    # Variable Declaration
+    # swerve_sys:SwerveDrive = None
+    # m_getValue:typing.Callable[[],float] = lambda: 0.0
     
-#     # Initialization
-#     def __init__( self,
-#                   mySubsystem:Subsystem,
-#                   myValue: typing.Callable[[], float] = lambda: 0.0
-#                 ) -> None:
-#         # Command Attributes
-#         self.m_subsystem:SampleSubsystem = mySubsystem
-#         self.m_getValue = myValue
-#         self.setName( "SampleCommand" )
-#         self.addRequirements( mySubsystem )
+    # Initialization
+    def __init__( self,
+                  swerveSys: SwerveDrive,
+                  getX: typing.Callable[[], float] = lambda: 0.0,
+                  getY: typing.Callable[[], float] = lambda: 0.0,
+                  getRot: typing.Callable[[], float] = lambda: 0.0
+                ) -> None:
+        # Command Attributes
+        self.swerve_sys:SwerveDrive = swerveSys
+        self.get_x = getX
+        self.get_y = getY
+        self.get_rot = getRot
 
-#     # On Start
-#     def initialize(self) -> None:
-#         pass
+        self.field_centric = True
 
-#     # Periodic
-#     def execute(self) -> None:
-#         self.m_subsystem.setSetpoint( self.m_getValue() )
+        self.desired_rot: typing.Callable[[], Rotation2d] = lambda: Rotation2d()
+        self.use_desired_rot = False
 
-#     # On End
-#     def end(self, interrupted:bool) -> None:
-#         pass
+        self.setName( f"{self.__class__.__name__}" )
+        self.addRequirements( swerveSys )
 
-#     # Is Finished
-#     def isFinished(self) -> bool:
-#         return False
+    # On Start
+    def initialize(self) -> None:
+        pass
 
-#     # Run When Disabled
-#     def runsWhenDisabled(self) -> bool:
-#         return False
+    # Periodic
+    def execute(self) -> None:
+        pass
+
+    # On End
+    def end(self, interrupted:bool) -> None:
+        pass
+
+    # Is Finished
+    def isFinished(self) -> bool:
+        return False
+
+    # Run When Disabled
+    def runsWhenDisabled(self) -> bool:
+        return False
+    
+    def setDriveWithRot(self, enabled:bool, switch_desired_rot:typing.Callable[[], Rotation2d]) -> None:
+        self.use_desired_rot = enabled
+        self.desired_rot = switch_desired_rot

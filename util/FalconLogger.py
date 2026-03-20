@@ -49,8 +49,9 @@ class FalconLogger:
                     self.logInput(logged_obj.key + "/converted velocity", logged_obj.obj.get_velocity().value)
                     self.logInput(logged_obj.key + "/rotor position", logged_obj.obj.get_rotor_position().value)
                     self.logInput(logged_obj.key + "/converted position", logged_obj.obj.get_position().value)
-                    self.logInput(logged_obj.key + "/output current - amps", logged_obj.obj.get_stator_current().value)
-                    self.logInput(logged_obj.key + "/output current - amps", logged_obj.obj.get_motor_stall_current().value)
+                    self.logInput(logged_obj.key + "/stator current - amps", logged_obj.obj.get_stator_current().value)
+                    self.logInput(logged_obj.key + "/torque current - amps", logged_obj.obj.get_torque_current().value)
+                    self.logInput(logged_obj.key + "/stall current - amps", logged_obj.obj.get_motor_stall_current().value)
                     self.logInput(logged_obj.key + "/temp - c", logged_obj.obj.get_device_temp().value)
                 case _:
                     print(f"Unsupported object {logged_obj} added to FalconLogger's loggedInputs")

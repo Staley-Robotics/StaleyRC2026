@@ -10,7 +10,7 @@ from wpimath.units import *
 from phoenix6.units import *
 
 from phoenix6.hardware import TalonFX, CANcoder
-from phoenix6.configs import TalonFXConfiguration, MotorOutputConfigs, Slot0Configs, FeedbackConfigs, CANcoderConfiguration, MagnetSensorConfigs, ClosedLoopGeneralConfigs
+from phoenix6.configs import * #TalonFXConfiguration, MotorOutputConfigs, Slot0Configs, FeedbackConfigs, CANcoderConfiguration, MagnetSensorConfigs, ClosedLoopGeneralConfigs, Slot1Configs
 from phoenix6.signals import InvertedValue, NeutralModeValue, FeedbackSensorSourceValue, GravityTypeValue, SensorDirectionValue, StaticFeedforwardSignValue, GainSchedBehaviorValue
 from phoenix6.controls import PositionVoltage, VoltageOut
 from phoenix6.sim import ChassisReference
@@ -32,6 +32,7 @@ class Intake(Subsystem):
     class Speeds:
         STOP = 0
         IN = 0.45
+        OUT = -0.4
 
     class Positions:
         '''
@@ -82,7 +83,16 @@ class Intake(Subsystem):
                 .with_static_feedforward_sign(StaticFeedforwardSignValue.USE_CLOSED_LOOP_SIGN)
                 .with_gain_sched_behavior(GainSchedBehaviorValue.USE_SLOT1)
         ).with_slot1(
-            
+            Slot1Configs()
+                .with_k_p(IntakeConstants.kP)
+                .with_k_i(IntakeConstants.kI / 3)
+                .with_k_d(IntakeConstants.kD)
+                .with_k_s(0)
+                .with_k_g(IntakeConstants.kG)
+                .with_gravity_type(GravityTypeValue.ARM_COSINE)
+                .with_gravity_arm_position_offset(-0.03)
+                .with_static_feedforward_sign(StaticFeedforwardSignValue.USE_CLOSED_LOOP_SIGN)
+                .with_gain_sched_behavior(GainSchedBehaviorValue.INACTIVE)
         ).with_feedback(
             FeedbackConfigs()
                 .with_feedback_remote_sensor_id(pivotEncoderID)

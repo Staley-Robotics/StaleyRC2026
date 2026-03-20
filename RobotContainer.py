@@ -49,7 +49,7 @@ class RobotContainer:
         self.launcherSys = Launcher( 13 )
 
         ## Climber
-        self.climbSys = ClimberOpenLoop( 14 )
+        # self.climbSys = ClimberOpenLoop( 14 )
 
         #### Weirdo Subsystems
         ## Drive
@@ -69,10 +69,10 @@ class RobotContainer:
         SmartDashboard.putData("AutoChooser", self.autoChooser)
 
         ### Logging
-        # SmartDashboard.putData("Subsystems/Intake", self.intakeSys)
+        SmartDashboard.putData("Subsystems/Intake", self.intakeSys)
         SmartDashboard.putData("Subsystems/Agitator", self.agitatorSys)
         SmartDashboard.putData("Subsystems/Launcher", self.launcherSys)
-        SmartDashboard.putData("Subsystems/Climber", self.climbSys)
+        # SmartDashboard.putData("Subsystems/Climber", self.climbSys)
         SmartDashboard.putData("Subsystems/Swerve", self.swerveSys)
         SmartDashboard.putData("Subsystems/Vision", self.visionSys)
 
@@ -95,8 +95,8 @@ class RobotContainer:
         """
         #NOTE: drive bindings handled in configureDriveBindings
         ## Climbing
-        self.controller1.y().toggleOnTrue(ControlClimberOpenLoop(self.climbSys, self.controller1.getTriggers))
-        self.controlBoard.extra2().whileTrue(ControlClimberOpenLoop(self.climbSys, lambda: -1 if self.controlBoard.switch2().getAsBoolean() else 1))
+        # self.controller1.y().toggleOnTrue(ControlClimberOpenLoop(self.climbSys, self.controller1.getTriggers))
+        # self.controlBoard.extra2().whileTrue(ControlClimberOpenLoop(self.climbSys, lambda: -1 if self.controlBoard.switch2().getAsBoolean() else 1))
 
         ## Intaking
         # Pivot
@@ -107,6 +107,7 @@ class RobotContainer:
         # Bawlz
         # allow controller 1 or 2 to toggle on a()
         (self.controller1.a() | self.controller2.a()).toggleOnTrue(SetIntakeSpeed(self.intakeSys, Intake.Speeds.IN))
+        self.controlBoard.extra1().whileTrue(SetIntakeSpeed(self.intakeSys, Intake.Speeds.OUT))
 
         ## Launching
         # handleLaunch = RunLauncherByDist(self.launcherSys)\
@@ -116,6 +117,14 @@ class RobotContainer:
         #                      self.launcherSys.isAtSpeed
         #                 ))
         # handleLaunch = LaunchBalls(self.launcherSys, self.agitatorSys)
+
+        def increaseLauncherC():
+            RunLauncherByDist.c += 1
+        def decreaseLauncherC():
+            RunLauncherByDist.c -= 1
+
+        self.controller2.povUp().onTrue(cmd.runOnce(increaseLauncherC))
+        self.controller2.povDown().onTrue(cmd.runOnce(decreaseLauncherC))
         
         self.launcherSys.setDefaultCommand(LauncherDefault(self.launcherSys))
 
@@ -153,7 +162,7 @@ class RobotContainer:
                         .with_velocity_x( -self.controller1.getLeftY() * self._max_speed() )
                         .with_velocity_y( -self.controller1.getLeftX() * self._max_speed() )
                         .with_target_direction( Rotation2d().fromDegrees(-90) )
-                        .with_deadband(self._max_speed() * 0.1)
+                        .with_deadband(self._translational_deadband())
                 )
             ).withName('Drive Field Centric for Outpost')
         )
@@ -164,7 +173,7 @@ class RobotContainer:
                         .with_velocity_x( -self.controller1.getLeftY() * self._max_speed() )
                         .with_velocity_y( -self.controller1.getLeftX() * self._max_speed() )
                         .with_target_direction( Rotation2d().fromDegrees(45) ) # TODO: normalize to closest proper mult of 45
-                        .with_deadband(self._max_speed() * 0.1)
+                        .with_deadband(self._translational_deadband())
                 )
             ).withName('Drive Field Centric for Bump')
         )
@@ -175,7 +184,7 @@ class RobotContainer:
                         .with_velocity_x( -self.controller1.getLeftY() * self._max_speed() )
                         .with_velocity_y( -self.controller1.getLeftX() * self._max_speed() )
                         .with_target_direction( Rotation2d().fromDegrees(180) ) # TODO: normalize to closest proper mult of 45
-                        .with_deadband(self._max_speed() * 0.1)
+                        .with_deadband(self._translational_deadband())
                 )
             ).withName('Drive Field Centric for Tower')
         )
@@ -234,7 +243,7 @@ class RobotContainer:
         
 
         ## Climbing
-        self.controller1.y().toggleOnTrue(ControlClimberOpenLoop(self.climbSys, self.controller1.getTriggers))
+        # self.controller1.y().toggleOnTrue(ControlClimberOpenLoop(self.climbSys, self.controller1.getTriggers))
         # self.climbSys.y().toggle(ControlClimberSpeed( self.climbSys,
         #                                                      self.controller1.y().getAsBoolean,
         #                                                      self.controller1.rightBumper().getAsBoolean, 
@@ -248,14 +257,17 @@ class RobotContainer:
 
         '''--------------------Create drive requests--------------------'''
         ## speed configs
-        self._max_speed = lambda: self.drive_max_speed_pct * TunerConstants.speed_at_12_volts
-        self._max_angular_rate = rotationsToRadians(self.drive_max_rot_speed)
         self.drive_max_speed_pct = 0.75 # always start with "full" speed
+        self._max_speed = lambda: self.drive_max_speed_pct * TunerConstants.speed_at_12_volts
+        self._translational_deadband = lambda: self._max_speed() * 0.05
+
+        self._max_angular_rate = rotationsToRadians(self.drive_max_rot_speed)
+        self._rot_deadband = self._max_angular_rate * 0.05
         
         self.drive_fc = ( # field centric
             swerve.requests.FieldCentric() # deadband in application because can vary
             .with_rotational_deadband(
-                self._max_angular_rate * 0.1  # Add a 10% deadband
+                self._rot_deadband  # Add a 10% deadband
             )
             .with_drive_request_type(
                 swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE
@@ -264,7 +276,7 @@ class RobotContainer:
         self.drive_rc = ( # robot centric
             swerve.requests.RobotCentric()
             .with_rotational_deadband(
-                self._max_angular_rate * 0.1  # Add a 10% deadband
+                self._rot_deadband  # Add a 10% deadband
             )
             .with_drive_request_type(
                 swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE
@@ -284,7 +296,7 @@ class RobotContainer:
                     self.drive_fc.with_velocity_x( -self.controller1.getLeftY() * self._max_speed() )
                                  .with_velocity_y( -self.controller1.getLeftX() * self._max_speed() )
                                  .with_rotational_rate( -self.controller1.getRightX() * self._max_angular_rate )
-                                 .with_deadband(self._max_speed() * 0.1)
+                                 .with_deadband(self._translational_deadband())
                 )
             ).withName('Drive Field Centric')
         )
@@ -310,7 +322,7 @@ class RobotContainer:
                                               .with_velocity_y( -self.controller1.getLeftX() * self._max_speed() )
                                               .with_target_direction( self.gameCalc.getRotToTarget() )
                                               .with_heading_pid( self.drive_rot_kP, self.drive_rot_kI, self.drive_rot_kD )
-                                              .with_deadband(self._max_speed() * 0.1)
+                                              .with_deadband(self._translational_deadband())
             ).withName('FC + Auto Rotate')
         )
         
@@ -321,7 +333,7 @@ class RobotContainer:
                     self.drive_rc.with_velocity_x( -self.controller1.getLeftY() * self._max_speed() )
                                  .with_velocity_y( -self.controller1.getLeftX() * self._max_speed() )
                                  .with_rotational_rate( -self.controller1.getRightX() * self._max_angular_rate )
-                                 .with_deadband(self._max_speed() * 0.1)
+                                 .with_deadband(self._translational_deadband())
                 )
             ).withName('Drive Robot Centric')
         )
