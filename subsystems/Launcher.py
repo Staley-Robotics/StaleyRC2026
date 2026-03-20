@@ -1,11 +1,12 @@
 from wpilib import XboxController
-from wpimath.controller import SimpleMotorFeedforwardMeters, PIDController
+from wpimath.controller import SimpleMotorFeedforwardRadians, PIDController
 from commands2 import subsystem
 
 from ntcore.util import ntproperty 
 
 from phoenix6.hardware import TalonFX # Motor controller class for Falcons & Krakens
 from phoenix6.configs import TalonFXConfiguration, MotorOutputConfigs, Slot0Configs
+from phoenix6.controls import VelocityVoltage
 
 class Launcher(subsystem):
   
@@ -22,15 +23,12 @@ class Launcher(subsystem):
         kS = 0.1
         kA = 6.16
 
-
-
-
     flywheel_speed = ntproperty("/motor2 speed", 1.0)
     max_Velocity = ntproperty("Target Velocity", 1.0) #best one is -33
     flywheel_speed_mult = 0
 
     PID = PIDController(.2, 0, 0)
-    FeedForward = SimpleMotorFeedforwardMeters(.2, .1, 6.16)
+    FeedForward = SimpleMotorFeedforwardRadians(.2, .1, 6.16)
 
     # adds "motor1 speed mult" as an editable property on the networktables
     # this allows for the value to be adjusted without redeploying through programs like Glass or Shuffleboard
@@ -49,25 +47,20 @@ class Launcher(subsystem):
                 .with_k_a(self.LauncherConstraints.kA)
         )
 
+        self.flywheel.configurator.apply(self.flywheelConfig)
+
+        self.request = VelocityVoltage(0).with_slot(0)
+
         
-    def periodic(self):
-        '''
-        Runs every frame while the robot is enabled and in Teleop
-        '''
-        self.Current_V = self.flywheel.get_velocity().value
-
-        self.PIDOut = self.PID.calculate(self.Current_V, self.target_V)
-
-        self.FeedForwardOut = self.FeedForward.calculate(self.target_V)
-
-        self.flywheel.setVoltage(self.PIDOut + self.FeedForwardOut)
+    def run(self):
+        self.flywheel.set_control(self.request)
 
 
     def stop(self):
-        self.target_V = self.Speeds.STOP
+        self.request.velocity = self.Speeds.STOP
 
 
     def setSpeed(self, speed:float):
 
-        self.target_V = speed
+        self.request.velocity = speed
 
