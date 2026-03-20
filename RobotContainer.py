@@ -115,25 +115,30 @@ class RobotContainer:
         #                      False:SetFlywheelSpeed(self.agitatorSys, 0)},
         #                      self.launcherSys.isAtSpeed
         #                 ))
-        handleLaunch = LaunchBalls(self.launcherSys, self.agitatorSys)
+        # handleLaunch = LaunchBalls(self.launcherSys, self.agitatorSys)
         
-        (self.controller2.x()).toggleOnTrue(handleLaunch) # will trigger launcher (note: player 1 lost this control)
+        self.launcherSys.setDefaultCommand(LauncherDefault(self.launcherSys))
 
-        self.controlBoard.launchLow()\
-            .toggleOnTrue(SetFlywheelSpeed(self.launcherSys, Launcher.LauncherSpeeds.SPEED_LOW)
-            .alongWith(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_LOW)))
-        self.controlBoard.launchMed()\
-            .toggleOnTrue(SetFlywheelSpeed(self.launcherSys, Launcher.LauncherSpeeds.SPEED_MED)
-            .alongWith(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_MED)))
-        self.controlBoard.launchMed()\
-            .toggleOnTrue(SetFlywheelSpeed(self.launcherSys, Launcher.LauncherSpeeds.SPEED_HIGH)
-            .alongWith(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_HIGH)))
+        self.controller2.x().toggleOnTrue(RunLauncherByDist(self.launcherSys)) # will trigger launcher (note: player 1 lost this control)
+        (self.controller2.rightTrigger(0.3) | self.controller2.leftTrigger(0.3)).whileTrue(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_MED))
+
+        # self.controlBoard.launchLow()\
+        #     .toggleOnTrue(SetFlywheelSpeed(self.launcherSys, Launcher.LauncherSpeeds.SPEED_LOW)
+        #     .alongWith(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_LOW)))
+        # self.controlBoard.launchMed()\
+        #     .toggleOnTrue(SetFlywheelSpeed(self.launcherSys, Launcher.LauncherSpeeds.SPEED_MED)
+        #     .alongWith(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_MED)))
+        # self.controlBoard.launchMed()\
+        #     .toggleOnTrue(SetFlywheelSpeed(self.launcherSys, Launcher.LauncherSpeeds.SPEED_HIGH)
+        #     .alongWith(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_HIGH)))
         # NOTE: all these agitator speeds are the same
 
         self.controlBoard.bigRed().whileTrue(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.EJECT))
 
-        self.controlBoard.switch3().whileTrue(RunLauncherByNT(self.launcherSys))
-        self.controlBoard.extra3().whileTrue(RunAgitatorByNT(self.agitatorSys))
+        self.controlBoard.bigBlue().whileTrue(cmd.runOnce(lambda: (self.launcherSys.setDesiredSpeed(0), self.agitatorSys.setDesiredSpeed(0))).addRequirements(self.agitatorSys, self.launcherSys))
+
+        # self.controlBoard.switch3().whileTrue(RunLauncherByNT(self.launcherSys))
+        # self.controlBoard.extra3().whileTrue(RunAgitatorByNT(self.agitatorSys))
 
         ## Misc
         # self.controlBoard.bigRed().whileTrue( Panic() ) # TODO: implement Panic()
@@ -147,7 +152,8 @@ class RobotContainer:
                     self.drive_fc_outpost
                         .with_velocity_x( -self.controller1.getLeftY() * self._max_speed() )
                         .with_velocity_y( -self.controller1.getLeftX() * self._max_speed() )
-                        .with_target_direction( Rotation2d(-90).fromDegrees() )
+                        .with_target_direction( Rotation2d().fromDegrees(-90) )
+                        .with_deadband(self._max_speed() * 0.1)
                 )
             ).withName('Drive Field Centric for Outpost')
         )
@@ -157,7 +163,8 @@ class RobotContainer:
                     self.drive_fc_bump
                         .with_velocity_x( -self.controller1.getLeftY() * self._max_speed() )
                         .with_velocity_y( -self.controller1.getLeftX() * self._max_speed() )
-                        .with_target_direction( Rotation2d(45).fromDegrees() ) # TODO: normalize to closest proper mult of 45
+                        .with_target_direction( Rotation2d().fromDegrees(45) ) # TODO: normalize to closest proper mult of 45
+                        .with_deadband(self._max_speed() * 0.1)
                 )
             ).withName('Drive Field Centric for Bump')
         )
@@ -167,7 +174,8 @@ class RobotContainer:
                     self.drive_fc_tower
                         .with_velocity_x( -self.controller1.getLeftY() * self._max_speed() )
                         .with_velocity_y( -self.controller1.getLeftX() * self._max_speed() )
-                        .with_target_direction( Rotation2d(180).fromDegrees() ) # TODO: normalize to closest proper mult of 45
+                        .with_target_direction( Rotation2d().fromDegrees(180) ) # TODO: normalize to closest proper mult of 45
+                        .with_deadband(self._max_speed() * 0.1)
                 )
             ).withName('Drive Field Centric for Tower')
         )
@@ -245,8 +253,7 @@ class RobotContainer:
         self.drive_max_speed_pct = 0.75 # always start with "full" speed
         
         self.drive_fc = ( # field centric
-            swerve.requests.FieldCentric()
-            .with_deadband(self._max_speed() * 0.1)
+            swerve.requests.FieldCentric() # deadband in application because can vary
             .with_rotational_deadband(
                 self._max_angular_rate * 0.1  # Add a 10% deadband
             )
@@ -256,7 +263,6 @@ class RobotContainer:
         )
         self.drive_rc = ( # robot centric
             swerve.requests.RobotCentric()
-            .with_deadband(self._max_speed() * 0.1)
             .with_rotational_deadband(
                 self._max_angular_rate * 0.1  # Add a 10% deadband
             )
@@ -278,6 +284,7 @@ class RobotContainer:
                     self.drive_fc.with_velocity_x( -self.controller1.getLeftY() * self._max_speed() )
                                  .with_velocity_y( -self.controller1.getLeftX() * self._max_speed() )
                                  .with_rotational_rate( -self.controller1.getRightX() * self._max_angular_rate )
+                                 .with_deadband(self._max_speed() * 0.1)
                 )
             ).withName('Drive Field Centric')
         )
@@ -303,6 +310,7 @@ class RobotContainer:
                                               .with_velocity_y( -self.controller1.getLeftX() * self._max_speed() )
                                               .with_target_direction( self.gameCalc.getRotToTarget() )
                                               .with_heading_pid( self.drive_rot_kP, self.drive_rot_kI, self.drive_rot_kD )
+                                              .with_deadband(self._max_speed() * 0.1)
             ).withName('FC + Auto Rotate')
         )
         
@@ -313,6 +321,7 @@ class RobotContainer:
                     self.drive_rc.with_velocity_x( -self.controller1.getLeftY() * self._max_speed() )
                                  .with_velocity_y( -self.controller1.getLeftX() * self._max_speed() )
                                  .with_rotational_rate( -self.controller1.getRightX() * self._max_angular_rate )
+                                 .with_deadband(self._max_speed() * 0.1)
                 )
             ).withName('Drive Robot Centric')
         )

@@ -17,12 +17,14 @@ from util.FalconLogger import FalconLogger
 class Launcher(Subsystem):
     '''This is functionally quite similar (if not the same) as Agitator, but for now they are kept seperate for a variety of annoyances' sake'''
     class LauncherSpeeds:
-        WAIT:rotations_per_second = 8 # default speed for lower power consumption but faster acceleration when needed
+        WAIT:rotations_per_second = 5 # default speed for lower power consumption but faster acceleration when needed
         SPEED_AT_ZERO_DIST:rotations_per_second = 20 # total guess, speed at minimum distance TODO: measure
         SPEED_AT_MAX_DIST:rotations_per_second = 70 # total guess, speed at some arbitrary larger distance TODO: measure
         SPEED_LOW:rotations_per_second = 20
         SPEED_MED:rotations_per_second = 40
         SPEED_HIGH:rotations_per_second = 70
+
+        STOP:rotations_per_second = 0 # at 5 to keep moving and reduce acceleration later
 
         '''
         kraken free speed max: 6000 rpm = 100 rps
@@ -45,7 +47,7 @@ class Launcher(Subsystem):
         k_S:float=0.22
         k_V:float=0.12
 
-        kAtSpeedTolerance:rotations_per_second = 3.0
+    kAtSpeedTolerance:rotations_per_second = ntproperty("/Settings/Launcher/atSpeed tolerance", 3.0, persistent=True)
 
     def __init__(self, motorID:int) -> None:
         ### Motor Setup
@@ -90,6 +92,7 @@ class Launcher(Subsystem):
         
         # Logging: Write Post Operation Information
         FalconLogger.logOutput("/Launcher/Outputs/Setpoint", self.getDesiredSpeed())
+        FalconLogger.logOutput("/Launcher/Outputs/isAtSpeed", self.isAtSpeed())
 
     def run(self) -> None:
         # control velocity
@@ -108,4 +111,4 @@ class Launcher(Subsystem):
         return self.velocity_req.velocity
     
     def isAtSpeed(self) -> bool:
-        return abs(self.motor.get_closed_loop_error().value) < self.Constants.kAtSpeedTolerance
+        return abs(self.motor.get_closed_loop_error().value) < self.kAtSpeedTolerance

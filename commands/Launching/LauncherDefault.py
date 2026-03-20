@@ -23,12 +23,12 @@ class LauncherDefault(Command):
         self.addRequirements( launcherSys )
 
     def initialize(self) -> None:
+        pass
+
+    def execute(self) -> None:
         self.launcher_sys.setDesiredSpeed(
             self.launcher_sys.LauncherSpeeds.WAIT
         )
-
-    def execute(self) -> None:
-        pass
 
     def end(self, interrupted:bool) -> None:
         pass

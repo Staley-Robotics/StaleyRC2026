@@ -51,7 +51,8 @@ class LaunchBalls(Command):
             self.agitator_sys.setDesiredSpeed(0)
 
     def end(self, interrupted:bool) -> None:
-        pass
+        self.launcher_sys.setDesiredSpeed(0)
+        self.agitator_sys.setDesiredSpeed(0)
 
     def isFinished(self) -> bool:
         return False

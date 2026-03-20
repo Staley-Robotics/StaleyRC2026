@@ -85,6 +85,7 @@ class Agitator(Subsystem):
         
         # Logging: Write Post Operation Information
         FalconLogger.logOutput("/Agitator/Outputs/Setpoint", self.getDesiredSpeed())
+        FalconLogger.logOutput("/Launcher/Outputs/isAtSpeed", self.isAtSpeed())
 
     def run(self) -> None:
         # control velocity

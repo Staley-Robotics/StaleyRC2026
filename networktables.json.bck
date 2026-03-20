@@ -1,5 +1,13 @@
 [
   {
+    "name": "/Settings/Launcher/atSpeed tolerance",
+    "type": "double",
+    "value": 3.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
     "name": "/Settings/ControlIntakePos/input mult",
     "type": "double",
     "value": 0.04,
@@ -43,22 +51,6 @@
     "name": "/Settings/RunLauncherByNT/speed (rps: 0-70)",
     "type": "double",
     "value": 0.0,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Settings/ControlClimberPos/input mult",
-    "type": "double",
-    "value": 1.0,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Settings/ControlClimberSpeed/speed control increment",
-    "type": "double",
-    "value": 0.1,
     "properties": {
       "persistent": true
     }
@@ -115,6 +107,22 @@
     "name": "/climberSpeed",
     "type": "double",
     "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Settings/ControlClimberPos/input mult",
+    "type": "double",
+    "value": 1.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Settings/ControlClimberSpeed/speed control increment",
+    "type": "double",
+    "value": 0.1,
     "properties": {
       "persistent": true
     }

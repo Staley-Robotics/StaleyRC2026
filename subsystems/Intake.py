@@ -11,7 +11,7 @@ from phoenix6.units import *
 
 from phoenix6.hardware import TalonFX, CANcoder
 from phoenix6.configs import TalonFXConfiguration, MotorOutputConfigs, Slot0Configs, FeedbackConfigs, CANcoderConfiguration, MagnetSensorConfigs, ClosedLoopGeneralConfigs
-from phoenix6.signals import InvertedValue, NeutralModeValue, FeedbackSensorSourceValue, GravityTypeValue, SensorDirectionValue, StaticFeedforwardSignValue
+from phoenix6.signals import InvertedValue, NeutralModeValue, FeedbackSensorSourceValue, GravityTypeValue, SensorDirectionValue, StaticFeedforwardSignValue, GainSchedBehaviorValue
 from phoenix6.controls import PositionVoltage, VoltageOut
 from phoenix6.sim import ChassisReference
 
@@ -21,6 +21,7 @@ class IntakeConstants:
     kP:float=7.0    # proportion       The farther away, the harder it pushes
     kI:float=2.0    # integral         The longer it's been off, the harder it pushes
     kD:float=4.0    # differential     The harder it pushes, the less it pushes
+    kS:float=0.4    # static
     kG:float=1.0    # gravity          Constant force, but accounting for gravity
 
     gear_ratio:float=11/60 # rotor/mechanism
@@ -74,21 +75,27 @@ class Intake(Subsystem):
                 .with_k_p(IntakeConstants.kP)
                 .with_k_i(IntakeConstants.kI)
                 .with_k_d(IntakeConstants.kD)
+                .with_k_s(IntakeConstants.kS)
                 .with_k_g(IntakeConstants.kG)
                 .with_gravity_type(GravityTypeValue.ARM_COSINE)
                 .with_gravity_arm_position_offset(-0.03)
                 .with_static_feedforward_sign(StaticFeedforwardSignValue.USE_CLOSED_LOOP_SIGN)
+                .with_gain_sched_behavior(GainSchedBehaviorValue.USE_SLOT1)
+        ).with_slot1(
+            
         ).with_feedback(
             FeedbackConfigs()
                 .with_feedback_remote_sensor_id(pivotEncoderID)
                 .with_feedback_sensor_source(FeedbackSensorSourceValue.REMOTE_CANCODER)
-                .with_rotor_to_sensor_ratio(IntakeConstants.gear_ratio) #rotor tooth count / pivot tooth count?
+                .with_rotor_to_sensor_ratio(IntakeConstants.gear_ratio) #rotor tooth count / pivot tooth count
                 .with_sensor_to_mechanism_ratio(1)
+        ).with_closed_loop_general(
+            ClosedLoopGeneralConfigs()
+                .with_gain_sched_error_threshold(0.016)
         )
         self.pivot_motor.configurator.apply(pivot_motor_config)
 
         # Encoder
-        #just for configs - accessed thru motor
         self.pivot_encoder = CANcoder(pivotEncoderID, "rio")
         encoder_cfg = CANcoderConfiguration()\
             .with_magnet_sensor(
