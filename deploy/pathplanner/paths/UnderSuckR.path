@@ -3,49 +3,60 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.5862054208273886,
-        "y": 2.3594436519258206
+        "x": 3.5473894436519258,
+        "y": 0.6127246790299581
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.586205420827388,
-        "y": 2.3594436519258206
+        "x": 4.547389443651925,
+        "y": 0.6127246790299581
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 7.843024251069899,
-        "y": 3.148701854493581
+        "x": 6.730299572039942,
+        "y": 0.6127246790299581
       },
       "prevControl": {
-        "x": 6.843024251069899,
-        "y": 3.148701854493581
+        "x": 5.730299572039942,
+        "y": 0.6127246790299582
+      },
+      "nextControl": {
+        "x": 7.730299572039942,
+        "y": 0.6127246790299581
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 7.791269614835947,
+        "y": 2.2041797432239663
+      },
+      "prevControl": {
+        "x": 7.534358059914406,
+        "y": 1.4213908701854503
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "fullloadR"
+      "linkedName": "endunderR"
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 0.19829424307036353,
-      "rotationDegrees": 45.0
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [
     {
       "name": "DeployIntake",
-      "waypointRelativePos": 0.5482781904118794,
+      "waypointRelativePos": 0.8102633355840754,
       "endWaypointRelativePos": null,
       "command": null
     },
     {
       "name": "RunIntake",
-      "waypointRelativePos": 0.8399729912221459,
+      "waypointRelativePos": 1.577312626603652,
       "endWaypointRelativePos": null,
       "command": null
     }
@@ -60,7 +71,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 45.0
+    "rotation": 90.0
   },
   "reversed": false,
   "folder": null,
