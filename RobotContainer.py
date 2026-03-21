@@ -22,9 +22,7 @@ from util import * #FalconXboxController, Telemetry, ControlMode, RebuiltCalc, R
 
 class RobotContainer:
     # Variable Declaration
-    __autoChooser:SendableChooser = SendableChooser()
-
-    drive_max_speed_pct: percent =  ntproperty("Settings/drive/max speed %", 0.75, persistent=True)
+    drive_max_speed_pct: percent =  ntproperty("Settings/drive/max speed %", 0.60, persistent=True)
     drive_max_rot_speed: percent =  ntproperty("Settings/drive/max rot speed (rots/sec)", 0.65, persistent=True)
 
     drive_rot_kP: percent =  ntproperty("Settings/drive/pid/kP", 5.00, persistent=True)
@@ -65,7 +63,7 @@ class RobotContainer:
 
         ## Auto
         self.initNamedCommands()
-        self.autoChooser = AutoBuilder.buildAutoChooser("Just Move")
+        self.autoChooser = AutoBuilder.buildAutoChooser()
         SmartDashboard.putData("AutoChooser", self.autoChooser)
 
         ### Logging
@@ -117,18 +115,14 @@ class RobotContainer:
         #                      self.launcherSys.isAtSpeed
         #                 ))
         # handleLaunch = LaunchBalls(self.launcherSys, self.agitatorSys)
+        runLauncher = RunLauncherByDist(self.launcherSys)
 
-        def increaseLauncherC():
-            RunLauncherByDist.c += 1
-        def decreaseLauncherC():
-            RunLauncherByDist.c -= 1
-
-        self.controller2.povUp().onTrue(cmd.runOnce(increaseLauncherC))
-        self.controller2.povDown().onTrue(cmd.runOnce(decreaseLauncherC))
+        self.controller2.rightBumper().onTrue(cmd.runOnce(runLauncher.change_c(+0.5)))
+        self.controller2.leftBumper().onTrue(cmd.runOnce(runLauncher.change_c(-0.5)))
         
         self.launcherSys.setDefaultCommand(LauncherDefault(self.launcherSys))
 
-        self.controller2.x().toggleOnTrue(RunLauncherByDist(self.launcherSys)) # will trigger launcher (note: player 1 lost this control)
+        self.controller2.x().toggleOnTrue(runLauncher) # will trigger launcher (note: player 1 lost this control)
         (self.controller2.rightTrigger(0.3) | self.controller2.leftTrigger(0.3)).whileTrue(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_MED))
 
         # self.controlBoard.launchLow()\
@@ -144,7 +138,9 @@ class RobotContainer:
 
         self.controlBoard.bigRed().whileTrue(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.EJECT))
 
-        self.controlBoard.bigBlue().whileTrue(cmd.runOnce(lambda: (self.launcherSys.setDesiredSpeed(0), self.agitatorSys.setDesiredSpeed(0))).addRequirements(self.agitatorSys, self.launcherSys))
+        stopLauncher=cmd.runOnce(lambda: (self.launcherSys.setDesiredSpeed(0), self.agitatorSys.setDesiredSpeed(0)))
+        stopLauncher.addRequirements(self.agitatorSys, self.launcherSys)
+        self.controlBoard.bigBlue().whileTrue(stopLauncher)
 
         # self.controlBoard.switch3().whileTrue(RunLauncherByNT(self.launcherSys))
         # self.controlBoard.extra3().whileTrue(RunAgitatorByNT(self.agitatorSys))
@@ -191,6 +187,22 @@ class RobotContainer:
 
         SmartDashboard.putData(ChangeVisionPipelines(self.visionSys, 0))
         SmartDashboard.putData(ChangeVisionPipelines(self.visionSys, 1))
+
+        ## Disabling
+        disableIntake = cmd.runOnce(self.intakeSys.toggleDisabled)
+        disableIntake.addRequirements(self.intakeSys)
+
+        self.controlBoard.extra1().onTrue(disableIntake)
+
+        disableAgitator = cmd.runOnce(self.agitatorSys.toggleDisabled)
+        disableAgitator.addRequirements(self.agitatorSys)
+        
+        self.controlBoard.extra2().onTrue(disableAgitator)
+        
+        disableLauncher = cmd.runOnce(self.launcherSys.toggleDisabled)
+        disableLauncher.addRequirements(self.launcherSys)
+        
+        self.controlBoard.extra3().onTrue(disableLauncher)
 
         ## Targeting
         self.controlBoard.relayLeft().onTrue(cmd.runOnce(self.gameCalc.setDesiredRelay(RelayTarget.LEFT)))
@@ -257,7 +269,7 @@ class RobotContainer:
 
         '''--------------------Create drive requests--------------------'''
         ## speed configs
-        self.drive_max_speed_pct = 0.75 # always start with "full" speed
+        self.drive_max_speed_pct = 0.60 # always start with "full" speed
         self._max_speed = lambda: self.drive_max_speed_pct * TunerConstants.speed_at_12_volts
         self._translational_deadband = lambda: self._max_speed() * 0.05
 
@@ -309,7 +321,7 @@ class RobotContainer:
         ## Controls
         # Toggle halfspeed
         def toggleHalfSpeed():
-            self.drive_max_speed_pct = 0.25 if self.drive_max_speed_pct > 0.5 else 0.75
+            self.drive_max_speed_pct = 0.25 if self.drive_max_speed_pct > 0.5 else 0.60
         self.controller1.leftStick().onTrue(cmd.runOnce(toggleHalfSpeed))
 
         # Brake

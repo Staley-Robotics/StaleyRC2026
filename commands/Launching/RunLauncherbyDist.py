@@ -12,8 +12,8 @@ class RunLauncherByDist(Command):
     # Variable Declaration
     launcher_sys:Launcher = None
 
-    a = ntproperty("Settings/RunLauncherByDist/mult a (dist)", 5.0, persistent=True)
-    b = ntproperty("Settings/RunLauncherByDist/mult b (dist^2)", 0.75, persistent=True)
+    a = ntproperty("Settings/RunLauncherByDist/mult a (dist)", 1.0, persistent=True)
+    b = ntproperty("Settings/RunLauncherByDist/mult b (dist^2)", 0.2, persistent=True)
     c = ntproperty("Settings/RunLauncherByDist/const", 14.0, persistent=True)
     
     # Initialization
@@ -52,3 +52,6 @@ class RunLauncherByDist(Command):
 
     def runsWhenDisabled(self) -> bool:
         return False
+    
+    def change_c(self, change_by:float) -> None:
+        self.c += change_by

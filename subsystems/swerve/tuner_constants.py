@@ -19,7 +19,7 @@ class TunerConstants:
     # output type specified by SwerveModuleConstants.SteerMotorClosedLoopOutput
     _steer_gains = (
         configs.Slot0Configs()
-        .with_k_p(100)
+        .with_k_p(90) # NOTE: default 100, dropping to 85 for current hopefully
         .with_k_i(0)
         .with_k_d(0.5)
         .with_k_s(0.1)
@@ -58,17 +58,33 @@ class TunerConstants:
 
     # The stator current at which the wheels start to slip;
     # This needs to be tuned to your individual robot
-    _slip_current: units.ampere = 120.0
+    _slip_current: units.ampere = 90.0 # NOTE: default (max) is 120, dropping to 90 for current hopefully TODO: tune
 
     # Initial configs for the drive and steer motors and the azimuth encoder; these cannot be null.
     # Some configs will be overwritten; check the `with_*_initial_configs()` API documentation.
-    _drive_initial_configs = configs.TalonFXConfiguration()
+    _drive_initial_configs = configs.TalonFXConfiguration().with_current_limits(
+        configs.CurrentLimitsConfigs()
+        # Swerve azimuth does not require much torque output, so we can set a relatively low
+        # stator current limit to help avoid brownouts without impacting performance.
+        .with_stator_current_limit(60.0)
+        .with_stator_current_limit_enable(True)
+    ).with_closed_loop_ramps(
+        configs.ClosedLoopRampsConfigs()
+        .with_voltage_closed_loop_ramp_period(0.03)
+        .with_duty_cycle_closed_loop_ramp_period(0.03)
+        .with_torque_closed_loop_ramp_period(0.03)
+    ) # setting all since we can request different control types for these motors
     _steer_initial_configs = configs.TalonFXConfiguration().with_current_limits(
         configs.CurrentLimitsConfigs()
         # Swerve azimuth does not require much torque output, so we can set a relatively low
         # stator current limit to help avoid brownouts without impacting performance.
         .with_stator_current_limit(60.0)
         .with_stator_current_limit_enable(True)
+    ).with_closed_loop_ramps(
+        configs.ClosedLoopRampsConfigs()
+        .with_voltage_closed_loop_ramp_period(0.03)
+        .with_duty_cycle_closed_loop_ramp_period(0.03)
+        .with_torque_closed_loop_ramp_period(0.03)
     )
     _encoder_initial_configs = configs.CANcoderConfiguration()
     # Configs for the Pigeon 2; leave this None to skip applying Pigeon 2 configs
@@ -83,7 +99,7 @@ class TunerConstants:
 
     # Theoretical free speed (m/s) at 12 V applied output;
     # This needs to be tuned to your individual robot
-    speed_at_12_volts: units.meters_per_second = 5.14
+    speed_at_12_volts: units.meters_per_second = 4.94 # NOTE: default is 5.14, dropping to 4.94 bc current hopefully # TODO: tune
 
     # Every 1 rotation of the azimuth results in _couple_ratio drive motor turns;
     # This may need to be tuned to your individual robot

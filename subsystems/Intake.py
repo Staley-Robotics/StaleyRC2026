@@ -19,7 +19,7 @@ from util.FalconLogger import FalconLogger
 
 class IntakeConstants:
     kP:float=7.0    # proportion       The farther away, the harder it pushes
-    kI:float=2.0    # integral         The longer it's been off, the harder it pushes
+    kI:float=0.0    # integral         The longer it's been off, the harder it pushes
     kD:float=4.0    # differential     The harder it pushes, the less it pushes
     kS:float=0.4    # static
     kG:float=1.0    # gravity          Constant force, but accounting for gravity
@@ -31,7 +31,7 @@ class IntakeConstants:
 class Intake(Subsystem):
     class Speeds:
         STOP = 0
-        IN = 0.45
+        IN = 0.30
         OUT = -0.4
 
     class Positions:
@@ -41,12 +41,14 @@ class Intake(Subsystem):
         90 should be straight up
         '''
         MAX:degrees = (0.354004 * 360) - 5 # -5 degrees
-        MIN:degrees = 0    # 0 (by definition)
-        START:degree = MAX-1
+        MIN:degrees = 1.5    # 0 (by definition)
+        START:degree = MAX
 
-        STORED:degrees =  120
-        INTAKING:degrees = 0
+        STORED:degrees =  MAX - 1
+        INTAKING:degrees = MIN
         BOUNCE_UP:degrees = 70
+    
+    disablePivot = ntproperty("/Disabling/IntakePivot", False, persistent=False)
 
     def __init__(self, intakeMotorID:int, pivotMotorID:int, pivotEncoderID:int, pivotEncoderOffset:rotation) -> None:
         ### Motor Setup
@@ -84,15 +86,14 @@ class Intake(Subsystem):
                 .with_gain_sched_behavior(GainSchedBehaviorValue.USE_SLOT1)
         ).with_slot1(
             Slot1Configs()
-                .with_k_p(IntakeConstants.kP)
-                .with_k_i(IntakeConstants.kI / 3)
-                .with_k_d(IntakeConstants.kD)
+                .with_k_p(0)#IntakeConstants.kP)
+                .with_k_i(0)
+                .with_k_d(0)#IntakeConstants.kD)
                 .with_k_s(0)
-                .with_k_g(IntakeConstants.kG)
+                .with_k_g(0)
                 .with_gravity_type(GravityTypeValue.ARM_COSINE)
                 .with_gravity_arm_position_offset(-0.03)
                 .with_static_feedforward_sign(StaticFeedforwardSignValue.USE_CLOSED_LOOP_SIGN)
-                .with_gain_sched_behavior(GainSchedBehaviorValue.INACTIVE)
         ).with_feedback(
             FeedbackConfigs()
                 .with_feedback_remote_sensor_id(pivotEncoderID)
@@ -101,7 +102,10 @@ class Intake(Subsystem):
                 .with_sensor_to_mechanism_ratio(1)
         ).with_closed_loop_general(
             ClosedLoopGeneralConfigs()
-                .with_gain_sched_error_threshold(0.016)
+                .with_gain_sched_error_threshold(IntakeConstants.tolerance / 360)
+        ).with_closed_loop_ramps(
+            ClosedLoopRampsConfigs()
+                .with_voltage_closed_loop_ramp_period(0.03)
         )
         self.pivot_motor.configurator.apply(pivot_motor_config)
 
@@ -176,6 +180,9 @@ class Intake(Subsystem):
         FalconLogger.logOutput("/Intake/Outputs/Error (deg)", self.pivot_motor.get_closed_loop_error().value * 360)
         FalconLogger.logOutput("/Intake/Outputs/closed loop reference (deg)", self.pivot_motor.get_closed_loop_reference().value * 360)
         FalconLogger.logOutput("/Intake/Outputs/Position (deg)", self.getPivotPosition())
+
+        FalconLogger.logOutput("systemStates/Intake running", self.getIntakeSpeed() > 0.1)
+        FalconLogger.logOutput("systemStates/Intake deployed", self.getPivotPosition() < 60)
     
     def simulationPeriodic(self):
         ## Simulation Physics
@@ -221,7 +228,16 @@ class Intake(Subsystem):
 
         ## Pivot
         #control position
-        self.pivot_motor.set_control(self.pivot_request)
+        if not self.disablePivot:
+            if abs(self.pivot_request.position * 360 - self.getPivotPosition()) < IntakeConstants.tolerance:
+                self.pivot_motor.set_control(VoltageOut(0.0))
+            else:
+                self.pivot_motor.set_control(self.pivot_request)
+        else:
+            self.pivot_motor.set_control(VoltageOut(0.0))
+    
+    def toggleDisabled(self) -> None:
+        self.disablePivot = not self.disablePivot
 
     def stop(self) -> None:
         self.setIntakeSpeed(self.Speeds.STOP)
@@ -243,4 +259,4 @@ class Intake(Subsystem):
         return self.pivot_encoder.get_absolute_position().value * 360 # rot to deg
     
     def getAtSetpoint(self) -> bool:
-        return self.pivot_motor.get_closed_loop_error().value * 360 < IntakeConstants.tolerance
+        return abs(self.pivot_motor.get_closed_loop_error().value * 360) < IntakeConstants.tolerance

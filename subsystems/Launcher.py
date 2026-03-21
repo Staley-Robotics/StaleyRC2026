@@ -8,7 +8,7 @@ from wpimath.units import *
 from phoenix6.units import *
 
 from phoenix6.hardware import TalonFX
-from phoenix6.configs import TalonFXConfiguration, MotorOutputConfigs, Slot0Configs, ClosedLoopGeneralConfigs, CurrentLimitsConfigs
+from phoenix6.configs import * #TalonFXConfiguration, MotorOutputConfigs, Slot0Configs, ClosedLoopGeneralConfigs, CurrentLimitsConfigs
 from phoenix6.signals import InvertedValue, NeutralModeValue
 from phoenix6.controls import VelocityVoltage
 
@@ -17,7 +17,7 @@ from util.FalconLogger import FalconLogger
 class Launcher(Subsystem):
     '''This is functionally quite similar (if not the same) as Agitator, but for now they are kept seperate for a variety of annoyances' sake'''
     class LauncherSpeeds:
-        WAIT:rotations_per_second = 5 # default speed for lower power consumption but faster acceleration when needed
+        WAIT:rotations_per_second = 10 # default speed for lower power consumption but faster acceleration when needed
         SPEED_AT_ZERO_DIST:rotations_per_second = 20 # total guess, speed at minimum distance TODO: measure
         SPEED_AT_MAX_DIST:rotations_per_second = 70 # total guess, speed at some arbitrary larger distance TODO: measure
         SPEED_LOW:rotations_per_second = 20
@@ -41,13 +41,15 @@ class Launcher(Subsystem):
         MAX:meters=10
 
     class Constants:
-        k_P:float=0.0
+        k_P:float=0.25
         k_I:float=0.0
         k_D:float=0.0
         k_S:float=0.22
-        k_V:float=0.12
+        k_V:float=0.11
 
     kAtSpeedTolerance:rotations_per_second = ntproperty("/Settings/Launcher/atSpeed tolerance", 3.0, persistent=True)
+
+    disabled = ntproperty("/Disabling/Launcher", False, persistent=False)
 
     def __init__(self, motorID:int) -> None:
         ### Motor Setup
@@ -67,12 +69,15 @@ class Launcher(Subsystem):
                 .with_k_d(self.Constants.k_D)\
                 .with_k_s(self.Constants.k_S)\
                 .with_k_v(self.Constants.k_V)
+        ).with_closed_loop_ramps(
+            ClosedLoopRampsConfigs()
+                .with_voltage_closed_loop_ramp_period(0.03)
         )
         # .with_current_limits(
         #     CurrentLimitsConfigs()
-        #     .with_stator_current_limit(80.0)
+        #     .with_stator_current_limit(90.0)
         #     .with_stator_current_limit_enable(True)
-        # ) # hitting limit caused code to continually crash
+        # ) # hitting limit caused continual crash without clear error?
         self.motor.configurator.apply(motor_config)
 
         ### Functionality Setup
@@ -94,15 +99,20 @@ class Launcher(Subsystem):
         FalconLogger.logOutput("/Launcher/Outputs/Setpoint", self.getDesiredSpeed())
         FalconLogger.logOutput("/Launcher/Outputs/isAtSpeed", self.isAtSpeed())
 
+        FalconLogger.logOutput("systemStates/Agitator running", self.isAtSpeed())
+
     def run(self) -> None:
         # control velocity
-        if self.getDesiredSpeed() == 0:
+        if self.getDesiredSpeed() == 0 and not self.disabled:
             self.motor.set(0)
         else:
             self.motor.set_control(self.velocity_req)
 
     def stop(self) -> None:
         self.velocity_req.velocity = 0.0
+
+    def toggleDisabled(self) -> None:
+        self.disabled = not self.disabled
 
     def setDesiredSpeed(self, speed:rotations_per_second) -> None:
         self.velocity_req.velocity = min(speed, self.LauncherSpeeds.kMaxAllowedSpeed)
