@@ -61,9 +61,14 @@ class Agitator(Subsystem):
                 .with_k_d(self.Constants.k_D)\
                 .with_k_s(self.Constants.k_S)\
                 .with_k_v(self.Constants.k_V)
-        ).with_closed_loop_ramps(
-            ClosedLoopRampsConfigs()
-                .with_voltage_closed_loop_ramp_period(0.03)
+        ).with_current_limits(
+            CurrentLimitsConfigs()
+            .with_stator_current_limit(60.0)
+            .with_stator_current_limit_enable(True)
+            .with_supply_current_limit(12)
+            .with_supply_current_limit_enable(True)
+            .with_supply_current_lower_limit(40)
+            .with_supply_current_lower_time(1.0)
         )
         # .with_current_limits(
         #     CurrentLimitsConfigs()

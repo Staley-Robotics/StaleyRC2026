@@ -58,7 +58,7 @@ class TunerConstants:
 
     # The stator current at which the wheels start to slip;
     # This needs to be tuned to your individual robot
-    _slip_current: units.ampere = 90.0 # NOTE: default (max) is 120, dropping to 90 for current hopefully TODO: tune
+    _slip_current: units.ampere = 60.0 # NOTE: default (max) is 120, dropping to 90 for current hopefully TODO: tune
 
     # Initial configs for the drive and steer motors and the azimuth encoder; these cannot be null.
     # Some configs will be overwritten; check the `with_*_initial_configs()` API documentation.
@@ -66,7 +66,7 @@ class TunerConstants:
         configs.CurrentLimitsConfigs()
         # Swerve azimuth does not require much torque output, so we can set a relatively low
         # stator current limit to help avoid brownouts without impacting performance.
-        .with_stator_current_limit(60.0)
+        .with_stator_current_limit(45.0)
         .with_stator_current_limit_enable(True)
     ).with_closed_loop_ramps(
         configs.ClosedLoopRampsConfigs()
@@ -78,7 +78,7 @@ class TunerConstants:
         configs.CurrentLimitsConfigs()
         # Swerve azimuth does not require much torque output, so we can set a relatively low
         # stator current limit to help avoid brownouts without impacting performance.
-        .with_stator_current_limit(60.0)
+        .with_stator_current_limit(60.0) # TODO lower?
         .with_stator_current_limit_enable(True)
     ).with_closed_loop_ramps(
         configs.ClosedLoopRampsConfigs()
