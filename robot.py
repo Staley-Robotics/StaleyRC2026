@@ -2,8 +2,11 @@
 from pathlib import Path
 
 # FRC Imports
-from wpilib import DriverStation, DataLogManager, RobotBase, TimedRobot
+from wpilib import DriverStation, DataLogManager, RobotBase, TimedRobot, XboxController
 from commands2 import Command, CommandScheduler
+from rev import SparkMax
+from phoenix6.signal_logger import SignalLogger
+from ntcore.util import ntproperty
 
 # Local Imports
 from RobotContainer import RobotContainer
@@ -15,6 +18,10 @@ class MyRobot(TimedRobot):
     __autoCmd:Command = None
     __logger:FalconLogger = None
 
+    climberSpeed = ntproperty("/climberSpeed", defaultValue=0.0, persistent=True)
+
+    controller = XboxController(0)
+
     # Initialization
     def robotInit(self):
         # Disable Joystick Notifications
@@ -24,10 +31,17 @@ class MyRobot(TimedRobot):
         logDir = '/U/logs' if RobotBase.isReal() else '.logs'
         DataLogManager.start( dir=(logDir if Path(logDir).is_dir() else ''), period=1.0 )
         DriverStation.startDataLog( DataLogManager.getLog() )
+
+        # handle phoenix logs
+        if RobotBase.isSimulation():
+            SignalLogger.set_path('.logs/ctre')
         
         # Built The Robot
         self.__robotContainer = RobotContainer()
         self.__logger = FalconLogger(False)
+
+        # and a test climb motor
+        # self.iMotor = SparkMax(14, SparkMax.MotorType.kBrushless)
 
     # Periodic Loop / All Modes
     def robotPeriodic(self):
@@ -40,17 +54,18 @@ class MyRobot(TimedRobot):
         # Write the Log Results
         try:
             self.__logger.writeLog()
-        except:
-            print("WARNING! FalconLogger Cannot Write to Log!")
+        except Exception as err:
+            print(f"WARNING! FalconLogger Cannot Write to Log!: {err}")
+
+        self.__robotContainer.gameCalc.debugLog()
 
     # Autonomous Mode
     def autonomousInit(self):
         # Start the Autonomous Package
-        try:
-            self.__autoCmd = self.__robotContainer.getAutonomousCommand()
-            self.__autoCmd.schedule()
-        except:
-            print("WARNING! getAutonomousCommand failed!")
+        self.autonomousCommand = self.__robotContainer.getAutonomousCommand()
+
+        if self.autonomousCommand:
+            CommandScheduler.getInstance().schedule(self.autonomousCommand)
     
     def autonomousPeriodic(self): pass
 
@@ -63,7 +78,21 @@ class MyRobot(TimedRobot):
 
     # Teleop Mode
     def teleopInit(self): pass
-    def teleopPeriodic(self): pass
+    def teleopPeriodic(self): pass# stuff here for climber
+        # Buttons
+        # a_pressed = self.controller.getAButtonPressed()
+        # b_pressed = self.controller.getBButtonPressed()
+        # back_pressed = self.controller.getBackButtonPressed()
+        # l_bumper_pressed = self.controller.getLeftBumperButtonPressed()
+        # r_bumper_pressed = self.controller.getRightBumperButtonPressed()
+
+        # if (r_bumper_pressed):
+        #     self.climberSpeed = min(1, max(self.climberSpeed + 0.1, -1)) # 
+        # if (l_bumper_pressed):
+        #     self.climberSpeed = min(1, max(self.climberSpeed - 0.1, -1)) #
+
+        # self.iMotor.set(self.climberSpeed)
+
     def teleopExit(self): pass
 
     # Test Mode

@@ -1,0 +1,127 @@
+from enum import Enum
+
+from commands2 import Subsystem
+from wpilib import RobotState
+from ntcore.util import ntproperty
+
+from wpimath.units import *
+from phoenix6.units import *
+
+from phoenix6.hardware import TalonFX
+from phoenix6.configs import * #TalonFXConfiguration, MotorOutputConfigs, Slot0Configs, ClosedLoopGeneralConfigs, CurrentLimitsConfigs
+from phoenix6.signals import InvertedValue, NeutralModeValue
+from phoenix6.controls import VelocityVoltage
+
+from util.FalconLogger import FalconLogger
+
+class Launcher(Subsystem):
+    '''This is functionally quite similar (if not the same) as Agitator, but for now they are kept seperate for a variety of annoyances' sake'''
+    class LauncherSpeeds:
+        WAIT:rotations_per_second = 10 # default speed for lower power consumption but faster acceleration when needed
+        SPEED_AT_ZERO_DIST:rotations_per_second = 20 # total guess, speed at minimum distance TODO: measure
+        SPEED_AT_MAX_DIST:rotations_per_second = 70 # total guess, speed at some arbitrary larger distance TODO: measure
+        SPEED_LOW:rotations_per_second = 20
+        SPEED_MED:rotations_per_second = 40
+        SPEED_HIGH:rotations_per_second = 70
+
+        STOP:rotations_per_second = 0 # at 5 to keep moving and reduce acceleration later
+
+        '''
+        kraken free speed max: 6000 rpm = 100 rps
+        measured mechanism speed at 12 volts = ~83
+        cut to 75 for safety (and because free speed is gonna be higher than max in our mechanism)
+
+        NOTE: actual flywheel speed will be double the motor speed because of gearing
+        '''
+        kMaxAllowedSpeed:rotations_per_second = 75.0
+        kSpeedAt12Volts:rotations_per_second = 83.0
+    
+    class LauncherDistances:
+        MIN:meters=1
+        MAX:meters=10
+
+    class Constants:
+        k_P:float=0.25
+        k_I:float=0.0
+        k_D:float=0.0
+        k_S:float=0.22
+        k_V:float=0.11
+
+    kAtSpeedTolerance:rotations_per_second = ntproperty("/Settings/Launcher/atSpeed tolerance", 3.0, persistent=True)
+
+    disabled = ntproperty("/Disabling/Launcher", False, persistent=False)
+
+    def __init__(self, motorID:int) -> None:
+        ### Motor Setup
+        ## Launch Motor
+        self.motor = TalonFX(motorID, "rio")
+
+        # Config
+        motor_config = TalonFXConfiguration()
+        motor_config = motor_config.with_motor_output(
+            MotorOutputConfigs()
+            .with_neutral_mode(NeutralModeValue.COAST)
+            .with_inverted(InvertedValue.CLOCKWISE_POSITIVE)
+        ).with_slot0(
+            Slot0Configs()\
+                .with_k_p(self.Constants.k_P)\
+                .with_k_i(self.Constants.k_I)\
+                .with_k_d(self.Constants.k_D)\
+                .with_k_s(self.Constants.k_S)\
+                .with_k_v(self.Constants.k_V)
+        ).with_closed_loop_ramps(
+            ClosedLoopRampsConfigs()
+                .with_voltage_closed_loop_ramp_period(0.25)
+        ).with_current_limits(
+            CurrentLimitsConfigs()
+            .with_stator_current_limit(60.0)
+            .with_stator_current_limit_enable(True)
+            .with_supply_current_limit(12)
+            .with_supply_current_limit_enable(True)
+            .with_supply_current_lower_limit(40)
+            .with_supply_current_lower_time(1.0)
+        ) # hitting limit caused continual crash without clear error?
+        self.motor.configurator.apply(motor_config)
+
+        ### Functionality Setup
+        self.velocity_req = VelocityVoltage(0.0)
+
+        # Logging
+        FalconLogger.addLoggedObject("Launcher/Inputs/motor", self.motor)
+
+    def periodic(self) -> None:
+        # Logging: Write Current Measured Subsystem State
+
+        # Run Subsystem: Set New State To Subsystem
+        if RobotState.isDisabled():
+            self.stop()
+        else:
+            self.run()
+        
+        # Logging: Write Post Operation Information
+        FalconLogger.logOutput("/Launcher/Outputs/Setpoint", self.getDesiredSpeed())
+        FalconLogger.logOutput("/Launcher/Outputs/isAtSpeed", self.isAtSpeed())
+
+        FalconLogger.logOutput("systemStates/Agitator running", self.isAtSpeed())
+
+    def run(self) -> None:
+        # control velocity
+        if self.getDesiredSpeed() == 0 and not self.disabled:
+            self.motor.set(0)
+        else:
+            self.motor.set_control(self.velocity_req)
+
+    def stop(self) -> None:
+        self.velocity_req.velocity = 0.0
+
+    def toggleDisabled(self) -> None:
+        self.disabled = not self.disabled
+
+    def setDesiredSpeed(self, speed:rotations_per_second) -> None:
+        self.velocity_req.velocity = min(speed, self.LauncherSpeeds.kMaxAllowedSpeed)
+
+    def getDesiredSpeed(self) -> rotations_per_second:
+        return self.velocity_req.velocity
+    
+    def isAtSpeed(self) -> bool:
+        return abs(self.motor.get_closed_loop_error().value) < self.kAtSpeedTolerance
