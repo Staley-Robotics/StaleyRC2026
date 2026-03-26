@@ -1,5 +1,21 @@
 [
   {
+    "name": "Settings/drive/max speed %",
+    "type": "double",
+    "value": 0.6,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "Settings/drive/max rot speed (rots/sec)",
+    "type": "double",
+    "value": 0.65,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
     "name": "/Settings/Launcher/atSpeed tolerance",
     "type": "double",
     "value": 3.0,
@@ -64,22 +80,6 @@
     }
   },
   {
-    "name": "Settings/drive/max speed %",
-    "type": "double",
-    "value": 0.75,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "Settings/drive/max rot speed (rots/sec)",
-    "type": "double",
-    "value": 0.65,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
     "name": "Settings/drive/pid/kP",
     "type": "double",
     "value": 30.0,
@@ -107,6 +107,14 @@
     "name": "/climberSpeed",
     "type": "double",
     "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Disabling/Intake",
+    "type": "boolean",
+    "value": false,
     "properties": {
       "persistent": true
     }

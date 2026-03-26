@@ -6,6 +6,7 @@ from commands2.sysid import SysIdRoutine
 from wpilib import DriverStation, Notifier, RobotController, Field2d, SmartDashboard
 from wpilib.sysid import SysIdRoutineLog
 from wpimath.geometry import Pose2d, Rotation2d
+from wpimath.units import *
 
 from phoenix6 import SignalLogger, swerve, units, utils
 
@@ -14,7 +15,9 @@ from pathplannerlib.controller import PPHolonomicDriveController
 from pathplannerlib.config import RobotConfig, PIDConstants
 from pathplannerlib.logging import PathPlannerLogging
 
-from .tuner_constants import TunerSwerveDrivetrain
+from ntcore.util import ntproperty
+
+from .tuner_constants import TunerSwerveDrivetrain, TunerConstants
 from util import FalconLogger
 
 
@@ -33,6 +36,35 @@ class SwerveDrive(Subsystem, TunerSwerveDrivetrain):
     """Blue alliance sees forward as 0 degrees (toward red alliance wall)"""
     _RED_ALLIANCE_PERSPECTIVE_ROTATION = Rotation2d.fromDegrees(180)
     """Red alliance sees forward as 180 degrees (toward blue alliance wall)"""
+
+    '''
+            ## speed configs
+        self.drive_max_speed_pct = 0.75 # always start with "full" speed
+        self._max_speed = lambda: self.drive_max_speed_pct * TunerConstants.speed_at_12_volts
+        self._translational_deadband = lambda: self._max_speed() * 0.05
+
+        self._max_angular_rate = rotationsToRadians(self.drive_max_rot_speed)
+        self._rot_deadband = self._max_angular_rate * 0.05'''
+
+    drive_max_speed_pct: percent =  ntproperty("Settings/drive/max speed %", 0.75, persistent=True)
+    drive_max_rot_speed: percent =  ntproperty("Settings/drive/max rot speed (rots/sec)", 0.65, persistent=True)
+
+    deadband_percentage:percent = 0.05
+
+    @property
+    def max_drive_speed(self) -> meters_per_second:
+        return self.drive_max_speed_pct * TunerConstants.speed_at_12_volts
+    @property
+    def max_rot_speed(self) -> units.rotations_per_second:
+        return self.drive_max_rot_speed
+    
+    @property
+    def translation_deadband(self) -> meters_per_second:
+        return self.max_drive_speed * self.deadband_percentage
+    @property
+    def rotation_deadband(self) -> meters_per_second:
+        return self.max_rot_speed * self.deadband_percentage
+
 
     @overload
     def __init__(

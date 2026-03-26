@@ -164,6 +164,9 @@ class RebuiltCalc:
 
     @classmethod
     def getRotToTarget(cls) -> Rotation2d:
+        '''
+        gets the Rotation2d to the current target relative to the field based on current robot translation
+        '''
         target = cls.getCurrentTargetPoint()
 
         #this probably works idk

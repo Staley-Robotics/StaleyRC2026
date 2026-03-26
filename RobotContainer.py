@@ -21,15 +21,6 @@ from subsystems import TunerConstants, ClimberClosedLoop, Intake, Launcher, Agit
 from util import * #FalconXboxController, Telemetry, ControlMode, RebuiltCalc, RebuiltControlBoard
 
 class RobotContainer:
-    # Variable Declaration
-    __autoChooser:SendableChooser = SendableChooser()
-
-    drive_max_speed_pct: percent =  ntproperty("Settings/drive/max speed %", 0.75, persistent=True)
-    drive_max_rot_speed: percent =  ntproperty("Settings/drive/max rot speed (rots/sec)", 0.65, persistent=True)
-
-    drive_rot_kP: percent =  ntproperty("Settings/drive/pid/kP", 5.00, persistent=True)
-    drive_rot_kI: percent =  ntproperty("Settings/drive/pid/kI", 0.00, persistent=True)
-    drive_rot_kD: percent =  ntproperty("Settings/drive/pid/kD", 0.00, persistent=True)
 
     def __init__(self) -> None:
         ### Controllers
@@ -53,11 +44,13 @@ class RobotContainer:
 
         #### Weirdo Subsystems
         ## Drive
-        self.swerveSys = TunerConstants.create_drivetrain() # TODO: characterization & configs?
+        self.swerveSys = TunerConstants.create_drivetrain() # TODO: characterization & configs
         self._logger = Telemetry(TunerConstants.speed_at_12_volts)
 
         ## Vision
         self.visionSys = Vision( self.swerveSys.add_vision_measurement )
+        SmartDashboard.putData(ChangeVisionPipelines(self.visionSys, 0))
+        SmartDashboard.putData(ChangeVisionPipelines(self.visionSys, 1))
 
         ## Initialize RebuiltCalc
         self.gameCalc = RebuiltCalc.getInst()
@@ -105,7 +98,6 @@ class RobotContainer:
         (self.controller1.povUp() | self.controller2.povUp()).onTrue(PivotToPosition(self.intakeSys, Intake.Positions.STORED))
 
         # Bawlz
-        # allow controller 1 or 2 to toggle on a()
         (self.controller1.a() | self.controller2.a()).toggleOnTrue(SetIntakeSpeed(self.intakeSys, Intake.Speeds.IN))
         self.controlBoard.extra1().whileTrue(SetIntakeSpeed(self.intakeSys, Intake.Speeds.OUT))
 
@@ -118,13 +110,13 @@ class RobotContainer:
         #                 ))
         # handleLaunch = LaunchBalls(self.launcherSys, self.agitatorSys)
 
-        def increaseLauncherC():
-            RunLauncherByDist.c += 1
-        def decreaseLauncherC():
-            RunLauncherByDist.c -= 1
+        # def increaseLauncherC():
+        #     RunLauncherByDist.c += 1
+        # def decreaseLauncherC():
+        #     RunLauncherByDist.c -= 1
 
-        self.controller2.povUp().onTrue(cmd.runOnce(increaseLauncherC))
-        self.controller2.povDown().onTrue(cmd.runOnce(decreaseLauncherC))
+        # self.controller2.povUp().onTrue(cmd.runOnce(increaseLauncherC))
+        # self.controller2.povDown().onTrue(cmd.runOnce(decreaseLauncherC))
         
         self.launcherSys.setDefaultCommand(LauncherDefault(self.launcherSys))
 
@@ -189,9 +181,6 @@ class RobotContainer:
             ).withName('Drive Field Centric for Tower')
         )
 
-        SmartDashboard.putData(ChangeVisionPipelines(self.visionSys, 0))
-        SmartDashboard.putData(ChangeVisionPipelines(self.visionSys, 1))
-
         ## Targeting
         self.controlBoard.relayLeft().onTrue(cmd.runOnce(self.gameCalc.setDesiredRelay(RelayTarget.LEFT)))
         self.controlBoard.relayRight().onTrue(cmd.runOnce(self.gameCalc.setDesiredRelay(RelayTarget.RIGHT)))
@@ -255,88 +244,42 @@ class RobotContainer:
         Uses only controller1, controller2 and operator console controls should be set in each respective configure*Bindings func
         """
 
-        '''--------------------Create drive requests--------------------'''
-        ## speed configs
-        self.drive_max_speed_pct = 0.75 # always start with "full" speed
-        self._max_speed = lambda: self.drive_max_speed_pct * TunerConstants.speed_at_12_volts
-        self._translational_deadband = lambda: self._max_speed() * 0.05
+        '''--------------------Create drive commands--------------------'''        
+        self.drive_idle = self.swerveSys.apply_request(lambda: swerve.requests.Idle()).ignoringDisable(True).withName('Idling')
+        self.drive_brake = self.swerveSys.apply_request(lambda: swerve.requests.SwerveDriveBrake()).withName('Brake')
 
-        self._max_angular_rate = rotationsToRadians(self.drive_max_rot_speed)
-        self._rot_deadband = self._max_angular_rate * 0.05
-        
-        self.drive_fc = ( # field centric
-            swerve.requests.FieldCentric() # deadband in application because can vary
-            .with_rotational_deadband(
-                self._rot_deadband  # Add a 10% deadband
-            )
-            .with_drive_request_type(
-                swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE
-            )
+        self.drive_by_stick = DriveByStick(
+            self.swerveSys,
+            self.controller1.getLeftX,
+            self.controller1.getLeftY,
+            self.controller1.getRightX,
         )
-        self.drive_rc = ( # robot centric
-            swerve.requests.RobotCentric()
-            .with_rotational_deadband(
-                self._rot_deadband  # Add a 10% deadband
-            )
-            .with_drive_request_type(
-                swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE
-            )
+        self.drive_facing_target = DriveFacingDirection(
+            self.swerveSys,
+            self.controller1.getLeftX,
+            self.controller1.getLeftY,
+            RebuiltCalc.getRotToTarget
         )
-        self.drive_brake = swerve.requests.SwerveDriveBrake()
-        self.drive_idle = swerve.requests.Idle()
-        self.drive_point = swerve.requests.PointWheelsAt()
-        self.drive_fc_with_rot = swerve.requests.FieldCentricFacingAngle()
 
         '''--------------------Assign Drive Commands--------------------'''
-        ## Default
-        # NOTE: x = forward & y = left bc wpilib (maybe)
-        self.swerveSys.setDefaultCommand(
-            self.swerveSys.apply_request(
-                lambda: (
-                    self.drive_fc.with_velocity_x( -self.controller1.getLeftY() * self._max_speed() )
-                                 .with_velocity_y( -self.controller1.getLeftX() * self._max_speed() )
-                                 .with_rotational_rate( -self.controller1.getRightX() * self._max_angular_rate )
-                                 .with_deadband(self._translational_deadband())
-                )
-            ).withName('Drive Field Centric')
-        )
-        # Idle while the robot is disabled. This ensures the configured
-        # neutral mode is applied to the drive motors while disabled.
-        Trigger(DriverStation.isDisabled).whileTrue(
-            self.swerveSys.apply_request(lambda: self.drive_idle).ignoringDisable(True).withName('Idling')
-        )
+        ## Defaults
+        self.swerveSys.setDefaultCommand(self.drive_by_stick)
+
+        # Idle while the robot is disabled.
+        Trigger(DriverStation.isDisabled).whileTrue(self.drive_idle)
 
         ## Controls
         # Toggle halfspeed
         def toggleHalfSpeed():
-            self.drive_max_speed_pct = 0.25 if self.drive_max_speed_pct > 0.5 else 0.75
+            self.swerveSys.drive_max_speed_pct = 0.2 if self.swerveSys.drive_max_speed_pct > 0.5 else 0.6
         self.controller1.leftStick().onTrue(cmd.runOnce(toggleHalfSpeed))
 
-        # Brake
-        self.controller1.b().toggleOnTrue(self.swerveSys.apply_request(lambda: self.drive_brake).withName('Brake'))
+        # Brake (X shape)
+        self.controller1.b().toggleOnTrue(self.drive_brake)
 
-        # Drive + auto rotate
-        self.controller1.rightBumper().toggleOnTrue(
-            self.swerveSys.apply_request(
-                lambda: self.drive_fc_with_rot.with_velocity_x( -self.controller1.getLeftY() * self._max_speed() ) #Rotation2d(-self.controller1.getLeftY(), -self.controller1.getLeftX())
-                                              .with_velocity_y( -self.controller1.getLeftX() * self._max_speed() )
-                                              .with_target_direction( self.gameCalc.getRotToTarget() )
-                                              .with_heading_pid( self.drive_rot_kP, self.drive_rot_kI, self.drive_rot_kD )
-                                              .with_deadband(self._translational_deadband())
-            ).withName('FC + Auto Rotate')
-        )
-        
-        # Drive Robot-centric
-        self.controller1.leftBumper().toggleOnTrue(
-            self.swerveSys.apply_request(
-                lambda: (
-                    self.drive_rc.with_velocity_x( -self.controller1.getLeftY() * self._max_speed() )
-                                 .with_velocity_y( -self.controller1.getLeftX() * self._max_speed() )
-                                 .with_rotational_rate( -self.controller1.getRightX() * self._max_angular_rate )
-                                 .with_deadband(self._translational_deadband())
-                )
-            ).withName('Drive Robot Centric')
-        )
+        self.controller1.leftBumper().onTrue(cmd.runOnce(self.drive_by_stick.toggleFieldCentric))
+        self.controller1.rightBumper().toggleOnTrue(self.drive_facing_target)
+
     def configureDriveCharacterizationBindings(self):
         '''
         Setup controls to run Characterization (aka SystemIdentification) on the swervedrive
