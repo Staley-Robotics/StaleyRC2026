@@ -1,21 +1,5 @@
 [
   {
-    "name": "Settings/drive/max speed %",
-    "type": "double",
-    "value": 0.6,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "Settings/drive/max rot speed (rots/sec)",
-    "type": "double",
-    "value": 0.65,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
     "name": "/Settings/Launcher/atSpeed tolerance",
     "type": "double",
     "value": 3.0,
@@ -75,6 +59,22 @@
     "name": "/Settings/ControlClimberOpenLoop/input mult",
     "type": "double",
     "value": 0.3,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "Settings/drive/max speed %",
+    "type": "double",
+    "value": 0.25,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "Settings/drive/max rot speed (rots/sec)",
+    "type": "double",
+    "value": 0.65,
     "properties": {
       "persistent": true
     }

@@ -8,7 +8,7 @@ from wpimath.units import *
 from phoenix6.units import *
 
 from phoenix6.hardware import TalonFX
-from phoenix6.configs import TalonFXConfiguration, MotorOutputConfigs, Slot0Configs, ClosedLoopGeneralConfigs, CurrentLimitsConfigs
+from phoenix6.configs import * #TalonFXConfiguration, MotorOutputConfigs, Slot0Configs, ClosedLoopGeneralConfigs, CurrentLimitsConfigs
 from phoenix6.signals import InvertedValue, NeutralModeValue
 from phoenix6.controls import VelocityVoltage
 
@@ -40,7 +40,8 @@ class Agitator(Subsystem):
         '''
         kMaxAllowedSpeed:rotations_per_second = 60.0
         kSpeedAt12Volts:rotations_per_second = 90.0
-
+    
+    disabled = ntproperty("/Disabling/Agitator", False, persistent=False)
 
     def __init__(self, motorID:int) -> None:
         ### Motor Setup
@@ -60,6 +61,14 @@ class Agitator(Subsystem):
                 .with_k_d(self.Constants.k_D)\
                 .with_k_s(self.Constants.k_S)\
                 .with_k_v(self.Constants.k_V)
+        ).with_current_limits(
+            CurrentLimitsConfigs()
+            .with_stator_current_limit(60.0)
+            .with_stator_current_limit_enable(True)
+            .with_supply_current_limit(12)
+            .with_supply_current_limit_enable(True)
+            .with_supply_current_lower_limit(40)
+            .with_supply_current_lower_time(1.0)
         )
         # .with_current_limits(
         #     CurrentLimitsConfigs()
@@ -78,7 +87,7 @@ class Agitator(Subsystem):
         # Logging: Write Current Measured Subsystem State
 
         # Run Subsystem: Set New State To Subsystem
-        if RobotState.isDisabled():
+        if RobotState.isDisabled() or self.disabled:
             self.stop()
         else:
             self.run()
@@ -87,12 +96,17 @@ class Agitator(Subsystem):
         FalconLogger.logOutput("/Agitator/Outputs/Setpoint", self.getDesiredSpeed())
         FalconLogger.logOutput("/Launcher/Outputs/isAtSpeed", self.isAtSpeed())
 
+        FalconLogger.logOutput("systemStates/Agitator running", self.getDesiredSpeed() > 5)
+
     def run(self) -> None:
         # control velocity
         self.motor.set_control(self.velocity_req)
 
     def stop(self) -> None:
         self.velocity_req.velocity = 0.0
+    
+    def toggleDisabled(self) -> None:
+        self.disabled = not self.disabled
 
     def setDesiredSpeed(self, speed:rotations_per_second) -> None:
         self.velocity_req.velocity = speed

@@ -58,7 +58,7 @@ class RobotContainer:
 
         ## Auto
         self.initNamedCommands()
-        self.autoChooser = AutoBuilder.buildAutoChooser("Just Move")
+        self.autoChooser = AutoBuilder.buildAutoChooser()
         SmartDashboard.putData("AutoChooser", self.autoChooser)
 
         ### Logging
@@ -98,8 +98,9 @@ class RobotContainer:
         (self.controller1.povUp() | self.controller2.povUp()).onTrue(PivotToPosition(self.intakeSys, Intake.Positions.STORED))
 
         # Bawlz
-        (self.controller1.a() | self.controller2.a()).toggleOnTrue(SetIntakeSpeed(self.intakeSys, Intake.Speeds.IN))
-        self.controlBoard.extra1().whileTrue(SetIntakeSpeed(self.intakeSys, Intake.Speeds.OUT))
+        # allow controller 1 or 2 to toggle on a()
+        (self.controller1.a() | self.controller2.a()).whileTrue(SetIntakeSpeed(self.intakeSys, Intake.Speeds.IN))
+        # self.controlBoard.extra1().whileTrue(SetIntakeSpeed(self.intakeSys, Intake.Speeds.OUT))
 
         ## Launching
         # handleLaunch = RunLauncherByDist(self.launcherSys)\
@@ -109,18 +110,14 @@ class RobotContainer:
         #                      self.launcherSys.isAtSpeed
         #                 ))
         # handleLaunch = LaunchBalls(self.launcherSys, self.agitatorSys)
+        runLauncher = RunLauncherByDist(self.launcherSys)
 
-        # def increaseLauncherC():
-        #     RunLauncherByDist.c += 1
-        # def decreaseLauncherC():
-        #     RunLauncherByDist.c -= 1
-
-        # self.controller2.povUp().onTrue(cmd.runOnce(increaseLauncherC))
-        # self.controller2.povDown().onTrue(cmd.runOnce(decreaseLauncherC))
+        self.controller2.rightBumper().onTrue(cmd.runOnce(runLauncher.change_c(+0.5)))
+        self.controller2.leftBumper().onTrue(cmd.runOnce(runLauncher.change_c(-0.5)))
         
         self.launcherSys.setDefaultCommand(LauncherDefault(self.launcherSys))
 
-        self.controller2.x().toggleOnTrue(RunLauncherByDist(self.launcherSys)) # will trigger launcher (note: player 1 lost this control)
+        self.controller2.x().toggleOnTrue(runLauncher) # will trigger launcher (note: player 1 lost this control)
         (self.controller2.rightTrigger(0.3) | self.controller2.leftTrigger(0.3)).whileTrue(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_MED))
 
         # self.controlBoard.launchLow()\
@@ -136,7 +133,9 @@ class RobotContainer:
 
         self.controlBoard.bigRed().whileTrue(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.EJECT))
 
-        self.controlBoard.bigBlue().whileTrue(cmd.runOnce(lambda: (self.launcherSys.setDesiredSpeed(0), self.agitatorSys.setDesiredSpeed(0))).addRequirements(self.agitatorSys, self.launcherSys))
+        stopLauncher=cmd.runOnce(lambda: (self.launcherSys.setDesiredSpeed(0), self.agitatorSys.setDesiredSpeed(0)))
+        stopLauncher.addRequirements(self.agitatorSys, self.launcherSys)
+        self.controlBoard.bigBlue().whileTrue(stopLauncher)
 
         # self.controlBoard.switch3().whileTrue(RunLauncherByNT(self.launcherSys))
         # self.controlBoard.extra3().whileTrue(RunAgitatorByNT(self.agitatorSys))
@@ -180,6 +179,25 @@ class RobotContainer:
                 )
             ).withName('Drive Field Centric for Tower')
         )
+
+        SmartDashboard.putData(ChangeVisionPipelines(self.visionSys, 0))
+        SmartDashboard.putData(ChangeVisionPipelines(self.visionSys, 1))
+
+        ## Disabling
+        disableIntake = cmd.runOnce(self.intakeSys.toggleDisabled)
+        disableIntake.addRequirements(self.intakeSys)
+
+        self.controlBoard.extra1().onTrue(disableIntake)
+
+        disableAgitator = cmd.runOnce(self.agitatorSys.toggleDisabled)
+        disableAgitator.addRequirements(self.agitatorSys)
+        
+        self.controlBoard.extra2().onTrue(disableAgitator)
+        
+        disableLauncher = cmd.runOnce(self.launcherSys.toggleDisabled)
+        disableLauncher.addRequirements(self.launcherSys)
+        
+        self.controlBoard.extra3().onTrue(disableLauncher)
 
         ## Targeting
         self.controlBoard.relayLeft().onTrue(cmd.runOnce(self.gameCalc.setDesiredRelay(RelayTarget.LEFT)))
