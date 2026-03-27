@@ -27,7 +27,7 @@ class RobotContainer:
         self.controller1 = FalconXboxController( 0 )
         self.controller2 = FalconXboxController( 1 )
         self.controlBoard = RebuiltControlBoard( 2, 3 )
-        self.control_mode = ControlMode.COMP
+        self.control_mode = ControlMode.TEST
 
         ### Subsystems
         ## Intake

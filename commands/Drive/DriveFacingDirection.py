@@ -14,7 +14,7 @@ from util import RebuiltCalc
 
 class DriveFacingDirection(Command):
     # Variable Declaration
-    drive_rot_kP: percent =  ntproperty("Settings/drive/pid/kP", 5.00, persistent=True)
+    drive_rot_kP: percent =  ntproperty("Settings/drive/pid/kP", 4.00, persistent=True)
     drive_rot_kI: percent =  ntproperty("Settings/drive/pid/kI", 0.00, persistent=True)
     drive_rot_kD: percent =  ntproperty("Settings/drive/pid/kD", 0.00, persistent=True)
     
@@ -23,7 +23,7 @@ class DriveFacingDirection(Command):
                   swerveSys: SwerveDrive,
                   getX: typing.Callable[[], float] = lambda: 0.0,
                   getY: typing.Callable[[], float] = lambda: 0.0,
-                  getDesiredRot: typing.Callable[[], float] = lambda: 0.0
+                  getDesiredRot: typing.Callable[[], Rotation2d] = lambda: 0.0
                 ) -> None:
         # Command Attributes
         self.swerve_sys:SwerveDrive = swerveSys
@@ -53,7 +53,7 @@ class DriveFacingDirection(Command):
                           .with_deadband( self.swerve_sys.translation_deadband )
                           .with_rotational_deadband( self.swerve_sys.rotation_deadband )
 
-                          .with_target_direction( self.get_desired_rot() )
+                          .with_target_direction( self.get_desired_rot().rotateBy(Rotation2d(math.pi)) )
                           .with_heading_pid( self.drive_rot_kP, self.drive_rot_kI, self.drive_rot_kD )
         )
     
