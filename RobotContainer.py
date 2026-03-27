@@ -226,35 +226,121 @@ class RobotContainer:
         """
         #NOTE: drive bindings handled in configureDriveBindings
         ## Climbing
-        # self.controller1.y().toggleOnTrue(ControlClimberPos(self.climbSys, self.controller1.getRightUpDown))
+        # self.controller1.y().toggleOnTrue(ControlClimberOpenLoop(self.climbSys, self.controller1.getTriggers))
+        # self.controlBoard.extra2().whileTrue(ControlClimberOpenLoop(self.climbSys, lambda: -1 if self.controlBoard.switch2().getAsBoolean() else 1))
 
         ## Intaking
         # Pivot
-        # self.controller1.a().toggleOnTrue(ControlPivotPos(self.climbSys, self.controller1.getRightUpDown))
-        # #OR
-        # self.controller1.povDown().onTrue(PivotToPosition(self.intakeSys, 10 ))
-        # self.controller1.povLeft().onTrue(PivotToPosition(self.intakeSys, 45 ))
-        # self.controller1.povUp().onTrue(PivotToPosition(self.intakeSys, 90 ))
+        (self.controller1.povDown() | self.controller2.povDown()).onTrue(PivotToPosition(self.intakeSys, Intake.Positions.INTAKING))
+        (self.controller1.povLeft() | self.controller2.povLeft()).onTrue(PivotToPosition(self.intakeSys, Intake.Positions.BOUNCE_UP))
+        (self.controller1.povUp() | self.controller2.povUp()).onTrue(PivotToPosition(self.intakeSys, Intake.Positions.STORED))
 
-        # # Bawlz
-        # self.controller1.x().toggleOnTrue(SetIntakeSpeed(self.intakeSys, Intake.IntakeSpeeds.IN))
+        # Bawlz
+        # allow controller 1 or 2 to toggle on a()
+        (self.controller1.a() | self.controller2.a()).whileTrue(SetIntakeSpeed(self.intakeSys, Intake.Speeds.IN))
+        # self.controlBoard.extra1().whileTrue(SetIntakeSpeed(self.intakeSys, Intake.Speeds.OUT))
 
         ## Launching
-        # self.controller1.rightTrigger().whileTrue(RunLauncherByDist(self.launcherSys))
-        # self.controller1.rightBumper().whileTrue(ControlFlywheelSpeed(self.agitatorSys, lambda: 3000))
-        self.controller1.a().toggleOnTrue(RunLauncherByNT(self.launcherSys))
-        self.controller1.b().toggleOnTrue(RunAgitatorByNT(self.agitatorSys))
-        # this is a stupid way to do waht its doing:
-        # self.controller1.rightTrigger(0.01).whileTrue(ControlFlywheelSpeed(self.launcherSys, self.controller1.getRightTriggerAxis))
-        # self.controller1.leftTrigger(0.01).whileTrue(ControlFlywheelSpeed(self.agitatorSys, self.controller1.getLeftTriggerAxis))
-        
+        # handleLaunch = RunLauncherByDist(self.launcherSys)\
+        #                 .alongWith(cmd.select(
+        #                     {True:SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_MED),
+        #                      False:SetFlywheelSpeed(self.agitatorSys, 0)},
+        #                      self.launcherSys.isAtSpeed
+        #                 ))
+        # handleLaunch = LaunchBalls(self.launcherSys, self.agitatorSys)
+        runLauncher = RunLauncherByDist(self.launcherSys)
 
-        ## Climbing
-        # self.controller1.y().toggleOnTrue(ControlClimberOpenLoop(self.climbSys, self.controller1.getTriggers))
-        # self.climbSys.y().toggle(ControlClimberSpeed( self.climbSys,
-        #                                                      self.controller1.y().getAsBoolean,
-        #                                                      self.controller1.rightBumper().getAsBoolean, 
-        #                                                      self.controller1.leftBumper().getAsBoolean))
+        self.controller2.rightBumper().onTrue(cmd.runOnce(runLauncher.change_c(+0.5)))
+        self.controller2.leftBumper().onTrue(cmd.runOnce(runLauncher.change_c(-0.5)))
+        
+        self.launcherSys.setDefaultCommand(LauncherDefault(self.launcherSys))
+
+        self.controller2.x().toggleOnTrue(runLauncher) # will trigger launcher (note: player 1 lost this control)
+        (self.controller2.rightTrigger(0.3) | self.controller2.leftTrigger(0.3)).whileTrue(RunAgitatorByNT(self.agitatorSys))
+
+        # self.controlBoard.launchLow()\
+        #     .toggleOnTrue(SetFlywheelSpeed(self.launcherSys, Launcher.LauncherSpeeds.SPEED_LOW)
+        #     .alongWith(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_LOW)))
+        # self.controlBoard.launchMed()\
+        #     .toggleOnTrue(SetFlywheelSpeed(self.launcherSys, Launcher.LauncherSpeeds.SPEED_MED)
+        #     .alongWith(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_MED)))
+        # self.controlBoard.launchMed()\
+        #     .toggleOnTrue(SetFlywheelSpeed(self.launcherSys, Launcher.LauncherSpeeds.SPEED_HIGH)
+        #     .alongWith(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_HIGH)))
+        # NOTE: all these agitator speeds are the same
+
+        self.controlBoard.bigRed().whileTrue(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.EJECT))
+
+        stopLauncher=cmd.runOnce(lambda: (self.launcherSys.setDesiredSpeed(0), self.agitatorSys.setDesiredSpeed(0)))
+        stopLauncher.addRequirements(self.agitatorSys, self.launcherSys)
+        self.controlBoard.bigBlue().whileTrue(stopLauncher)
+
+        # self.controlBoard.switch3().whileTrue(RunLauncherByNT(self.launcherSys))
+        # self.controlBoard.extra3().whileTrue(RunAgitatorByNT(self.agitatorSys))
+
+        ## Misc
+        # self.controlBoard.bigRed().whileTrue( Panic() ) # TODO: implement Panic()
+        ## Additional Drive Controls
+        self.drive_fc_outpost = swerve.requests.RobotCentricFacingAngle()
+        self.drive_fc_bump = swerve.requests.RobotCentricFacingAngle()
+        self.drive_fc_tower = swerve.requests.RobotCentricFacingAngle()
+        self.controlBoard.outpost().onTrue(
+            self.swerveSys.apply_request(
+                lambda: (
+                    self.drive_fc_outpost
+                        .with_velocity_x( -self.controller1.getLeftY() * self._max_speed() )
+                        .with_velocity_y( -self.controller1.getLeftX() * self._max_speed() )
+                        .with_target_direction( Rotation2d().fromDegrees(-90) )
+                        .with_deadband(self._translational_deadband())
+                )
+            ).withName('Drive Field Centric for Outpost')
+        )
+        self.controlBoard.bump().onTrue(
+            self.swerveSys.apply_request(
+                lambda: (
+                    self.drive_fc_bump
+                        .with_velocity_x( -self.controller1.getLeftY() * self._max_speed() )
+                        .with_velocity_y( -self.controller1.getLeftX() * self._max_speed() )
+                        .with_target_direction( Rotation2d().fromDegrees(45) ) # TODO: normalize to closest proper mult of 45
+                        .with_deadband(self._translational_deadband())
+                )
+            ).withName('Drive Field Centric for Bump')
+        )
+        self.controlBoard.tower().onTrue(
+            self.swerveSys.apply_request(
+                lambda: (
+                    self.drive_fc_tower
+                        .with_velocity_x( -self.controller1.getLeftY() * self._max_speed() )
+                        .with_velocity_y( -self.controller1.getLeftX() * self._max_speed() )
+                        .with_target_direction( Rotation2d().fromDegrees(180) ) # TODO: normalize to closest proper mult of 45
+                        .with_deadband(self._translational_deadband())
+                )
+            ).withName('Drive Field Centric for Tower')
+        )
+
+        SmartDashboard.putData(ChangeVisionPipelines(self.visionSys, 0))
+        SmartDashboard.putData(ChangeVisionPipelines(self.visionSys, 1))
+
+        ## Disabling
+        disableIntake = cmd.runOnce(self.intakeSys.toggleDisabled)
+        disableIntake.addRequirements(self.intakeSys)
+
+        self.controlBoard.extra1().onTrue(disableIntake)
+
+        disableAgitator = cmd.runOnce(self.agitatorSys.toggleDisabled)
+        disableAgitator.addRequirements(self.agitatorSys)
+        
+        self.controlBoard.extra2().onTrue(disableAgitator)
+        
+        disableLauncher = cmd.runOnce(self.launcherSys.toggleDisabled)
+        disableLauncher.addRequirements(self.launcherSys)
+        
+        self.controlBoard.extra3().onTrue(disableLauncher)
+
+        ## Targeting
+        self.controlBoard.relayLeft().onTrue(cmd.runOnce(self.gameCalc.setDesiredRelay(RelayTarget.LEFT)))
+        self.controlBoard.relayRight().onTrue(cmd.runOnce(self.gameCalc.setDesiredRelay(RelayTarget.RIGHT)))
+        self.controlBoard.relayAuto().onTrue(cmd.runOnce(self.gameCalc.setDesiredRelay(RelayTarget.AUTO)))
 
     def configureDriveBindings(self) -> None:
         """

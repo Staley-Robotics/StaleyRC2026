@@ -42,7 +42,7 @@
   {
     "name": "Settings/RunLauncherByDist/mult b (dist^2)",
     "type": "double",
-    "value": 1.0,
+    "value": 0.2,
     "properties": {
       "persistent": true
     }
@@ -50,7 +50,7 @@
   {
     "name": "Settings/RunLauncherByDist/const",
     "type": "double",
-    "value": 20.0,
+    "value": 14.0,
     "properties": {
       "persistent": true
     }
@@ -74,7 +74,23 @@
   {
     "name": "/Settings/ControlClimberOpenLoop/input mult",
     "type": "double",
-    "value": 0.3,
+    "value": 0.6,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "Settings/drive/max speed %",
+    "type": "double",
+    "value": 0.6,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "Settings/drive/max rot speed (rots/sec)",
+    "type": "double",
+    "value": 0.65,
     "properties": {
       "persistent": true
     }
@@ -82,7 +98,7 @@
   {
     "name": "Settings/drive/pid/kP",
     "type": "double",
-    "value": 30.0,
+    "value": 5.0,
     "properties": {
       "persistent": true
     }
@@ -112,9 +128,9 @@
     }
   },
   {
-    "name": "/Disabling/Intake",
-    "type": "boolean",
-    "value": false,
+    "name": "/Settings/RunFlywheelByNT/speed (rps: 0-70)",
+    "type": "double",
+    "value": 0.0,
     "properties": {
       "persistent": true
     }
@@ -122,23 +138,7 @@
   {
     "name": "/Settings/ControlClimberPos/input mult",
     "type": "double",
-    "value": 1.0,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Settings/ControlClimberSpeed/speed control increment",
-    "type": "double",
-    "value": 0.1,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Settings/RunFlywheelByNT/speed (rps: 0-70)",
-    "type": "double",
-    "value": 0.0,
+    "value": 0.02,
     "properties": {
       "persistent": true
     }
@@ -155,46 +155,6 @@
     "name": "/stepSize",
     "type": "double",
     "value": 0.1,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Agitator/At speed tolerance (rps)",
-    "type": "double",
-    "value": 2.0,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Agitator/Max configured speed (rps)",
-    "type": "double",
-    "value": 50.0,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Launcher/At speed tolerance (rps)",
-    "type": "double",
-    "value": 2.0,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Launcher/Max configured speed (rps)",
-    "type": "double",
-    "value": 50.0,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Settings/Intake/IntakeSpeed",
-    "type": "double",
-    "value": 0.8,
     "properties": {
       "persistent": true
     }
