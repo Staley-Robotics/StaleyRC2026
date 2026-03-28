@@ -1,3 +1,4 @@
+from .Intaking.RunIntakeByNT import *
 from .Intaking.ControlPivotPos import *
 from .Intaking.SetIntakeSpeed import *
 from .Intaking.PivotToPosition import *
@@ -11,3 +12,4 @@ from .Launching.ControlFlywheelSpeed import *
 from .Vision.ChangeVisionPipelines import *
 from .Climbing.ControlClimberOpenLoop import *
 from .Drive.DriveByStick import *
+from .Drive.ToggleHalfSpeed import *
