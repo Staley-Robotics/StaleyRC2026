@@ -37,7 +37,15 @@ class RunLauncherByDist(Command):
         # pct_of_dist = (dist-Launcher.LauncherDistances.MIN)/(Launcher.LauncherDistances.MAX-Launcher.LauncherDistances.MIN) # scales to percentage between
 
         # apply scale between speed at min dist and max dist, by some math magic
-        speed = (self.a*dist) + (self.b*(dist*dist)) + self.c
+        # speed = (self.a*dist) + (self.b*(dist*dist)) + self.c # quadratic control
+        
+        # -----3 point equation-----
+        #y = 26.80793*e^(-(x - 4.527298)^2/(2*3.177229^2))
+        # speed = 26.80793*pow(2.71828,(-pow((dist - 4.527298), 2)/(2*pow(3.177229, 2)))) # this is a bell curve that peaks at 26.8 rps at 4.5 meters, and is about 10 rps at 1 meter and 10 meters, which seems to be about right for our mechanism
+
+        # -----5 point equation-----
+        #y = 26.92683 + (19.89756 - 26.92683)/(1 + (x/3.306039)^7.263255)^1.770582
+        speed = 26.92683 + (19.89756 - 26.92683)/pow((1 + pow((dist/3.306039), 7.263255)), 1.770582) # this is a sigmoid that peaks at 26.9 rps at 0 meters, and is about 19.9 rps at 10 meters, which seems to be about right for our mechanism
 
         # apply speed
         self.launcher_sys.setDesiredSpeed(

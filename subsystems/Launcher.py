@@ -74,7 +74,7 @@ class Launcher(Subsystem):
                 .with_voltage_closed_loop_ramp_period(0.25)
         ).with_current_limits(
             CurrentLimitsConfigs()
-            .with_stator_current_limit(80.0)
+            .with_stator_current_limit(100.0)
             .with_stator_current_limit_enable(True)
             .with_supply_current_limit(40)
             .with_supply_current_limit_enable(True)

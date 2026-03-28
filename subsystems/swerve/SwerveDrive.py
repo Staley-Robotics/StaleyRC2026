@@ -182,6 +182,11 @@ class SwerveDrive(Subsystem, TunerSwerveDrivetrain):
         self._has_applied_operator_perspective = False
         """Keep track if we've ever applied the operator perspective before or not"""
 
+        # module logging through FalconLogger
+        for i, module in enumerate(self.modules):
+            FalconLogger.addLoggedObject(f"SwerveModules/Module{i}/drive", module.drive_motor)
+            FalconLogger.addLoggedObject(f"SwerveModules/Module{i}/steer", module.steer_motor)
+
         # Pathplanner
         robotConfig = RobotConfig.fromGUISettings()
         AutoBuilder.configure(
