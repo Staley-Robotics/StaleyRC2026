@@ -10,7 +10,7 @@ from phoenix6 import swerve
 from ntcore.util import ntproperty
 
 from subsystems import SwerveDrive
-from util import RebuiltCalc
+from util import RebuiltCalc, FalconLogger
 
 class DriveFacingDirection(Command):
     # Variable Declaration
@@ -35,6 +35,7 @@ class DriveFacingDirection(Command):
         self.drive_req = (
             swerve.requests.FieldCentricFacingAngle()
                 .with_drive_request_type(swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE)
+                .with_steer_request_type(swerve.SwerveModule.SteerRequestType.POSITION)
         )
 
         self.setName( f"{self.__class__.__name__}" )
@@ -56,7 +57,11 @@ class DriveFacingDirection(Command):
                           .with_target_direction( self.get_desired_rot().rotateBy(Rotation2d(math.pi)) )
                           .with_heading_pid( self.drive_rot_kP, self.drive_rot_kI, self.drive_rot_kD )
         )
-    
+        #Debug:
+        FalconLogger.logOutput("/Debug/DriveFacingDir/SetTargetDirection", self.get_desired_rot().degrees())
+        FalconLogger.logOutput("/Debug/DriveFacingDir/ReqTargetDirection", self.drive_req.target_direction)
+        FalconLogger.logOutput("/Debug/DriveFacingDir/currentRot", self.swerve_sys.get_state().pose.rotation().degrees())
+        
     def withRot(self, getDesiredRot:typing.Callable[[], float]) -> typing.Self:
         '''
         modifies getDesiredRot internally and returns self for conciseness

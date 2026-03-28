@@ -12,5 +12,6 @@ from .Vision.ChangeVisionPipelines import *
 from .Climbing.ControlClimberOpenLoop import *
 from .Drive.DriveByStick import *
 from .Drive.DriveFacingDirection import *
+from .Drive.DriveFacingDirectionCustom import *
 from .Drive.DriveDefault import *
 from .Drive.ToggleHalfSpeed import *

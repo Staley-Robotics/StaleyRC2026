@@ -56,7 +56,7 @@ class SwerveDrive(Subsystem, TunerSwerveDrivetrain):
         return self.drive_max_speed_pct * TunerConstants.speed_at_12_volts
     @property
     def max_rot_speed(self) -> units.rotations_per_second:
-        return self.drive_max_rot_speed
+        return rotationsToRadians(self.drive_max_rot_speed)
     
     @property
     def translation_deadband(self) -> meters_per_second:

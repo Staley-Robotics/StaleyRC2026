@@ -27,7 +27,7 @@ class RobotContainer:
         self.controller1 = FalconXboxController( 0 )
         self.controller2 = FalconXboxController( 1 )
         self.controlBoard = RebuiltControlBoard( 2, 3 )
-        self.control_mode = ControlMode.TEST
+        self.control_mode = ControlMode.COMP
 
         ### Subsystems
         ## Intake
@@ -87,10 +87,6 @@ class RobotContainer:
         configures controls for the robot at competition
         """
         #NOTE: drive bindings handled in configureDriveBindings
-        ## Climbing
-        # self.controller1.y().toggleOnTrue(ControlClimberOpenLoop(self.climbSys, self.controller1.getTriggers))
-        # self.controlBoard.extra2().whileTrue(ControlClimberOpenLoop(self.climbSys, lambda: -1 if self.controlBoard.switch2().getAsBoolean() else 1))
-
         ## Intaking
         # Pivot
         (self.controller1.povDown() | self.controller2.povDown()).onTrue(PivotToPosition(self.intakeSys, Intake.Positions.INTAKING))
@@ -102,14 +98,6 @@ class RobotContainer:
         (self.controller1.a() | self.controller2.a()).whileTrue(SetIntakeSpeed(self.intakeSys, Intake.Speeds.IN))
         # self.controlBoard.extra1().whileTrue(SetIntakeSpeed(self.intakeSys, Intake.Speeds.OUT))
 
-        ## Launching
-        # handleLaunch = RunLauncherByDist(self.launcherSys)\
-        #                 .alongWith(cmd.select(
-        #                     {True:SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_MED),
-        #                      False:SetFlywheelSpeed(self.agitatorSys, 0)},
-        #                      self.launcherSys.isAtSpeed
-        #                 ))
-        # handleLaunch = LaunchBalls(self.launcherSys, self.agitatorSys)
         runLauncher = RunLauncherByDist(self.launcherSys)
 
         self.controller2.rightBumper().onTrue(cmd.runOnce(runLauncher.change_c(+0.5)))
@@ -119,17 +107,6 @@ class RobotContainer:
 
         self.controller2.x().toggleOnTrue(runLauncher) # will trigger launcher (note: player 1 lost this control)
         (self.controller2.rightTrigger(0.3) | self.controller2.leftTrigger(0.3)).whileTrue(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_MED))
-
-        # self.controlBoard.launchLow()\
-        #     .toggleOnTrue(SetFlywheelSpeed(self.launcherSys, Launcher.LauncherSpeeds.SPEED_LOW)
-        #     .alongWith(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_LOW)))
-        # self.controlBoard.launchMed()\
-        #     .toggleOnTrue(SetFlywheelSpeed(self.launcherSys, Launcher.LauncherSpeeds.SPEED_MED)
-        #     .alongWith(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_MED)))
-        # self.controlBoard.launchMed()\
-        #     .toggleOnTrue(SetFlywheelSpeed(self.launcherSys, Launcher.LauncherSpeeds.SPEED_HIGH)
-        #     .alongWith(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_HIGH)))
-        # NOTE: all these agitator speeds are the same
 
         self.controlBoard.bigRed().whileTrue(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.EJECT))
 
