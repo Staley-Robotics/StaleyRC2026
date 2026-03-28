@@ -46,7 +46,7 @@ class SwerveDrive(Subsystem, TunerSwerveDrivetrain):
         self._max_angular_rate = rotationsToRadians(self.drive_max_rot_speed)
         self._rot_deadband = self._max_angular_rate * 0.05'''
 
-    drive_max_speed_pct: percent =  ntproperty("Settings/drive/max speed %", 0.75, persistent=True)
+    drive_max_speed_pct: percent =  ntproperty("Settings/drive/max speed %", 0.6, writeDefault=True)
     drive_max_rot_speed: percent =  ntproperty("Settings/drive/max rot speed (rots/sec)", 0.65, persistent=True)
 
     deadband_percentage:percent = 0.05
