@@ -54,7 +54,7 @@ class RobotContainer:
 
         ## Initialize RebuiltCalc
         self.gameCalc = RebuiltCalc.getInst()
-        self.gameCalc.setGetRobotPose(lambda: self.swerveSys.get_state().pose)
+        self.gameCalc.setGetRobotPose(self.swerveSys.get_state)
 
         ## Auto
         self.initNamedCommands()

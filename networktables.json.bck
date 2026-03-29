@@ -16,6 +16,14 @@
     }
   },
   {
+    "name": "/Settings/RunIntakeByNT/speed (rps: -1 to 1)",
+    "type": "double",
+    "value": 0.3,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
     "name": "/Settings/ControlIntakePos/input mult",
     "type": "double",
     "value": 0.04,
@@ -74,7 +82,7 @@
   {
     "name": "Settings/drive/pid/kP",
     "type": "double",
-    "value": 30.0,
+    "value": 10.0,
     "properties": {
       "persistent": true
     }
@@ -89,6 +97,14 @@
   },
   {
     "name": "Settings/drive/pid/kD",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/climberSpeed",
     "type": "double",
     "value": 0.0,
     "properties": {
@@ -113,14 +129,6 @@
   },
   {
     "name": "Settings/drive/customRotpid/kD",
-    "type": "double",
-    "value": 0.0,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/climberSpeed",
     "type": "double",
     "value": 0.0,
     "properties": {

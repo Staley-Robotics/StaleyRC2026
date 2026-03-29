@@ -348,6 +348,8 @@ class SwerveDrive(Subsystem, TunerSwerveDrivetrain):
         ## Logging
         self.field.setRobotPose( self.get_state().pose )
         FalconLogger.logOutput("swerve/pose", self.get_state().pose)
+        # FalconLogger.logOutput("swerve/state", self.get_state())
+
 
     def _start_sim_thread(self):
         def _sim_periodic():

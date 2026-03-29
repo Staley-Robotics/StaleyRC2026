@@ -5,6 +5,8 @@ from wpilib import DriverStation
 from wpimath.geometry import Pose2d, Translation2d, Translation3d, Rotation2d
 from wpimath.units import meters, inchesToMeters
 
+from phoenix6.swerve import SwerveDrivetrain
+
 from util import FalconLogger
 
 '''
@@ -58,6 +60,7 @@ class RebuiltCalc:
 
     # variable definitions
     getRobotPose:typing.Callable[[], Pose2d] = lambda:Pose2d()
+    getRobotState:typing.Callable[[], Pose2d] = lambda:Pose2d()
 
     desiredRelayPoint:TargetPoints|None = None
 
@@ -73,8 +76,9 @@ class RebuiltCalc:
         return cls._instance
     
     @classmethod
-    def setGetRobotPose(cls, getRobotPose:typing.Callable[[], Pose2d]):
-        cls.getRobotPose:typing.Callable[[], Pose2d] = getRobotPose
+    def setGetRobotPose(cls, getRobotState:typing.Callable[[], SwerveDrivetrain.SwerveDriveState]):
+        cls.getRobotPose:typing.Callable[[], Pose2d] = lambda: getRobotState().pose
+        cls.getRobotState:typing.Callable[[], SwerveDrivetrain.SwerveDriveState] = getRobotState
     
     @classmethod
     def debugLog(cls) -> None:
@@ -109,25 +113,30 @@ class RebuiltCalc:
         """
         gets the Translation2d (point on the field) of the current target
         """
+        point = None
         if cls.botInScoreZone():
             if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
-                return TargetPoints.blueHub
+                point = TargetPoints.blueHub
             else:
-                return TargetPoints.redHub
-        
-        if not (cls.desiredRelayPoint is None):
-            return cls.desiredRelayPoint
+                point = TargetPoints.redHub
+        elif not (cls.desiredRelayPoint is None):
+            point = cls.desiredRelayPoint
         else:
             if cls.botIsLeft():
                 if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
-                    return TargetPoints.relayLeftBlue
+                    point = TargetPoints.relayLeftBlue
                 else:
-                    return TargetPoints.relayLeftRed
+                    point = TargetPoints.relayLeftRed
             else:
                 if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
-                    return TargetPoints.relayRightBlue
+                    point = TargetPoints.relayRightBlue
                 else:
-                    return TargetPoints.relayRightRed
+                    point = TargetPoints.relayRightRed
+
+        # state:SwerveDrivetrain.SwerveDriveState = cls.getRobotState()
+        # point = Translation2d(point.x + state.speeds.vx * 2, point.y + state.speeds.vy * 2)
+
+        return point
     
     @classmethod
     def getCurrentTarget(cls) -> str:
