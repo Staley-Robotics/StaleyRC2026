@@ -5,6 +5,12 @@
     "data": {
       "commands": [
         {
+          "type": "named",
+          "data": {
+            "name": "DeployIntake"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "UnderSuckL"
@@ -14,6 +20,12 @@
           "type": "path",
           "data": {
             "pathName": "ShootUL"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "LaunchBalls"
           }
         }
       ]

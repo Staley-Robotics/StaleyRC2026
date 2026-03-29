@@ -41,13 +41,23 @@
       "name": "DeployIntake",
       "waypointRelativePos": 0.5482781904118794,
       "endWaypointRelativePos": null,
-      "command": null
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "DeployIntake"
+        }
+      }
     },
     {
       "name": "RunIntake",
       "waypointRelativePos": 0.8399729912221459,
       "endWaypointRelativePos": null,
-      "command": null
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "RunIntake"
+        }
+      }
     }
   ],
   "globalConstraints": {
@@ -60,7 +70,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 45.0
+    "rotation": 0.0
   },
   "reversed": false,
   "folder": null,

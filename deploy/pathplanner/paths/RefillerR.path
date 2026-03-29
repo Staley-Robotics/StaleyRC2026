@@ -57,7 +57,12 @@
       "name": "RunIntake",
       "waypointRelativePos": 1.0101282916947958,
       "endWaypointRelativePos": null,
-      "command": null
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "RunIntake"
+        }
+      }
     }
   ],
   "globalConstraints": {
@@ -76,7 +81,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 37.0
   },
   "useDefaultConstraints": true
 }

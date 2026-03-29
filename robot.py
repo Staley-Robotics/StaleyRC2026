@@ -33,7 +33,7 @@ class MyRobot(TimedRobot):
         DriverStation.startDataLog( DataLogManager.getLog() )
 
         # handle phoenix logs
-        if RobotBase.isSimulation():
+        if RobotBase.isSimulation() or not RobotBase.isReal():
             SignalLogger.set_path('.logs/ctre')
         
         # Built The Robot

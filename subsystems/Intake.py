@@ -19,7 +19,7 @@ from util.FalconLogger import FalconLogger
 
 class IntakeConstants:
     kP:float=7.0    # proportion       The farther away, the harder it pushes
-    kI:float=0.0    # integral         The longer it's been off, the harder it pushes
+    kI:float=0.08    # integral         The longer it's been off, the harder it pushes
     kD:float=4.0    # differential     The harder it pushes, the less it pushes
     kS:float=0.4    # static
     kG:float=1.0    # gravity          Constant force, but accounting for gravity
@@ -177,8 +177,10 @@ class Intake(Subsystem):
         if RobotState.isDisabled():
             self.stop()
         else:
+            if RobotState.isAutonomous():
+                self.setIntakeSpeed(self.Speeds.IN)
             self.run()
-
+        
         # Mech2d
         self.mechArmActual.setAngle( -self.getPivotPosition() )
         self.mechArmTarget.setAngle( -self.getPivotSetpoint() )

@@ -9,6 +9,12 @@
           "data": {
             "pathName": "shortShootOutpost"
           }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "LaunchBalls"
+          }
         }
       ]
     }

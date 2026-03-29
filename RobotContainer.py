@@ -401,6 +401,6 @@ class RobotContainer:
         """
         Initialize Named Commands for PathPlanner
         """
-        NamedCommands.registerCommand("LaunchBalls", RunLauncherByDist(self.launcherSys).alongWith(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_MED)))
+        NamedCommands.registerCommand("LaunchBalls", RunLauncherByDist(self.launcherSys).alongWith(cmd.waitUntil(lambda: self.launcherSys.isAtSpeed() and self.launcherSys.getDesiredSpeed() > Launcher.LauncherSpeeds.WAIT).andThen(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_MED))))
         NamedCommands.registerCommand("DeployIntake", PivotToPosition(self.intakeSys, Intake.Positions.INTAKING))
         NamedCommands.registerCommand("RunIntake", SetIntakeSpeed(self.intakeSys, Intake.Speeds.IN))
