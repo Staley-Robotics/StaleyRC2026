@@ -214,7 +214,8 @@ class RobotContainer:
 
         # Bawlz
         # allow controller 1 or 2 to toggle on a()
-        (self.controller1.a() | self.controller2.a()).whileTrue(SetIntakeSpeed(self.intakeSys, Intake.Speeds.IN))
+        # (self.controller1.a() | self.controller2.a()).whileTrue(SetIntakeSpeed(self.intakeSys, Intake.Speeds.IN))
+        (self.controller1.a() | self.controller2.a()).whileTrue(RunIntakeByNT(self.intakeSys))
         # self.controlBoard.extra1().whileTrue(SetIntakeSpeed(self.intakeSys, Intake.Speeds.OUT))
 
         ## Launching

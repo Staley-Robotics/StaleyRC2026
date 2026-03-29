@@ -252,6 +252,7 @@ class Intake(Subsystem):
         self.setPivotSetpoint(self.getPivotPosition())
 
     def setIntakeSpeed(self, speed:Speeds|percent) -> None:
+        """speed: as percentage (-1 to 1) or Intake.Speeds constant"""
         self.intake_request.output = speed * 12
 
     def getIntakeSpeed(self) -> percent:
