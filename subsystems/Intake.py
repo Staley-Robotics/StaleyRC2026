@@ -18,15 +18,16 @@ from phoenix6.sim import ChassisReference
 from util.FalconLogger import FalconLogger
 
 class IntakeConstants:
-    kP:float=7.0    # proportion       The farther away, the harder it pushes
-    kI:float=0.08    # integral         The longer it's been off, the harder it pushes
-    kD:float=4.0    # differential     The harder it pushes, the less it pushes
-    kS:float=0.4    # static
-    kG:float=1.0    # gravity          Constant force, but accounting for gravity
+    kP:float=23.0    # proportion       The farther away, the harder it pushes
+    kI:float=0.2    # integral         The longer it's been off, the harder it pushes
+    kD:float=1.0    # differential     The harder it pushes, the less it pushes :ROFL:
+    kS:float=0.3    # static
+    kG:float=0.27    # gravity          Constant force, but accounting for gravity
 
-    gear_ratio:float=11/60 # rotor/mechanism
+    gear_ratio:float=1/83.25 #11/60 # rotor/mechanism
 
-    tolerance:degrees = 10
+    tolerance:degrees = 2
+    wiggle_tolerance:degrees = 10
 
 class Intake(Subsystem):
     class Speeds:
@@ -46,7 +47,8 @@ class Intake(Subsystem):
 
         STORED:degrees =  MAX - 1
         INTAKING:degrees = MIN
-        BOUNCE_UP:degrees = 70
+        BOUNCE_DOWN:degrees = 30
+        BOUNCE_UP:degrees = 90
     
     disablePivot = ntproperty("/Disabling/IntakePivot", False, persistent=False)
 
@@ -160,7 +162,7 @@ class Intake(Subsystem):
             self.arm_sim = SingleJointedArmSim(
                 DCMotor.krakenX60(),
                 IntakeConstants.gear_ratio,
-                SingleJointedArmSim.estimateMOI( 0.3, 0.1 ),
+                SingleJointedArmSim.estimateMOI( 0.3, 3.4 ), # Andy weighed the intake
                 0.1,
                 degreesToRadians( self.Positions.MIN ),
                 degreesToRadians( self.Positions.MAX ),
@@ -190,6 +192,7 @@ class Intake(Subsystem):
         FalconLogger.logOutput("/Intake/Outputs/Error (deg)", self.pivot_motor.get_closed_loop_error().value * 360)
         FalconLogger.logOutput("/Intake/Outputs/closed loop reference (deg)", self.pivot_motor.get_closed_loop_reference().value * 360)
         FalconLogger.logOutput("/Intake/Outputs/Position (deg)", self.getPivotPosition())
+        FalconLogger.logOutput("/Intake/Outputs/isAtSetpoint", self.getAtSetpoint())
 
         FalconLogger.logOutput("systemStates/Intake running", self.getIntakeSpeed() > 0.1)
         FalconLogger.logOutput("systemStates/Intake deployed", self.getPivotPosition() < 60)

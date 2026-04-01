@@ -27,7 +27,7 @@ class RobotContainer:
         self.controller1 = FalconXboxController( 0 )
         self.controller2 = FalconXboxController( 1 )
         self.controlBoard = RebuiltControlBoard( 2, 3 )
-        self.control_mode = ControlMode.COMP
+        self.control_mode = ControlMode.TEST
 
         ### Subsystems
         ## Intake
@@ -211,6 +211,7 @@ class RobotContainer:
         (self.controller1.povDown() | self.controller2.povDown()).onTrue(PivotToPosition(self.intakeSys, Intake.Positions.INTAKING))
         (self.controller1.povLeft() | self.controller2.povLeft()).onTrue(PivotToPosition(self.intakeSys, Intake.Positions.BOUNCE_UP))
         (self.controller1.povUp() | self.controller2.povUp()).onTrue(PivotToPosition(self.intakeSys, Intake.Positions.STORED))
+        (self.controller1.povRight() | self.controller2.povRight()).whileTrue(IntakeWiggle(self.intakeSys, bottomPos=Intake.Positions.BOUNCE_DOWN, topPos=Intake.Positions.BOUNCE_UP))
 
         # Bawlz
         # allow controller 1 or 2 to toggle on a()
@@ -401,6 +402,6 @@ class RobotContainer:
         """
         Initialize Named Commands for PathPlanner
         """
-        NamedCommands.registerCommand("LaunchBalls", RunLauncherByDist(self.launcherSys).alongWith(cmd.waitUntil(lambda: self.launcherSys.isAtSpeed() and self.launcherSys.getDesiredSpeed() > Launcher.LauncherSpeeds.WAIT).andThen(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_MED))))
+        NamedCommands.registerCommand("LaunchBalls", RunLauncherByDist(self.launcherSys).alongWith(cmd.waitUntil(lambda: self.launcherSys.isAtSpeed() and self.launcherSys.getDesiredSpeed() > Launcher.LauncherSpeeds.WAIT).andThen(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_MED).alongWith(IntakeWiggle(self.intakeSys, bottomPos=Intake.Positions.BOUNCE_DOWN, topPos=Intake.Positions.BOUNCE_UP)))))
         NamedCommands.registerCommand("DeployIntake", PivotToPosition(self.intakeSys, Intake.Positions.INTAKING))
         NamedCommands.registerCommand("RunIntake", SetIntakeSpeed(self.intakeSys, Intake.Speeds.IN))
