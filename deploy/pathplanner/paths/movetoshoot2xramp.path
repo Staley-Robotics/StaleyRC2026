@@ -3,45 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.9192,
-        "y": 2.4953777777777773
+        "x": 8.72798888888889,
+        "y": 5.808488888888889
       },
       "prevControl": null,
       "nextControl": {
-        "x": 8.9192,
-        "y": 2.4953777777777773
+        "x": 9.72798888888889,
+        "y": 5.808488888888889
       },
       "isLocked": false,
-      "linkedName": "fullloadR"
+      "linkedName": "refilldoubleramp"
     },
     {
       "anchor": {
-        "x": 5.4636000000000005,
-        "y": 2.4953777777777773
+        "x": 3.4465000000000003,
+        "y": 5.7013
       },
       "prevControl": {
-        "x": 6.46325391935284,
-        "y": 2.469071095689546
-      },
-      "nextControl": {
-        "x": 5.093311111111111,
-        "y": 2.505122222222221
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
-        "x": 3.3295666666666666,
-        "y": 2.4953777777777773
-      },
-      "prevControl": {
-        "x": 4.959837708036138,
-        "y": 2.3401138690759224
+        "x": 2.4465000000000003,
+        "y": 5.7013
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "needrefillrdoubleramp"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
@@ -58,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 52.076378177636805
+    "rotation": -56.39532105389282
   },
   "reversed": false,
   "folder": null,

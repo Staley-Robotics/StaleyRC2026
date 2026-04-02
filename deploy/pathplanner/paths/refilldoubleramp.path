@@ -3,51 +3,63 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.9192,
-        "y": 2.4953777777777773
+        "x": 3.368544444444445,
+        "y": 5.64586305278174
       },
       "prevControl": null,
       "nextControl": {
-        "x": 8.9192,
-        "y": 2.4953777777777773
+        "x": 4.368544444444445,
+        "y": 5.64586305278174
       },
       "isLocked": false,
-      "linkedName": "fullloadR"
+      "linkedName": "depotmultiramp"
     },
     {
       "anchor": {
-        "x": 5.4636000000000005,
-        "y": 2.4953777777777773
+        "x": 6.2821333333333325,
+        "y": 5.808488888888889
       },
       "prevControl": {
-        "x": 6.46325391935284,
-        "y": 2.469071095689546
+        "x": 5.2821333333333325,
+        "y": 5.808488888888889
       },
       "nextControl": {
-        "x": 5.093311111111111,
-        "y": 2.505122222222221
+        "x": 7.2821333333333325,
+        "y": 5.808488888888889
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 3.3295666666666666,
-        "y": 2.4953777777777773
+        "x": 8.72798888888889,
+        "y": 5.808488888888889
       },
       "prevControl": {
-        "x": 4.959837708036138,
-        "y": 2.3401138690759224
+        "x": 7.995316666666666,
+        "y": 5.8036166666666675
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "needrefillrdoubleramp"
+      "linkedName": "refilldoubleramp"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 1,
+      "rotationDegrees": 0.0
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "RunIntake",
+      "waypointRelativePos": 0.9985111662531003,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
@@ -58,13 +70,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 52.076378177636805
+    "rotation": 0.0
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": -51.35108577214542
   },
   "useDefaultConstraints": true
 }

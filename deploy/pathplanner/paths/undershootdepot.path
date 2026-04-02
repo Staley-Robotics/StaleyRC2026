@@ -8,43 +8,68 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.032455555555555,
-        "y": 5.623344444444446
+        "x": 7.87018624141589,
+        "y": 5.609783944757189
       },
       "isLocked": false,
       "linkedName": "endunderL"
     },
     {
       "anchor": {
-        "x": 5.736444444444445,
-        "y": 5.594108416547789
+        "x": 7.578144444444446,
+        "y": 7.406577777777777
       },
       "prevControl": {
-        "x": 7.673434153590111,
-        "y": 5.35780631241084
+        "x": 8.311671369893324,
+        "y": 7.38779468121046
       },
       "nextControl": {
-        "x": 3.79945473529878,
-        "y": 5.830410520684737
+        "x": 5.796940455375731,
+        "y": 7.452188273278393
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 2.5122967189728955,
-        "y": 5.594108416547789
+        "x": 3.3003333333333336,
+        "y": 7.406577777777777
       },
       "prevControl": {
-        "x": 3.008,
-        "y": 5.584366666666666
+        "x": 5.068597456615632,
+        "y": 7.269849531392992
+      },
+      "nextControl": {
+        "x": 3.0510773627205214,
+        "y": 7.425851104264527
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 3.7875555555555556,
+        "y": 7.406577777777777
+      },
+      "prevControl": {
+        "x": 3.4810258381148995,
+        "y": 7.366570542838373
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "multishootdepot"
+      "linkedName": "multiShotDepot"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 1,
+      "rotationDegrees": 1.0
+    },
+    {
+      "waypointRelativePos": 2,
+      "rotationDegrees": 2.0
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
@@ -57,8 +82,8 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0,
-    "rotation": -40.0
+    "velocity": 0.0,
+    "rotation": -77.63
   },
   "reversed": false,
   "folder": null,

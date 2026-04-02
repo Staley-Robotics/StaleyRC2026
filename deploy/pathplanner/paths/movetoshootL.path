@@ -32,16 +32,16 @@
     },
     {
       "anchor": {
-        "x": 1.9947503566333804,
+        "x": 3.368544444444445,
         "y": 5.64586305278174
       },
       "prevControl": {
-        "x": 3.1592296718972896,
+        "x": 4.533023759708355,
         "y": 5.7364336661911555
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "depotmultiramp"
     }
   ],
   "rotationTargets": [
@@ -63,7 +63,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -40.0
+    "rotation": -51.35108577214542
   },
   "reversed": false,
   "folder": null,
