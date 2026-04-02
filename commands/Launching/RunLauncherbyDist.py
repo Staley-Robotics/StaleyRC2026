@@ -45,7 +45,7 @@ class RunLauncherByDist(Command):
 
         # -----5 point equation-----
         #y = 26.92683 + (19.89756 - 26.92683)/(1 + (x/3.306039)^7.263255)^1.770582
-        speed = 26.92683 + (19.89756 - 26.92683)/pow((1 + pow((dist/3.306039), 7.263255)), 1.770582) # this is a sigmoid that peaks at 26.9 rps at 0 meters, and is about 19.9 rps at 10 meters, which seems to be about right for our mechanism
+        speed = 26.92683 + (19.89756 - 26.92683)/pow((1 + pow((dist/3.306039), 7.263255)), 1.770582) + 1.0 # this is a sigmoid that peaks at 26.9 rps at 0 meters, and is about 19.9 rps at 10 meters, which seems to be about right for our mechanism
 
         # apply speed
         self.launcher_sys.setDesiredSpeed(

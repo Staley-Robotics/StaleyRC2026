@@ -27,7 +27,7 @@ class RobotContainer:
         self.controller1 = FalconXboxController( 0 )
         self.controller2 = FalconXboxController( 1 )
         self.controlBoard = RebuiltControlBoard( 2, 3 )
-        self.control_mode = ControlMode.TEST
+        self.control_mode = ControlMode.COMP
 
         ### Subsystems
         ## Intake
@@ -91,21 +91,24 @@ class RobotContainer:
         (self.controller1.povDown() | self.controller2.povDown()).onTrue(PivotToPosition(self.intakeSys, Intake.Positions.INTAKING))
         (self.controller1.povLeft() | self.controller2.povLeft()).onTrue(PivotToPosition(self.intakeSys, Intake.Positions.BOUNCE_UP))
         (self.controller1.povUp() | self.controller2.povUp()).onTrue(PivotToPosition(self.intakeSys, Intake.Positions.STORED))
+        (self.controller1.povRight() | self.controller2.povRight()).whileTrue(IntakeWiggle(self.intakeSys, bottomPos=Intake.Positions.BOUNCE_DOWN, topPos=Intake.Positions.BOUNCE_UP))
 
         # Bawlz
         # allow controller 1 or 2 to hold on a(), and c1 to hold either trigger
         ((self.controller1.a() | self.controller2.a()) | (self.controller1.rightTrigger(0.3) | self.controller1.leftTrigger(0.3))).whileTrue(SetIntakeSpeed(self.intakeSys, Intake.Speeds.IN))
-        # self.controlBoard.extra1().whileTrue(SetIntakeSpeed(self.intakeSys, Intake.Speeds.OUT))
+        self.controlBoard.extra1().whileTrue(SetIntakeSpeed(self.intakeSys, Intake.Speeds.OUT)) # Poop
 
+        ## Launching
         runLauncher = RunLauncherByDist(self.launcherSys)
 
-        self.controller2.rightBumper().onTrue(cmd.runOnce(runLauncher.change_c(+0.5)))
-        self.controller2.leftBumper().onTrue(cmd.runOnce(runLauncher.change_c(-0.5)))
+        # self.controller2.rightBumper().onTrue(cmd.runOnce(runLauncher.change_c(+0.5)))
+        # self.controller2.leftBumper().onTrue(cmd.runOnce(runLauncher.change_c(-0.5)))
         
         self.launcherSys.setDefaultCommand(LauncherDefault(self.launcherSys))
 
-        self.controller2.x().toggleOnTrue(runLauncher) # will trigger launcher (note: player 1 lost this control)
-        (self.controller2.rightTrigger(0.3) | self.controller2.leftTrigger(0.3)).whileTrue(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_MED))
+        self.controller2.x().toggleOnTrue(runLauncher)
+        self.controller2.leftTrigger(0.3).whileTrue(RunLauncherByDist(self.launcherSys)) # uses different instance of command for better control
+        self.controller2.rightTrigger(0.3).whileTrue(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_MED))
 
         self.controlBoard.bigRed().whileTrue(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.EJECT))
 
@@ -119,66 +122,71 @@ class RobotContainer:
         ## Misc
         # self.controlBoard.bigRed().whileTrue( Panic() ) # TODO: implement Panic()
         ## Additional Drive Controls
-        self.drive_fc_outpost = swerve.requests.RobotCentricFacingAngle()
-        self.drive_fc_bump = swerve.requests.RobotCentricFacingAngle()
-        self.drive_fc_tower = swerve.requests.RobotCentricFacingAngle()
-        self.controlBoard.outpost().onTrue(
-            self.swerveSys.apply_request(
-                lambda: (
-                    self.drive_fc_outpost
-                        .with_velocity_x( -self.controller1.getLeftY() * self._max_speed() )
-                        .with_velocity_y( -self.controller1.getLeftX() * self._max_speed() )
-                        .with_target_direction( Rotation2d().fromDegrees(-90) )
-                        .with_deadband(self._translational_deadband())
-                )
-            ).withName('Drive Field Centric for Outpost')
-        )
-        self.controlBoard.bump().onTrue(
-            self.swerveSys.apply_request(
-                lambda: (
-                    self.drive_fc_bump
-                        .with_velocity_x( -self.controller1.getLeftY() * self._max_speed() )
-                        .with_velocity_y( -self.controller1.getLeftX() * self._max_speed() )
-                        .with_target_direction( Rotation2d().fromDegrees(45) ) # TODO: normalize to closest proper mult of 45
-                        .with_deadband(self._translational_deadband())
-                )
-            ).withName('Drive Field Centric for Bump')
-        )
-        self.controlBoard.tower().onTrue(
-            self.swerveSys.apply_request(
-                lambda: (
-                    self.drive_fc_tower
-                        .with_velocity_x( -self.controller1.getLeftY() * self._max_speed() )
-                        .with_velocity_y( -self.controller1.getLeftX() * self._max_speed() )
-                        .with_target_direction( Rotation2d().fromDegrees(180) ) # TODO: normalize to closest proper mult of 45
-                        .with_deadband(self._translational_deadband())
-                )
-            ).withName('Drive Field Centric for Tower')
-        )
+        # self.drive_fc_outpost = swerve.requests.RobotCentricFacingAngle()
+        # self.drive_fc_bump = swerve.requests.RobotCentricFacingAngle()
+        # self.drive_fc_tower = swerve.requests.RobotCentricFacingAngle()
+        # self.controlBoard.outpost().onTrue(
+        #     self.swerveSys.apply_request(
+        #         lambda: (
+        #             self.drive_fc_outpost
+        #                 .with_velocity_x( -self.controller1.getLeftY() * self.swerveSys.max_drive_speed )
+        #                 .with_velocity_y( -self.controller1.getLeftX() * self.swerveSys.max_drive_speed )
+        #                 .with_target_direction( Rotation2d().fromDegrees(-90) )
+        #                 .with_deadband(self.swerveSys.translation_deadband)
+        #         )
+        #     ).withName('Drive Field Centric for Outpost')
+        # )
+        # self.controlBoard.bump().onTrue(
+        #     self.swerveSys.apply_request(
+        #         lambda: (
+        #             self.drive_fc_bump
+        #                 .with_velocity_x( -self.controller1.getLeftY() * self.swerveSys.max_drive_speed )
+        #                 .with_velocity_y( -self.controller1.getLeftX() * self.swerveSys.max_drive_speed )
+        #                 .with_target_direction( Rotation2d().fromDegrees(45) ) # TODO: normalize to closest proper mult of 45
+        #                 .with_deadband(self.swerveSys.translation_deadband)
+        #         )
+        #     ).withName('Drive Field Centric for Bump')
+        # )
+        # self.controlBoard.tower().onTrue(
+        #     self.swerveSys.apply_request(
+        #         lambda: (
+        #             self.drive_fc_tower
+        #                 .with_velocity_x( -self.controller1.getLeftY() * self.swerveSys.max_drive_speed )
+        #                 .with_velocity_y( -self.controller1.getLeftX() * self.swerveSys.max_drive_speed )
+        #                 .with_target_direction( Rotation2d().fromDegrees(180) ) # TODO: normalize to closest proper mult of 45
+        #                 .with_deadband(self.swerveSys.translation_deadband)
+        #         )
+        #     ).withName('Drive Field Centric for Tower')
+        # )
 
-        SmartDashboard.putData(ChangeVisionPipelines(self.visionSys, 0))
-        SmartDashboard.putData(ChangeVisionPipelines(self.visionSys, 1))
+        # SmartDashboard.putData(ChangeVisionPipelines(self.visionSys, 0))
+        # SmartDashboard.putData(ChangeVisionPipelines(self.visionSys, 1))
 
         ## Disabling
-        disableIntake = cmd.runOnce(self.intakeSys.toggleDisabled)
-        disableIntake.addRequirements(self.intakeSys)
+        # disableIntake = cmd.runOnce(self.intakeSys.toggleDisabled)
+        # disableIntake.addRequirements(self.intakeSys)
 
-        self.controlBoard.extra1().onTrue(disableIntake)
+        # self.controlBoard.extra1().onTrue(disableIntake)
 
-        disableAgitator = cmd.runOnce(self.agitatorSys.toggleDisabled)
-        disableAgitator.addRequirements(self.agitatorSys)
+        # disableAgitator = cmd.runOnce(self.agitatorSys.toggleDisabled)
+        # disableAgitator.addRequirements(self.agitatorSys)
         
-        self.controlBoard.extra2().onTrue(disableAgitator)
+        # self.controlBoard.extra2().onTrue(disableAgitator)
         
-        disableLauncher = cmd.runOnce(self.launcherSys.toggleDisabled)
-        disableLauncher.addRequirements(self.launcherSys)
+        # disableLauncher = cmd.runOnce(self.launcherSys.toggleDisabled)
+        # disableLauncher.addRequirements(self.launcherSys)
         
-        self.controlBoard.extra3().onTrue(disableLauncher)
+        # self.controlBoard.extra3().onTrue(disableLauncher)
 
         ## Targeting
-        self.controlBoard.relayLeft().onTrue(cmd.runOnce(RebuiltCalc.setDesiredRelay(RelayTarget.LEFT)))
-        self.controlBoard.relayRight().onTrue(cmd.runOnce(RebuiltCalc.setDesiredRelay(RelayTarget.RIGHT)))
-        self.controlBoard.relayAuto().onTrue(cmd.runOnce(RebuiltCalc.setDesiredRelay(RelayTarget.AUTO)))
+        self.controlBoard.relayLeft().onTrue(cmd.runOnce(lambda: RebuiltCalc.setDesiredRelay(RelayTarget.LEFT)))
+        self.controlBoard.relayRight().onTrue(cmd.runOnce(lambda: RebuiltCalc.setDesiredRelay(RelayTarget.RIGHT)))
+        self.controlBoard.relayAuto().onTrue(cmd.runOnce(lambda: RebuiltCalc.setDesiredRelay(RelayTarget.AUTO)))
+
+        self.controlBoard.switch3().onFalse(cmd.runOnce(RebuiltCalc.setDesiredRelay(RelayTarget.DONT)))
+        self.controlBoard.switch3().onTrue(cmd.runOnce(RebuiltCalc.setDesiredRelay(RelayTarget.AUTO)))
+
+        self.controlBoard.switch2().onChange(cmd.runOnce(RebuiltCalc.toggleInvertAutoRot))
     def configurePracticeBindings(self) -> None:
         """
         configures controls for the robot in practice
@@ -259,45 +267,45 @@ class RobotContainer:
         ## Misc
         # self.controlBoard.bigRed().whileTrue( Panic() ) # TODO: implement Panic()
         ## Additional Drive Controls
-        self.drive_fc_outpost = swerve.requests.RobotCentricFacingAngle()
-        self.drive_fc_bump = swerve.requests.RobotCentricFacingAngle()
-        self.drive_fc_tower = swerve.requests.RobotCentricFacingAngle()
-        self.controlBoard.outpost().onTrue(
-            self.swerveSys.apply_request(
-                lambda: (
-                    self.drive_fc_outpost
-                        .with_velocity_x( -self.controller1.getLeftY() * self._max_speed() )
-                        .with_velocity_y( -self.controller1.getLeftX() * self._max_speed() )
-                        .with_target_direction( Rotation2d().fromDegrees(-90) )
-                        .with_deadband(self._translational_deadband())
-                )
-            ).withName('Drive Field Centric for Outpost')
-        )
-        self.controlBoard.bump().onTrue(
-            self.swerveSys.apply_request(
-                lambda: (
-                    self.drive_fc_bump
-                        .with_velocity_x( -self.controller1.getLeftY() * self._max_speed() )
-                        .with_velocity_y( -self.controller1.getLeftX() * self._max_speed() )
-                        .with_target_direction( Rotation2d().fromDegrees(45) ) # TODO: normalize to closest proper mult of 45
-                        .with_deadband(self._translational_deadband())
-                )
-            ).withName('Drive Field Centric for Bump')
-        )
-        self.controlBoard.tower().onTrue(
-            self.swerveSys.apply_request(
-                lambda: (
-                    self.drive_fc_tower
-                        .with_velocity_x( -self.controller1.getLeftY() * self._max_speed() )
-                        .with_velocity_y( -self.controller1.getLeftX() * self._max_speed() )
-                        .with_target_direction( Rotation2d().fromDegrees(180) ) # TODO: normalize to closest proper mult of 45
-                        .with_deadband(self._translational_deadband())
-                )
-            ).withName('Drive Field Centric for Tower')
-        )
+        # self.drive_fc_outpost = swerve.requests.RobotCentricFacingAngle()
+        # self.drive_fc_bump = swerve.requests.RobotCentricFacingAngle()
+        # self.drive_fc_tower = swerve.requests.RobotCentricFacingAngle()
+        # self.controlBoard.outpost().onTrue(
+        #     self.swerveSys.apply_request(
+        #         lambda: (
+        #             self.drive_fc_outpost
+        #                 .with_velocity_x( -self.controller1.getLeftY() * self._max_speed() )
+        #                 .with_velocity_y( -self.controller1.getLeftX() * self._max_speed() )
+        #                 .with_target_direction( Rotation2d().fromDegrees(-90) )
+        #                 .with_deadband(self._translational_deadband())
+        #         )
+        #     ).withName('Drive Field Centric for Outpost')
+        # )
+        # self.controlBoard.bump().onTrue(
+        #     self.swerveSys.apply_request(
+        #         lambda: (
+        #             self.drive_fc_bump
+        #                 .with_velocity_x( -self.controller1.getLeftY() * self._max_speed() )
+        #                 .with_velocity_y( -self.controller1.getLeftX() * self._max_speed() )
+        #                 .with_target_direction( Rotation2d().fromDegrees(45) ) # TODO: normalize to closest proper mult of 45
+        #                 .with_deadband(self._translational_deadband())
+        #         )
+        #     ).withName('Drive Field Centric for Bump')
+        # )
+        # self.controlBoard.tower().onTrue(
+        #     self.swerveSys.apply_request(
+        #         lambda: (
+        #             self.drive_fc_tower
+        #                 .with_velocity_x( -self.controller1.getLeftY() * self._max_speed() )
+        #                 .with_velocity_y( -self.controller1.getLeftX() * self._max_speed() )
+        #                 .with_target_direction( Rotation2d().fromDegrees(180) ) # TODO: normalize to closest proper mult of 45
+        #                 .with_deadband(self._translational_deadband())
+        #         )
+        #     ).withName('Drive Field Centric for Tower')
+        # )
 
-        SmartDashboard.putData(ChangeVisionPipelines(self.visionSys, 0))
-        SmartDashboard.putData(ChangeVisionPipelines(self.visionSys, 1))
+        # SmartDashboard.putData(ChangeVisionPipelines(self.visionSys, 0))
+        # SmartDashboard.putData(ChangeVisionPipelines(self.visionSys, 1))
 
         ## Disabling
         disableIntake = cmd.runOnce(self.intakeSys.toggleDisabled)
@@ -316,9 +324,9 @@ class RobotContainer:
         self.controlBoard.extra3().onTrue(disableLauncher)
 
         ## Targeting
-        self.controlBoard.relayLeft().onTrue(cmd.runOnce(RebuiltCalc.setDesiredRelay(RelayTarget.LEFT)))
-        self.controlBoard.relayRight().onTrue(cmd.runOnce(RebuiltCalc.setDesiredRelay(RelayTarget.RIGHT)))
-        self.controlBoard.relayAuto().onTrue(cmd.runOnce(RebuiltCalc.setDesiredRelay(RelayTarget.AUTO)))
+        self.controlBoard.relayLeft().onTrue(cmd.runOnce(lambda: RebuiltCalc.setDesiredRelay(RelayTarget.LEFT)))
+        self.controlBoard.relayRight().onTrue(cmd.runOnce(lambda: RebuiltCalc.setDesiredRelay(RelayTarget.RIGHT)))
+        self.controlBoard.relayAuto().onTrue(cmd.runOnce(lambda: RebuiltCalc.setDesiredRelay(RelayTarget.AUTO)))
 
     def configureDriveBindings(self) -> None:
         """
@@ -353,7 +361,7 @@ class RobotContainer:
         ## Controls
         # Toggle halfspeed
         def toggleHalfSpeed():
-            self.swerveSys.drive_max_speed_pct = 0.2 if self.swerveSys.drive_max_speed_pct > 0.5 else 0.6
+            self.swerveSys.drive_max_speed_pct = 0.3 if self.swerveSys.drive_max_speed_pct > 0.5 else 0.6
         self.controller1.leftStick().onTrue(cmd.runOnce(toggleHalfSpeed))
 
         # Brake (X shape)
@@ -401,6 +409,10 @@ class RobotContainer:
         """
         Initialize Named Commands for PathPlanner
         """
-        NamedCommands.registerCommand("LaunchBalls", RunLauncherByDist(self.launcherSys).alongWith(cmd.waitUntil(lambda: self.launcherSys.isAtSpeed() and self.launcherSys.getDesiredSpeed() > Launcher.LauncherSpeeds.WAIT).andThen(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_MED).alongWith(IntakeWiggle(self.intakeSys, bottomPos=Intake.Positions.BOUNCE_DOWN, topPos=Intake.Positions.BOUNCE_UP)))))
+        NamedCommands.registerCommand("LaunchBalls", RunLauncherByDist(self.launcherSys).alongWith(
+                cmd.waitUntil(lambda: self.launcherSys.isAtSpeed() and self.launcherSys.getDesiredSpeed() > Launcher.LauncherSpeeds.WAIT)
+                .andThen(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_MED)
+                         .alongWith(IntakeWiggle(self.intakeSys, bottomPos=Intake.Positions.BOUNCE_DOWN, topPos=Intake.Positions.BOUNCE_UP))))
+            )
         NamedCommands.registerCommand("DeployIntake", PivotToPosition(self.intakeSys, Intake.Positions.INTAKING))
         NamedCommands.registerCommand("RunIntake", SetIntakeSpeed(self.intakeSys, Intake.Speeds.IN))

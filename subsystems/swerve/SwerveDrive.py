@@ -347,6 +347,7 @@ class SwerveDrive(Subsystem, TunerSwerveDrivetrain):
         ## Logging
         self.field.setRobotPose( self.get_state().pose )
         FalconLogger.logOutput("swerve/pose", self.get_state().pose)
+        FalconLogger.logOutput("systemStates/Swerve Half Speed", self.drive_max_speed_pct <= 0.5)
         # FalconLogger.logOutput("swerve/state", self.get_state())
 
 

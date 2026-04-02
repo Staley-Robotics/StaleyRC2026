@@ -1,13 +1,5 @@
 [
   {
-    "name": "/Settings/Launcher/atSpeed tolerance",
-    "type": "double",
-    "value": 3.0,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
     "name": "Settings/drive/max rot speed (rots/sec)",
     "type": "double",
     "value": 0.65,
@@ -107,6 +99,14 @@
     "name": "/climberSpeed",
     "type": "double",
     "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Settings/Launcher/atSpeed tolerance",
+    "type": "double",
+    "value": 3.0,
     "properties": {
       "persistent": true
     }

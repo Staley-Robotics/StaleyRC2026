@@ -58,7 +58,7 @@ class TunerConstants:
 
     # The stator current at which the wheels start to slip;
     # This needs to be tuned to your individual robot
-    _slip_current: units.ampere = 60.0 # NOTE: default (max) is 120, dropping to 90 for current hopefully TODO: tune
+    _slip_current: units.ampere = 50.0 # NOTE: default (max) is 120, dropping to 90 for current hopefully TODO: tune
 
     # Initial configs for the drive and steer motors and the azimuth encoder; these cannot be null.
     # Some configs will be overwritten; check the `with_*_initial_configs()` API documentation.

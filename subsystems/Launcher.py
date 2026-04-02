@@ -47,7 +47,7 @@ class Launcher(Subsystem):
         k_S:float=0.22
         k_V:float=0.11
 
-    kAtSpeedTolerance:rotations_per_second = ntproperty("/Settings/Launcher/atSpeed tolerance", 3.0, persistent=True)
+    kAtSpeedTolerance:rotations_per_second = 2.0 #ntproperty("/Settings/Launcher/atSpeed tolerance", 2.0, persistent=True)
 
     disabled = ntproperty("/Disabling/Launcher", False, persistent=False)
 
@@ -76,9 +76,9 @@ class Launcher(Subsystem):
             CurrentLimitsConfigs()
             .with_stator_current_limit(100.0)
             .with_stator_current_limit_enable(True)
-            .with_supply_current_limit(40)
+            .with_supply_current_limit(30)
             .with_supply_current_limit_enable(True)
-            .with_supply_current_lower_limit(40)
+            .with_supply_current_lower_limit(30)
             .with_supply_current_lower_time(1.0)
         ) # hitting limit caused continual crash without clear error?
         self.motor.configurator.apply(motor_config)
@@ -119,9 +119,11 @@ class Launcher(Subsystem):
 
     def setDesiredSpeed(self, speed:rotations_per_second) -> None:
         self.velocity_req.velocity = min(speed, self.LauncherSpeeds.kMaxAllowedSpeed)
-
+    
+    def getCurrentSpeed(self) -> rotations_per_second:
+        return self.motor.get_velocity().value
     def getDesiredSpeed(self) -> rotations_per_second:
         return self.velocity_req.velocity
     
     def isAtSpeed(self) -> bool:
-        return abs(self.motor.get_closed_loop_error().value) < self.kAtSpeedTolerance
+        return abs(self.getDesiredSpeed() - self.getCurrentSpeed()) < self.kAtSpeedTolerance

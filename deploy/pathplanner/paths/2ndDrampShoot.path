@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 8.601311111111112,
-        "y": 2.3881888888888874
+        "x": 7.8315,
+        "y": 3.2457000000000007
       },
       "prevControl": null,
       "nextControl": {
-        "x": 9.601311111111112,
-        "y": 2.3881888888888874
+        "x": 7.412488888888889,
+        "y": 2.2517666666666663
       },
       "isLocked": false,
       "linkedName": "DRamprefilledoutpost"
@@ -33,8 +33,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 4.0,
+    "maxAcceleration": 4.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -50,5 +50,5 @@
     "velocity": 0,
     "rotation": 0.0
   },
-  "useDefaultConstraints": true
+  "useDefaultConstraints": false
 }

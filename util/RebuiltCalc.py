@@ -69,6 +69,7 @@ class RelayTarget(Enum):
     LEFT=auto()
     RIGHT=auto()
     AUTO=auto()
+    DONT=auto()
 
 class FieldBoundaries:
     """
@@ -96,9 +97,12 @@ class RebuiltCalc:
     getRobotPose:typing.Callable[[], Pose2d] = lambda:Pose2d()
     getRobotState:typing.Callable[[], Pose2d] = lambda:Pose2d()
 
+    crntRelayTarget:RelayTarget = RelayTarget.DONT
     desiredRelayPoint:TargetPoints|None = None
 
     field_display = Field2d()
+
+    should_invert_auto_rot:bool = False
 
     '''
     defining all variables here in the class definition rather than __init__ means their values will be updated and accessible through the class
@@ -124,7 +128,7 @@ class RebuiltCalc:
         FalconLogger.logOutput("/RebuiltCalc/currentTargetName", cls.getCurrentTargetName())
         FalconLogger.logOutput("/RebuiltCalc/2dDistToTarget", cls.getDistToTarget())
         FalconLogger.logOutput("/RebuiltCalc/targetRotation", cls.getRotToTarget().degrees())
-        FalconLogger.logOutput("/RebuiltCalc/rotToTarget", cls.getRotToTarget().degrees() - pose.rotation().degrees() - 180)
+        FalconLogger.logOutput("/RebuiltCalc/rotToTarget", cls.getRotToTarget().degrees() - pose.rotation().degrees())
 
         cls.field_display.setRobotPose(pose)
         cls.field_display.getObject('crntTarget').setPose(cls.getCurrentTargetPose())
@@ -132,20 +136,21 @@ class RebuiltCalc:
     
     @classmethod
     def setDesiredRelay(cls, relay:RelayTarget) -> None:
-        if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
-            if relay == RelayTarget.AUTO:
-                cls.desiredRelayPoint = None
-            elif relay == RelayTarget.LEFT:
-                cls.desiredRelayPoint = TargetPoints.relayLeftBlue
-            else:
-                cls.desiredRelayPoint = TargetPoints.relayRightBlue
-        else:
-            if relay == RelayTarget.AUTO:
-                cls.desiredRelayPoint = None
-            elif relay == RelayTarget.LEFT:
-                cls.desiredRelayPoint = TargetPoints.relayLeftRed
-            else:
-                cls.desiredRelayPoint = TargetPoints.relayRightRed
+        cls.crntRelayTarget = relay
+        # if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
+        #     if relay == RelayTarget.AUTO:
+        #         cls.desiredRelayPoint = None
+        #     elif relay == RelayTarget.LEFT:
+        #         cls.desiredRelayPoint = TargetPoints.relayLeftBlue
+        #     else:
+        #         cls.desiredRelayPoint = TargetPoints.relayRightBlue
+        # else:
+        #     if relay == RelayTarget.AUTO:
+        #         cls.desiredRelayPoint = None
+        #     elif relay == RelayTarget.LEFT:
+        #         cls.desiredRelayPoint = TargetPoints.relayLeftRed
+        #     else:
+        #         cls.desiredRelayPoint = TargetPoints.relayRightRed
     
     @classmethod
     def botInScoreZone(cls) -> bool:
@@ -169,28 +174,35 @@ class RebuiltCalc:
         gets the Translation2d (point on the field) of the current target
         """
         point = None
+
         if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
             point = TargetPoints.blueHub
         else:
             point = TargetPoints.redHub
-        # if cls.botInScoreZone():
-        #     if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
-        #         point = TargetPoints.blueHub
-        #     else:
-        #         point = TargetPoints.redHub
-        # elif not (cls.desiredRelayPoint is None):
-        #     point = cls.desiredRelayPoint
-        # else:
-        #     if cls.botIsLeft():
-        #         if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
-        #             point = TargetPoints.relayLeftBlue
-        #         else:
-        #             point = TargetPoints.relayLeftRed
-        #     else:
-        #         if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
-        #             point = TargetPoints.relayRightBlue
-        #         else:
-        #             point = TargetPoints.relayRightRed
+        
+        if cls.crntRelayTarget != RelayTarget.DONT:
+            if cls.desiredRelayPoint is RelayTarget.AUTO:
+                if cls.botIsLeft():
+                    if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
+                        point = TargetPoints.relayLeftBlue
+                    else:
+                        point = TargetPoints.relayLeftRed
+                else:
+                    if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
+                        point = TargetPoints.relayRightBlue
+                    else:
+                        point = TargetPoints.relayRightRed
+            else:
+                if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
+                    if cls.crntRelayTarget == RelayTarget.LEFT:
+                        cls.desiredRelayPoint = TargetPoints.relayLeftBlue
+                    else:
+                        cls.desiredRelayPoint = TargetPoints.relayRightBlue
+                else:
+                    if cls.crntRelayTarget == RelayTarget.LEFT:
+                        cls.desiredRelayPoint = TargetPoints.relayLeftRed
+                    else:
+                        cls.desiredRelayPoint = TargetPoints.relayRightRed
 
         return point
     
@@ -258,6 +270,13 @@ class RebuiltCalc:
         dY = target.y - rob_pose.y
         goalAngle = Rotation2d( x = -dX, y = -dY ) # these negatives are wrong, but I'm dealing with them other places so they stay for now
 
+        if cls.should_invert_auto_rot:
+            goalAngle.rotateBy(Rotation2d().fromDegrees(180))
+
         return goalAngle
+    
+    @classmethod
+    def toggleInvertAutoRot(cls) -> None:
+        cls.should_invert_auto_rot = not cls.should_invert_auto_rot
     
 
