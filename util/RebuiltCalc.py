@@ -169,24 +169,28 @@ class RebuiltCalc:
         gets the Translation2d (point on the field) of the current target
         """
         point = None
-        if cls.botInScoreZone():
-            if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
-                point = TargetPoints.blueHub
-            else:
-                point = TargetPoints.redHub
-        elif not (cls.desiredRelayPoint is None):
-            point = cls.desiredRelayPoint
+        if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
+            point = TargetPoints.blueHub
         else:
-            if cls.botIsLeft():
-                if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
-                    point = TargetPoints.relayLeftBlue
-                else:
-                    point = TargetPoints.relayLeftRed
-            else:
-                if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
-                    point = TargetPoints.relayRightBlue
-                else:
-                    point = TargetPoints.relayRightRed
+            point = TargetPoints.redHub
+        # if cls.botInScoreZone():
+        #     if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
+        #         point = TargetPoints.blueHub
+        #     else:
+        #         point = TargetPoints.redHub
+        # elif not (cls.desiredRelayPoint is None):
+        #     point = cls.desiredRelayPoint
+        # else:
+        #     if cls.botIsLeft():
+        #         if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
+        #             point = TargetPoints.relayLeftBlue
+        #         else:
+        #             point = TargetPoints.relayLeftRed
+        #     else:
+        #         if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
+        #             point = TargetPoints.relayRightBlue
+        #         else:
+        #             point = TargetPoints.relayRightRed
 
         return point
     
