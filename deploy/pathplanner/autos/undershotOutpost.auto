@@ -15,6 +15,12 @@
           "data": {
             "pathName": "ShootUR"
           }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "LaunchBalls"
+          }
         }
       ]
     }

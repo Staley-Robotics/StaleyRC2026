@@ -4,6 +4,7 @@ robotpy-installer==2026.0.2
 ### RobotPy
 robotpy==2026.2.2
 robotpy[commands2]
+robotpy[apriltag]
 
 ### Non-RobotPy
 phoenix6==26.1.2

@@ -41,9 +41,9 @@ class Launcher(Subsystem):
         MAX:meters=10
 
     class Constants:
-        k_P:float=0.25
+        k_P:float=0.7
         k_I:float=0.0
-        k_D:float=0.0
+        k_D:float=0.03
         k_S:float=0.22
         k_V:float=0.11
 
@@ -74,9 +74,9 @@ class Launcher(Subsystem):
                 .with_voltage_closed_loop_ramp_period(0.25)
         ).with_current_limits(
             CurrentLimitsConfigs()
-            .with_stator_current_limit(60.0)
+            .with_stator_current_limit(100.0)
             .with_stator_current_limit_enable(True)
-            .with_supply_current_limit(12)
+            .with_supply_current_limit(40)
             .with_supply_current_limit_enable(True)
             .with_supply_current_lower_limit(40)
             .with_supply_current_lower_time(1.0)

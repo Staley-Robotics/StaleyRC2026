@@ -6,6 +6,8 @@ from commands2.sysid import SysIdRoutine
 from wpilib import DriverStation, Notifier, RobotController, Field2d, SmartDashboard
 from wpilib.sysid import SysIdRoutineLog
 from wpimath.geometry import Pose2d, Rotation2d
+from wpimath.kinematics import ChassisSpeeds
+from wpimath.units import *
 
 from phoenix6 import SignalLogger, swerve, units, utils
 
@@ -14,7 +16,9 @@ from pathplannerlib.controller import PPHolonomicDriveController
 from pathplannerlib.config import RobotConfig, PIDConstants
 from pathplannerlib.logging import PathPlannerLogging
 
-from .tuner_constants import TunerSwerveDrivetrain
+from ntcore.util import ntproperty
+
+from .tuner_constants import TunerSwerveDrivetrain, TunerConstants
 from util import FalconLogger
 
 
@@ -33,6 +37,28 @@ class SwerveDrive(Subsystem, TunerSwerveDrivetrain):
     """Blue alliance sees forward as 0 degrees (toward red alliance wall)"""
     _RED_ALLIANCE_PERSPECTIVE_ROTATION = Rotation2d.fromDegrees(180)
     """Red alliance sees forward as 180 degrees (toward blue alliance wall)"""
+
+    auto_aim_in_auto: bool = False
+
+    drive_max_speed_pct: percent =  ntproperty("Settings/drive/max speed %", 0.6, writeDefault=True)
+    drive_max_rot_speed: percent =  ntproperty("Settings/drive/max rot speed (rots/sec)", 0.65, persistent=True)
+
+    deadband_percentage:percent = 0.05
+
+    @property
+    def max_drive_speed(self) -> meters_per_second:
+        return self.drive_max_speed_pct * TunerConstants.speed_at_12_volts
+    @property
+    def max_rot_speed(self) -> units.rotations_per_second:
+        return rotationsToRadians(self.drive_max_rot_speed)
+    
+    @property
+    def translation_deadband(self) -> meters_per_second:
+        return self.max_drive_speed * self.deadband_percentage
+    @property
+    def rotation_deadband(self) -> meters_per_second:
+        return self.max_rot_speed * self.deadband_percentage
+
 
     @overload
     def __init__(
@@ -150,6 +176,11 @@ class SwerveDrive(Subsystem, TunerSwerveDrivetrain):
         self._has_applied_operator_perspective = False
         """Keep track if we've ever applied the operator perspective before or not"""
 
+        # module logging through FalconLogger
+        for i, module in enumerate(self.modules):
+            FalconLogger.addLoggedObject(f"SwerveModules/Module{i}/drive", module.drive_motor)
+            FalconLogger.addLoggedObject(f"SwerveModules/Module{i}/steer", module.steer_motor)
+
         # Pathplanner
         robotConfig = RobotConfig.fromGUISettings()
         AutoBuilder.configure(
@@ -254,6 +285,11 @@ class SwerveDrive(Subsystem, TunerSwerveDrivetrain):
 
         if utils.is_simulation():
             self._start_sim_thread()
+    
+    # output = lambda speeds, feedforwards: self.set_control( swerve.requests.ApplyRobotSpeeds().with_speeds(speeds)), # nobody knows what feedforwards are for
+    # def set_auto_control(self, speeds:ChassisSpeeds, feedforwards) -> None:
+    #     if self.auto_aim_in_auto:
+    #         req = swerve.requests.FieldCentricFacingAngle().wi
 
     def apply_request(
         self, request: Callable[[], swerve.requests.SwerveRequest]
@@ -311,6 +347,8 @@ class SwerveDrive(Subsystem, TunerSwerveDrivetrain):
         ## Logging
         self.field.setRobotPose( self.get_state().pose )
         FalconLogger.logOutput("swerve/pose", self.get_state().pose)
+        # FalconLogger.logOutput("swerve/state", self.get_state())
+
 
     def _start_sim_thread(self):
         def _sim_periodic():

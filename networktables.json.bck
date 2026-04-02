@@ -8,9 +8,57 @@
     }
   },
   {
+    "name": "Settings/drive/max rot speed (rots/sec)",
+    "type": "double",
+    "value": 0.65,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Settings/ControlClimberOpenLoop/input mult",
+    "type": "double",
+    "value": 0.3,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "Settings/drive/pid/kP",
+    "type": "double",
+    "value": 10.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "Settings/drive/pid/kI",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "Settings/drive/pid/kD",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
     "name": "/Settings/ControlIntakePos/input mult",
     "type": "double",
     "value": 0.04,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Settings/RunIntakeByNT/speed (rps: -1 to 1)",
+    "type": "double",
+    "value": 0.3,
     "properties": {
       "persistent": true
     }
@@ -56,55 +104,31 @@
     }
   },
   {
-    "name": "/Settings/ControlClimberOpenLoop/input mult",
-    "type": "double",
-    "value": 0.3,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "Settings/drive/max speed %",
-    "type": "double",
-    "value": 0.25,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "Settings/drive/max rot speed (rots/sec)",
-    "type": "double",
-    "value": 0.65,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "Settings/drive/pid/kP",
-    "type": "double",
-    "value": 30.0,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "Settings/drive/pid/kI",
-    "type": "double",
-    "value": 0.0,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "Settings/drive/pid/kD",
-    "type": "double",
-    "value": 0.0,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
     "name": "/climberSpeed",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "Settings/drive/customRotpid/kP",
+    "type": "double",
+    "value": 2.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "Settings/drive/customRotpid/kI",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "Settings/drive/customRotpid/kD",
     "type": "double",
     "value": 0.0,
     "properties": {

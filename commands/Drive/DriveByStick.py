@@ -4,13 +4,12 @@ from commands2 import Command, Subsystem
 from wpimath.geometry import Rotation2d
 
 from phoenix6.units import *
+from phoenix6 import swerve
 
 from subsystems import SwerveDrive
 
 class DriveByStick(Command):
     # Variable Declaration
-    # swerve_sys:SwerveDrive = None
-    # m_getValue:typing.Callable[[],float] = lambda: 0.0
     
     # Initialization
     def __init__( self,
@@ -27,8 +26,15 @@ class DriveByStick(Command):
 
         self.field_centric = True
 
-        self.desired_rot: typing.Callable[[], Rotation2d] = lambda: Rotation2d()
-        self.use_desired_rot = False
+        # create FC drive request with constant customizations
+        self.drive_fc = (
+            swerve.requests.FieldCentric()
+                .with_drive_request_type(swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE)
+        )
+        self.drive_rc = (
+            swerve.requests.RobotCentric()
+                .with_drive_request_type(swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE)
+        )
 
         self.setName( f"{self.__class__.__name__}" )
         self.addRequirements( swerveSys )
@@ -39,7 +45,22 @@ class DriveByStick(Command):
 
     # Periodic
     def execute(self) -> None:
-        pass
+        if self.field_centric:
+            self.swerve_sys.set_control(
+                self.drive_fc.with_velocity_x( -self.get_y() * self.swerve_sys.max_drive_speed )
+                             .with_velocity_y( -self.get_x() * self.swerve_sys.max_drive_speed )
+                             .with_rotational_rate( -self.get_rot() * self.swerve_sys.max_rot_speed )
+                             .with_deadband( self.swerve_sys.translation_deadband )
+                             .with_rotational_deadband( self.swerve_sys.rotation_deadband )
+            )
+        else:
+            self.swerve_sys.set_control(
+                self.drive_rc.with_velocity_x( -self.get_y() * self.swerve_sys.max_drive_speed )
+                             .with_velocity_y( -self.get_x() * self.swerve_sys.max_drive_speed )
+                             .with_rotational_rate( -self.get_rot() * self.swerve_sys.max_rot_speed )
+                             .with_deadband( self.swerve_sys.translation_deadband )
+                             .with_rotational_deadband( self.swerve_sys.rotation_deadband )
+            )
 
     # On End
     def end(self, interrupted:bool) -> None:
@@ -52,7 +73,6 @@ class DriveByStick(Command):
     # Run When Disabled
     def runsWhenDisabled(self) -> bool:
         return False
-    
-    def setDriveWithRot(self, enabled:bool, switch_desired_rot:typing.Callable[[], Rotation2d]) -> None:
-        self.use_desired_rot = enabled
-        self.desired_rot = switch_desired_rot
+
+    def toggleFieldCentric(self) -> None:
+        self.field_centric = not self.field_centric
