@@ -27,6 +27,8 @@ class IntakeWiggle(Command):
     def initialize(self) -> None:
         self.intake_sys.setPivotSetpoint(self.topPos)
         self.lastPos = self.intake_sys.getPivotSetpoint()
+
+        self.intake_sys.setIntakeSpeed(Intake.Speeds.IN)
         
         # self.intake_sys.setPivotSetpoint(self.setPos)
 
@@ -51,6 +53,7 @@ class IntakeWiggle(Command):
         # pass
         # if interrupted:
         self.intake_sys.setPivotSetpoint(self.intake_sys.getPivotPosition())
+        self.intake_sys.setIntakeSpeed(Intake.Speeds.STOP)
 
     def isFinished(self) -> bool:
         return False

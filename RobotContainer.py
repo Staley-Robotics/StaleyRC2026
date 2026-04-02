@@ -31,7 +31,7 @@ class RobotContainer:
 
         ### Subsystems
         ## Intake
-        self.intakeSys = Intake( 10, 11, 0, -0.4973)
+        self.intakeSys = Intake( 10, 11, 0, 0.182617)
 
         ## Agitator
         self.agitatorSys = Agitator( 12 )
@@ -53,8 +53,7 @@ class RobotContainer:
         SmartDashboard.putData(ChangeVisionPipelines(self.visionSys, 1))
 
         ## Initialize RebuiltCalc
-        self.gameCalc = RebuiltCalc.getInst()
-        self.gameCalc.setGetRobotPose(self.swerveSys.get_state)
+        RebuiltCalc.assignSwerveSys(self.swerveSys)
 
         ## Auto
         self.initNamedCommands()
@@ -94,8 +93,8 @@ class RobotContainer:
         (self.controller1.povUp() | self.controller2.povUp()).onTrue(PivotToPosition(self.intakeSys, Intake.Positions.STORED))
 
         # Bawlz
-        # allow controller 1 or 2 to toggle on a()
-        (self.controller1.a() | self.controller2.a()).whileTrue(SetIntakeSpeed(self.intakeSys, Intake.Speeds.IN))
+        # allow controller 1 or 2 to hold on a(), and c1 to hold either trigger
+        ((self.controller1.a() | self.controller2.a()) | (self.controller1.rightTrigger(0.3) | self.controller1.leftTrigger(0.3))).whileTrue(SetIntakeSpeed(self.intakeSys, Intake.Speeds.IN))
         # self.controlBoard.extra1().whileTrue(SetIntakeSpeed(self.intakeSys, Intake.Speeds.OUT))
 
         runLauncher = RunLauncherByDist(self.launcherSys)
@@ -177,9 +176,9 @@ class RobotContainer:
         self.controlBoard.extra3().onTrue(disableLauncher)
 
         ## Targeting
-        self.controlBoard.relayLeft().onTrue(cmd.runOnce(self.gameCalc.setDesiredRelay(RelayTarget.LEFT)))
-        self.controlBoard.relayRight().onTrue(cmd.runOnce(self.gameCalc.setDesiredRelay(RelayTarget.RIGHT)))
-        self.controlBoard.relayAuto().onTrue(cmd.runOnce(self.gameCalc.setDesiredRelay(RelayTarget.AUTO)))
+        self.controlBoard.relayLeft().onTrue(cmd.runOnce(RebuiltCalc.setDesiredRelay(RelayTarget.LEFT)))
+        self.controlBoard.relayRight().onTrue(cmd.runOnce(RebuiltCalc.setDesiredRelay(RelayTarget.RIGHT)))
+        self.controlBoard.relayAuto().onTrue(cmd.runOnce(RebuiltCalc.setDesiredRelay(RelayTarget.AUTO)))
     def configurePracticeBindings(self) -> None:
         """
         configures controls for the robot in practice
@@ -317,9 +316,9 @@ class RobotContainer:
         self.controlBoard.extra3().onTrue(disableLauncher)
 
         ## Targeting
-        self.controlBoard.relayLeft().onTrue(cmd.runOnce(self.gameCalc.setDesiredRelay(RelayTarget.LEFT)))
-        self.controlBoard.relayRight().onTrue(cmd.runOnce(self.gameCalc.setDesiredRelay(RelayTarget.RIGHT)))
-        self.controlBoard.relayAuto().onTrue(cmd.runOnce(self.gameCalc.setDesiredRelay(RelayTarget.AUTO)))
+        self.controlBoard.relayLeft().onTrue(cmd.runOnce(RebuiltCalc.setDesiredRelay(RelayTarget.LEFT)))
+        self.controlBoard.relayRight().onTrue(cmd.runOnce(RebuiltCalc.setDesiredRelay(RelayTarget.RIGHT)))
+        self.controlBoard.relayAuto().onTrue(cmd.runOnce(RebuiltCalc.setDesiredRelay(RelayTarget.AUTO)))
 
     def configureDriveBindings(self) -> None:
         """

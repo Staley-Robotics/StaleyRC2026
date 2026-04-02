@@ -6,6 +6,7 @@ from commands2.sysid import SysIdRoutine
 from wpilib import DriverStation, Notifier, RobotController, Field2d, SmartDashboard
 from wpilib.sysid import SysIdRoutineLog
 from wpimath.geometry import Pose2d, Rotation2d
+from wpimath.kinematics import ChassisSpeeds
 from wpimath.units import *
 
 from phoenix6 import SignalLogger, swerve, units, utils
@@ -37,14 +38,7 @@ class SwerveDrive(Subsystem, TunerSwerveDrivetrain):
     _RED_ALLIANCE_PERSPECTIVE_ROTATION = Rotation2d.fromDegrees(180)
     """Red alliance sees forward as 180 degrees (toward blue alliance wall)"""
 
-    '''
-            ## speed configs
-        self.drive_max_speed_pct = 0.75 # always start with "full" speed
-        self._max_speed = lambda: self.drive_max_speed_pct * TunerConstants.speed_at_12_volts
-        self._translational_deadband = lambda: self._max_speed() * 0.05
-
-        self._max_angular_rate = rotationsToRadians(self.drive_max_rot_speed)
-        self._rot_deadband = self._max_angular_rate * 0.05'''
+    auto_aim_in_auto: bool = False
 
     drive_max_speed_pct: percent =  ntproperty("Settings/drive/max speed %", 0.6, writeDefault=True)
     drive_max_rot_speed: percent =  ntproperty("Settings/drive/max rot speed (rots/sec)", 0.65, persistent=True)
@@ -291,6 +285,11 @@ class SwerveDrive(Subsystem, TunerSwerveDrivetrain):
 
         if utils.is_simulation():
             self._start_sim_thread()
+    
+    # output = lambda speeds, feedforwards: self.set_control( swerve.requests.ApplyRobotSpeeds().with_speeds(speeds)), # nobody knows what feedforwards are for
+    # def set_auto_control(self, speeds:ChassisSpeeds, feedforwards) -> None:
+    #     if self.auto_aim_in_auto:
+    #         req = swerve.requests.FieldCentricFacingAngle().wi
 
     def apply_request(
         self, request: Callable[[], swerve.requests.SwerveRequest]

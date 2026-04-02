@@ -26,7 +26,7 @@
   {
     "name": "Settings/drive/pid/kP",
     "type": "double",
-    "value": 30.0,
+    "value": 10.0,
     "properties": {
       "persistent": true
     }
@@ -107,6 +107,38 @@
     "name": "/climberSpeed",
     "type": "double",
     "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "Settings/drive/customRotpid/kP",
+    "type": "double",
+    "value": 2.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "Settings/drive/customRotpid/kI",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "Settings/drive/customRotpid/kD",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Disabling/Intake",
+    "type": "boolean",
+    "value": false,
     "properties": {
       "persistent": true
     }

@@ -10,7 +10,7 @@ from ntcore.util import ntproperty
 
 # Local Imports
 from RobotContainer import RobotContainer
-from util import FalconLogger
+from util import FalconLogger, RebuiltCalc
 
 class MyRobot(TimedRobot):
     # Variable Declaration
@@ -57,7 +57,8 @@ class MyRobot(TimedRobot):
         except Exception as err:
             print(f"WARNING! FalconLogger Cannot Write to Log!: {err}")
 
-        self.__robotContainer.gameCalc.debugLog()
+        # Write RebuitCalc Logging Data
+        RebuiltCalc.debugLog()
 
     # Autonomous Mode
     def autonomousInit(self):

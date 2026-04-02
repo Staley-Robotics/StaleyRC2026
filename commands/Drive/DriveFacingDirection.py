@@ -49,7 +49,7 @@ class DriveFacingDirection(Command):
     def execute(self) -> None:
         self.swerve_sys.set_control(
             self.drive_req.with_velocity_x( -self.get_y() * self.swerve_sys.max_drive_speed )
-                          .with_velocity_y( -self.get_x() * self.swerve_sys.max_rot_speed )
+                          .with_velocity_y( -self.get_x() * self.swerve_sys.max_drive_speed )
 
                           .with_deadband( self.swerve_sys.translation_deadband )
                           .with_rotational_deadband( self.swerve_sys.rotation_deadband )

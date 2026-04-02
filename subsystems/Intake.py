@@ -24,7 +24,7 @@ class IntakeConstants:
     kS:float=0.3    # static
     kG:float=0.27    # gravity          Constant force, but accounting for gravity
 
-    gear_ratio:float=1/83.25 #11/60 # rotor/mechanism
+    gear_ratio:float=1/75#1/83.25 #11/60 # rotor/mechanism
 
     tolerance:degrees = 2
     wiggle_tolerance:degrees = 10
@@ -32,7 +32,7 @@ class IntakeConstants:
 class Intake(Subsystem):
     class Speeds:
         STOP = 0
-        IN = 0.30
+        IN = 0.50
         OUT = -0.4
 
     class Positions:
