@@ -88,7 +88,7 @@ class FieldBoundaries:
 class LaunchingConstants:
     launcherOffset:Translation2d = Translation2d() #TODO: measure
     '''The offset of the launcher from the center of the robot'''
-    launchTime:seconds = 0.6 #ntproperty("Settings/RebuiltCalc/launchTime", 0.2, persistent=True) #TODO: measure
+    launchTime:seconds = 0.3#ntproperty("Settings/RebuiltCalc/launchTime", 0.2, persistent=True) #TODO: measure
     '''The average time it takes for a fuel to move from the agitator to leaving the launcher'''
 
 class RebuiltCalc:
@@ -270,9 +270,11 @@ class RebuiltCalc:
         dY = target.y - rob_pose.y
         goalAngle = Rotation2d( x = -dX, y = -dY ) # these negatives are wrong, but I'm dealing with them other places so they stay for now
 
-        if cls.should_invert_auto_rot:
-            goalAngle.rotateBy(Rotation2d().fromDegrees(180))
-
+        # if cls.should_invert_auto_rot:
+        #     goalAngle = goalAngle.rotateBy(Rotation2d().fromDegrees(180))
+        
+        if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
+            goalAngle = goalAngle.rotateBy(Rotation2d().fromDegrees(180))
         return goalAngle
     
     @classmethod

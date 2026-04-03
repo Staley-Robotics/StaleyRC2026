@@ -96,7 +96,12 @@ class RobotContainer:
         # Bawlz
         # allow controller 1 or 2 to hold on a(), and c1 to hold either trigger
         ((self.controller1.a() | self.controller2.a()) | (self.controller1.rightTrigger(0.3) | self.controller1.leftTrigger(0.3))).whileTrue(SetIntakeSpeed(self.intakeSys, Intake.Speeds.IN))
-        self.controlBoard.extra1().whileTrue(SetIntakeSpeed(self.intakeSys, Intake.Speeds.OUT)) # Poop
+        # Eject
+        self.controlBoard.extra1().whileTrue(
+            SetIntakeSpeed(self.intakeSys, Intake.Speeds.OUT)
+            .alongWith(SetFlywheelSpeed(self.launcherSys, Launcher.LauncherSpeeds.EJECT))
+            .alongWith(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_MED))
+        ) # Poop
 
         ## Launching
         runLauncher = RunLauncherByDist(self.launcherSys)
@@ -108,7 +113,11 @@ class RobotContainer:
 
         self.controller2.x().toggleOnTrue(runLauncher)
         self.controller2.leftTrigger(0.3).whileTrue(RunLauncherByDist(self.launcherSys)) # uses different instance of command for better control
-        self.controller2.rightTrigger(0.3).whileTrue(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_MED))
+        self.controller2.rightTrigger(0.3).whileTrue(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_MED).onlyWhile(
+            # only launch if launcher at speed OR switch say yes
+            lambda: (self.launcherSys.isAtSpeed() and self.launcherSys.getDesiredSpeed() != Launcher.LauncherSpeeds.WAIT) or self.controlBoard.switch1().getAsBoolean()
+            )
+        )
 
         self.controlBoard.bigRed().whileTrue(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.EJECT))
 
@@ -183,10 +192,10 @@ class RobotContainer:
         self.controlBoard.relayRight().onTrue(cmd.runOnce(lambda: RebuiltCalc.setDesiredRelay(RelayTarget.RIGHT)))
         self.controlBoard.relayAuto().onTrue(cmd.runOnce(lambda: RebuiltCalc.setDesiredRelay(RelayTarget.AUTO)))
 
-        self.controlBoard.switch3().onFalse(cmd.runOnce(RebuiltCalc.setDesiredRelay(RelayTarget.DONT)))
-        self.controlBoard.switch3().onTrue(cmd.runOnce(RebuiltCalc.setDesiredRelay(RelayTarget.AUTO)))
+        self.controlBoard.switch3().onFalse(cmd.runOnce(lambda: RebuiltCalc.setDesiredRelay(RelayTarget.DONT)))
+        self.controlBoard.switch3().onTrue(cmd.runOnce(lambda: RebuiltCalc.setDesiredRelay(RelayTarget.AUTO)))
 
-        self.controlBoard.switch2().onChange(cmd.runOnce(RebuiltCalc.toggleInvertAutoRot))
+        self.controller1.y().onTrue(cmd.runOnce(RebuiltCalc.toggleInvertAutoRot))
     def configurePracticeBindings(self) -> None:
         """
         configures controls for the robot in practice

@@ -8,36 +8,36 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.368544444444445,
-        "y": 5.64586305278174
+        "x": 4.886517173996875,
+        "y": 5.337098771547923
       },
       "isLocked": false,
       "linkedName": "depotmultiramp"
     },
     {
       "anchor": {
-        "x": 6.2821333333333325,
-        "y": 5.808488888888889
+        "x": 6.2528999999999995,
+        "y": 5.340755555555555
       },
       "prevControl": {
-        "x": 5.2821333333333325,
-        "y": 5.808488888888889
+        "x": 5.256387432270695,
+        "y": 5.553825828977424
       },
       "nextControl": {
-        "x": 7.2821333333333325,
-        "y": 5.808488888888889
+        "x": 7.075411711721405,
+        "y": 5.164889439076454
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 8.72798888888889,
-        "y": 5.808488888888889
+        "x": 8.211533333333334,
+        "y": 4.843788888888888
       },
       "prevControl": {
-        "x": 7.995316666666666,
-        "y": 5.8036166666666675
+        "x": 7.410160172573935,
+        "y": 5.028303758530691
       },
       "nextControl": null,
       "isLocked": false,
@@ -67,8 +67,8 @@
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 4.0,
+    "maxAcceleration": 4.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,

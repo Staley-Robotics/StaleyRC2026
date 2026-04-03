@@ -3,16 +3,16 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.8315,
+        "x": 8.299233333333333,
         "y": 3.2457000000000007
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.412488888888889,
+        "x": 7.880222222222223,
         "y": 2.2517666666666663
       },
       "isLocked": false,
-      "linkedName": "DRamprefilledoutpost"
+      "linkedName": "refilledoutramp"
     },
     {
       "anchor": {

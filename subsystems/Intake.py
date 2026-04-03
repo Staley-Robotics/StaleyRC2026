@@ -32,8 +32,8 @@ class IntakeConstants:
 class Intake(Subsystem):
     class Speeds:
         STOP = 0
-        IN = 0.50
-        OUT = -0.4
+        IN = 0.55
+        OUT = -0.55
 
     class Positions:
         '''

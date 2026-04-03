@@ -1,0 +1,37 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "DeployIntake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "depotTrenchSweep"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "aimDepotFromSweep"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "LaunchBalls"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

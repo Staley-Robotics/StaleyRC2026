@@ -24,6 +24,8 @@ class Launcher(Subsystem):
         SPEED_MED:rotations_per_second = 40
         SPEED_HIGH:rotations_per_second = 70
 
+        EJECT:rotations_per_second = 13 # just enough to overshoot the intake
+
         STOP:rotations_per_second = 0 # at 5 to keep moving and reduce acceleration later
 
         '''

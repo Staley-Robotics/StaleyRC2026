@@ -173,7 +173,7 @@ class SwerveDrive(Subsystem, TunerSwerveDrivetrain):
         self._sim_notifier: Notifier | None = None
         self._last_sim_time: units.second = 0.0
 
-        self._has_applied_operator_perspective = False
+        # self._has_applied_operator_perspective = False
         """Keep track if we've ever applied the operator perspective before or not"""
 
         # module logging through FalconLogger
@@ -334,15 +334,15 @@ class SwerveDrive(Subsystem, TunerSwerveDrivetrain):
         # This allows us to correct the perspective in case the robot code restarts mid-match.
         # Otherwise, only check and apply the operator perspective if the DS is disabled.
         # This ensures driving behavior doesn't change until an explicit disable event occurs during testing.
-        if not self._has_applied_operator_perspective or DriverStation.isDisabled():
-            alliance_color = DriverStation.getAlliance()
-            if alliance_color is not None:
-                self.set_operator_perspective_forward(
-                    self._RED_ALLIANCE_PERSPECTIVE_ROTATION
-                    if alliance_color == DriverStation.Alliance.kRed
-                    else self._BLUE_ALLIANCE_PERSPECTIVE_ROTATION
-                )
-                self._has_applied_operator_perspective = True
+        # if not self._has_applied_operator_perspective or DriverStation.isDisabled():
+        alliance_color = DriverStation.getAlliance()
+        if alliance_color is not None:
+            self.set_operator_perspective_forward(
+                self._RED_ALLIANCE_PERSPECTIVE_ROTATION
+                if alliance_color == DriverStation.Alliance.kRed
+                else self._BLUE_ALLIANCE_PERSPECTIVE_ROTATION
+            )
+            # self._has_applied_operator_perspective = True
         
         ## Logging
         self.field.setRobotPose( self.get_state().pose )
