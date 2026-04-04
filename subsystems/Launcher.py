@@ -49,7 +49,7 @@ class Launcher(Subsystem):
         k_S:float=0.22
         k_V:float=0.11
 
-    kAtSpeedTolerance:rotations_per_second = 2.0 #ntproperty("/Settings/Launcher/atSpeed tolerance", 2.0, persistent=True)
+    kAtSpeedTolerance:rotations_per_second = 6.0 #ntproperty("/Settings/Launcher/atSpeed tolerance", 2.0, persistent=True)
 
     disabled = ntproperty("/Disabling/Launcher", False, persistent=False)
 

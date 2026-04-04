@@ -195,7 +195,7 @@ class RobotContainer:
         self.controlBoard.switch3().onFalse(cmd.runOnce(lambda: RebuiltCalc.setDesiredRelay(RelayTarget.DONT)))
         self.controlBoard.switch3().onTrue(cmd.runOnce(lambda: RebuiltCalc.setDesiredRelay(RelayTarget.AUTO)))
 
-        self.controller1.y().onTrue(cmd.runOnce(RebuiltCalc.toggleInvertAutoRot))
+        self.controller1.y().onTrue(cmd.runOnce(RebuiltCalc.toggleUseRelayTargeting))
     def configurePracticeBindings(self) -> None:
         """
         configures controls for the robot in practice

@@ -7,13 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "UnderSuckR"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "UnderUnderoutpost"
+            "pathName": "underOverOutpost"
           }
         },
         {
@@ -23,7 +17,7 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 2.6
+                  "waitTime": 5.0
                 }
               },
               {
@@ -38,13 +32,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "underShootoutpostRefill"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "2xshootunderoutpost"
+            "pathName": "underOverMeatstickOutpost"
           }
         },
         {

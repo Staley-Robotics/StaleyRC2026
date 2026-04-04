@@ -16,32 +16,32 @@
     },
     {
       "anchor": {
-        "x": 2.6158059914407983,
-        "y": 6.021084165477889
+        "x": 2.7254111111111117,
+        "y": 5.321266666666666
       },
       "prevControl": {
-        "x": 3.2780029934960178,
-        "y": 5.970917725928252
+        "x": 3.387608113166331,
+        "y": 5.271100227117029
       },
       "nextControl": {
-        "x": 1.7618544935805986,
-        "y": 6.085777460770328
+        "x": 1.871459613250912,
+        "y": 5.385959961959105
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 0.9725962910128385,
-        "y": 6.021084165477889
+        "x": 0.8934555555555557,
+        "y": 5.974144444444444
       },
       "prevControl": {
-        "x": 1.7100998573466475,
-        "y": 6.059900142653353
+        "x": 1.6309591218893646,
+        "y": 6.0129604216199075
       },
       "nextControl": {
-        "x": 0.14845908632542038,
-        "y": 5.97770852312592
+        "x": 0.06931835086813753,
+        "y": 5.930768802092475
       },
       "isLocked": false,
       "linkedName": null
@@ -75,7 +75,7 @@
   "eventMarkers": [
     {
       "name": "DeployIntake",
-      "waypointRelativePos": 1.020931802835923,
+      "waypointRelativePos": 0.2709677419354921,
       "endWaypointRelativePos": null,
       "command": {
         "type": "named",
@@ -112,7 +112,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 90.0
   },
   "useDefaultConstraints": true
 }

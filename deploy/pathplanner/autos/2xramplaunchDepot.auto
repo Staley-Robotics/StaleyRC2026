@@ -5,6 +5,12 @@
     "data": {
       "commands": [
         {
+          "type": "named",
+          "data": {
+            "name": "DeployIntake"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "vacoomL"
@@ -33,6 +39,12 @@
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "DeployIntake"
           }
         },
         {
