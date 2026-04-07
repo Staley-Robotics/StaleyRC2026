@@ -27,17 +27,17 @@ class RobotContainer:
         self.controller1 = FalconXboxController( 0 )
         self.controller2 = FalconXboxController( 1 )
         self.controlBoard = RebuiltControlBoard( 2, 3 )
-        self.control_mode = ControlMode.COMP
+        self.control_mode = ControlMode.DEMO
 
         ### Subsystems
         ## Intake
-        self.intakeSys = Intake( 10, 11, 0, 0.182617)
+        self.intakeSys = Intake( 10, 11, 0, 0.182617, lambda: not self.controlBoard.switch2().getAsBoolean())
 
         ## Agitator
-        self.agitatorSys = Agitator( 12 )
+        self.agitatorSys = Agitator( 12, self.controlBoard.switch1().getAsBoolean )
 
         ## Launcher
-        self.launcherSys = Launcher( 13 )
+        self.launcherSys = Launcher( 13, self.controlBoard.switch1().getAsBoolean )
 
         ## Climber
         # self.climbSys = ClimberOpenLoop( 14 )
@@ -85,7 +85,14 @@ class RobotContainer:
         """
         configures controls for the robot at competition
         """
-        #NOTE: drive bindings handled in configureDriveBindings
+        #NOTE: other drive bindings handled in configureDriveBindings
+        self.drive_facing_target = DriveFacingDirection(
+            self.swerveSys,
+            self.controller1.getLeftX,
+            self.controller1.getLeftY,
+            RebuiltCalc.getRotToTarget
+        )
+        self.controller1.rightBumper().toggleOnTrue(self.drive_facing_target)
         ## Intaking
         # Pivot
         (self.controller1.povDown() | self.controller2.povDown()).onTrue(PivotToPosition(self.intakeSys, Intake.Positions.INTAKING))
@@ -207,11 +214,64 @@ class RobotContainer:
     def configureDemoBindings(self) -> None:
         """
         configures controls for the robot at demo
-        """
-        ### Driver 1 (Driver)
-        #NOTE: drive bindings handled in configureDriveBindings
 
-        ### Driver 2 (Operator)
+        Uses only 1 controller and the control board
+        simplified controls to be more easily handled by untrained drivers
+        """
+        '''------------------------Controller------------------------'''
+        ## Intaking
+        # Pivot
+        (self.controller1.povDown() | self.controller2.povDown()).onTrue(PivotToPosition(self.intakeSys, Intake.Positions.INTAKING))
+        (self.controller1.povLeft() | self.controller2.povLeft()).onTrue(PivotToPosition(self.intakeSys, Intake.Positions.BOUNCE_UP))
+        (self.controller1.povUp() | self.controller2.povUp()).onTrue(PivotToPosition(self.intakeSys, Intake.Positions.STORED))
+        (self.controller1.povRight() | self.controller2.povRight()).whileTrue(IntakeWiggle(self.intakeSys, bottomPos=Intake.Positions.BOUNCE_DOWN, topPos=Intake.Positions.BOUNCE_UP))
+
+        # Bawlz
+        # allow controller 1 to hold on a(), and c1 to hold either trigger
+        (self.controller1.a()).whileTrue(SetIntakeSpeed(self.intakeSys, Intake.Speeds.IN))
+        # Eject
+        self.controlBoard.extra1().whileTrue(
+            SetIntakeSpeed(self.intakeSys, Intake.Speeds.OUT)
+            .alongWith(SetFlywheelSpeed(self.launcherSys, Launcher.LauncherSpeeds.EJECT))
+            .alongWith(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_MED))
+        ) # Poop
+
+        ## Launching
+        runLauncher = RunLauncherByNT(self.launcherSys)
+
+        self.controller1.rightBumper().onTrue(cmd.runOnce(runLauncher.changeSpeed(+0.5)))
+        self.controller1.leftBumper().onTrue(cmd.runOnce(runLauncher.changeSpeed(-0.5)))
+        
+        self.controller1.leftTrigger(0.3).whileTrue(runLauncher)
+        self.controller1.rightTrigger(0.3).whileTrue(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_MED))
+
+        self.controlBoard.bigRed().whileTrue(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.EJECT))
+
+        stopLauncher=cmd.runOnce(lambda: (self.launcherSys.setDesiredSpeed(0), self.agitatorSys.setDesiredSpeed(0)))
+        stopLauncher.addRequirements(self.agitatorSys, self.launcherSys)
+        self.controlBoard.bigBlue().whileTrue(stopLauncher)
+
+        '''------------------------Control Board------------------------'''
+
+        self.controlBoard.extra1().whileTrue(runLauncher)
+        self.controlBoard.extra2().whileTrue(RunAgitatorByNT(self.agitatorSys))
+
+        endSwerveCommand = cmd.runOnce(lambda: None).withName('This shouldnt be here more than a frame')
+        endSwerveCommand.addRequirements(self.swerveSys)
+
+        self.controlBoard.switch2().onChange(
+            cmd.runOnce(self.intakeSys.toggleDisabled)
+        )
+
+        # self.controlBoard.switch3().onTrue(
+        #     cmd.runOnce(self.swerveSys.setDefaultCommand(self.swerveSys.apply_request(lambda: swerve.requests.Idle()).ignoringDisable(True).withName('Disabled')))
+        #     .andThen(self.swerveSys.apply_request(lambda: swerve.requests.Idle()).ignoringDisable(True).withName('Disabled'))
+        # )
+        # self.controlBoard.switch3().onFalse(
+        #     cmd.runOnce(self.swerveSys.setDefaultCommand(self.drive_by_stick))
+        #     .andThen(endSwerveCommand)
+        # )
+        
     def configureTestBindings(self) -> None:
         """
         configures controls for the robot to test subsystems' functionality
@@ -352,12 +412,7 @@ class RobotContainer:
             self.controller1.getLeftX,
             self.controller1.getLeftY,
             self.controller1.getRightX,
-        )
-        self.drive_facing_target = DriveFacingDirection(
-            self.swerveSys,
-            self.controller1.getLeftX,
-            self.controller1.getLeftY,
-            RebuiltCalc.getRotToTarget
+            self.controlBoard.switch3().getAsBoolean
         )
 
         '''--------------------Assign Drive Commands--------------------'''
@@ -377,7 +432,6 @@ class RobotContainer:
         self.controller1.b().toggleOnTrue(self.drive_brake)
 
         self.controller1.leftBumper().onTrue(cmd.runOnce(self.drive_by_stick.toggleFieldCentric))
-        self.controller1.rightBumper().toggleOnTrue(self.drive_facing_target)
 
     def configureDriveCharacterizationBindings(self):
         '''

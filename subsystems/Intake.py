@@ -50,9 +50,9 @@ class Intake(Subsystem):
         BOUNCE_DOWN:degrees = 30
         BOUNCE_UP:degrees = 90
     
-    disablePivot = ntproperty("/Disabling/IntakePivot", False, persistent=False)
+    # disablePivot = ntproperty("/Disabling/IntakePivot", False, persistent=False)
 
-    def __init__(self, intakeMotorID:int, pivotMotorID:int, pivotEncoderID:int, pivotEncoderOffset:rotation) -> None:
+    def __init__(self, intakeMotorID:int, pivotMotorID:int, pivotEncoderID:int, pivotEncoderOffset:rotation, isDisabled:typing.Callable[[], bool]) -> None:
         ### Motor Setup
         ## Intake Motor
         self.intake_motor = TalonFX(intakeMotorID, "rio")
@@ -133,6 +133,7 @@ class Intake(Subsystem):
         ### Functionality Setup
         self.intake_request = VoltageOut(0.0)
         self.pivot_request = PositionVoltage(self.getPivotPosition())
+        self.disablePivot = isDisabled
  
         ## Logging
         FalconLogger.addLoggedObject("/Intake/PivotMotor", self.pivot_motor)
@@ -196,6 +197,7 @@ class Intake(Subsystem):
 
         FalconLogger.logOutput("systemStates/Intake running", self.getIntakeSpeed() > 0.1)
         FalconLogger.logOutput("systemStates/Intake deployed", self.getPivotPosition() < 60)
+        FalconLogger.logOutput("/Disabling/Intake", self.disablePivot())
     
     def simulationPeriodic(self):
         ## Simulation Physics
@@ -241,16 +243,17 @@ class Intake(Subsystem):
 
         ## Pivot
         #control position
-        if not self.disablePivot:
-            if abs(self.pivot_request.position * 360 - self.getPivotPosition()) < IntakeConstants.tolerance:
-                self.pivot_motor.set_control(VoltageOut(0.0))
-            else:
-                self.pivot_motor.set_control(self.pivot_request)
-        else:
+        if abs(self.pivot_request.position * 360 - self.getPivotPosition()) < IntakeConstants.tolerance or not self.disablePivot():
             self.pivot_motor.set_control(VoltageOut(0.0))
+        else:
+            self.pivot_motor.set_control(self.pivot_request)
     
     def toggleDisabled(self) -> None:
-        self.disablePivot = not self.disablePivot
+        if self.disablePivot():
+            self.pivot_motor.setNeutralMode(NeutralModeValue.COAST)
+        else:
+            self.pivot_motor.setNeutralMode(NeutralModeValue.BRAKE)
+        # self.disablePivot = not self.disablePivot
 
     def stop(self) -> None:
         self.setIntakeSpeed(self.Speeds.STOP)

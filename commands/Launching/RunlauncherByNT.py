@@ -2,6 +2,7 @@ import typing
 
 from commands2 import Command, Subsystem
 from wpimath.units import percent
+from phoenix6.units import rotations_per_second
 from ntcore.util import ntproperty
 
 from subsystems import Launcher
@@ -30,6 +31,9 @@ class RunLauncherByNT(Command):
 
     def end(self, interrupted:bool) -> None:
         self.flywheel_sys.setDesiredSpeed( 0.0 )
+    
+    def changeSpeed(self, speedModification:rotations_per_second) -> None:
+        self.speed += speedModification
 
     def isFinished(self) -> bool:
         return False

@@ -40,9 +40,9 @@ class Agitator(Subsystem):
         kMaxAllowedSpeed:rotations_per_second = 60.0
         kSpeedAt12Volts:rotations_per_second = 90.0
     
-    disabled = ntproperty("/Disabling/Agitator", False, persistent=False)
+    # disabled = ntproperty("/Disabling/Agitator", False, persistent=False)
 
-    def __init__(self, motorID:int) -> None:
+    def __init__(self, motorID:int, isDisabled:typing.Callable[[], bool]) -> None:
         ### Motor Setup
         ## Launch Motor
         self.motor = TalonFX(motorID, "rio")
@@ -79,6 +79,8 @@ class Agitator(Subsystem):
         ### Functionality Setup (velocity request)
         self.velocity_req = VelocityVoltage(0.0)
 
+        self.disabled = isDisabled
+
         # Logging
         FalconLogger.addLoggedObject("Agitator/Inputs/motor", self.motor)
 
@@ -86,7 +88,7 @@ class Agitator(Subsystem):
         # Logging: Write Current Measured Subsystem State
 
         # Run Subsystem: Set New State To Subsystem
-        if RobotState.isDisabled() or self.disabled:
+        if RobotState.isDisabled() or self.disabled():
             self.stop()
         else:
             self.run()
@@ -96,16 +98,19 @@ class Agitator(Subsystem):
         FalconLogger.logOutput("/Launcher/Outputs/isAtSpeed", self.isAtSpeed())
 
         FalconLogger.logOutput("systemStates/Agitator running", self.getDesiredSpeed() > 5)
+        FalconLogger.logOutput("/Disabling/Agitator", self.disabled())
 
     def run(self) -> None:
         # control velocity
-        self.motor.set_control(self.velocity_req)
+        if not self.disabled():
+            self.motor.set_control(self.velocity_req)
 
     def stop(self) -> None:
         self.velocity_req.velocity = 0.0
+        self.motor.set(0)
     
-    def toggleDisabled(self) -> None:
-        self.disabled = not self.disabled
+    # def toggleDisabled(self) -> None:
+    #     self.disabled = not self.disabled
 
     def setDesiredSpeed(self, speed:rotations_per_second) -> None:
         self.velocity_req.velocity = speed

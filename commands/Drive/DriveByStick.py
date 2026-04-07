@@ -16,13 +16,16 @@ class DriveByStick(Command):
                   swerveSys: SwerveDrive,
                   getX: typing.Callable[[], float] = lambda: 0.0,
                   getY: typing.Callable[[], float] = lambda: 0.0,
-                  getRot: typing.Callable[[], float] = lambda: 0.0
+                  getRot: typing.Callable[[], float] = lambda: 0.0,
+                  isDisabled: typing.Callable[[], bool] = lambda: False
                 ) -> None:
         # Command Attributes
         self.swerve_sys:SwerveDrive = swerveSys
         self.get_x = getX
         self.get_y = getY
         self.get_rot = getRot
+
+        self.is_disabled = isDisabled
 
         self.field_centric = True
 
@@ -45,22 +48,31 @@ class DriveByStick(Command):
 
     # Periodic
     def execute(self) -> None:
-        if self.field_centric:
-            self.swerve_sys.set_control(
-                self.drive_fc.with_velocity_x( -self.get_y() * self.swerve_sys.max_drive_speed )
-                             .with_velocity_y( -self.get_x() * self.swerve_sys.max_drive_speed )
-                             .with_rotational_rate( -self.get_rot() * self.swerve_sys.max_rot_speed )
-                             .with_deadband( self.swerve_sys.translation_deadband )
-                             .with_rotational_deadband( self.swerve_sys.rotation_deadband )
+        if not self.is_disabled():
+            if self.field_centric:
+                self.swerve_sys.set_control(
+                    self.drive_fc.with_velocity_x( -self.get_y() * self.swerve_sys.max_drive_speed )
+                                .with_velocity_y( -self.get_x() * self.swerve_sys.max_drive_speed )
+                                .with_rotational_rate( -self.get_rot() * self.swerve_sys.max_rot_speed )
+                                .with_deadband( self.swerve_sys.translation_deadband )
+                                .with_rotational_deadband( self.swerve_sys.rotation_deadband )
+                )
+            else:
+                self.swerve_sys.set_control(
+                    self.drive_rc.with_velocity_x( -self.get_y() * self.swerve_sys.max_drive_speed )
+                                .with_velocity_y( -self.get_x() * self.swerve_sys.max_drive_speed )
+                                .with_rotational_rate( -self.get_rot() * self.swerve_sys.max_rot_speed )
+                                .with_deadband( self.swerve_sys.translation_deadband )
+                                .with_rotational_deadband( self.swerve_sys.rotation_deadband )
             )
         else:
             self.swerve_sys.set_control(
-                self.drive_rc.with_velocity_x( -self.get_y() * self.swerve_sys.max_drive_speed )
-                             .with_velocity_y( -self.get_x() * self.swerve_sys.max_drive_speed )
-                             .with_rotational_rate( -self.get_rot() * self.swerve_sys.max_rot_speed )
-                             .with_deadband( self.swerve_sys.translation_deadband )
-                             .with_rotational_deadband( self.swerve_sys.rotation_deadband )
-            )
+                    self.drive_rc.with_velocity_x(0)
+                                .with_velocity_y(0)
+                                .with_rotational_rate(0)
+                                .with_deadband(0)
+                                .with_rotational_deadband(0)
+                )
 
     # On End
     def end(self, interrupted:bool) -> None:

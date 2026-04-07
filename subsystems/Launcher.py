@@ -51,9 +51,9 @@ class Launcher(Subsystem):
 
     kAtSpeedTolerance:rotations_per_second = 6.0 #ntproperty("/Settings/Launcher/atSpeed tolerance", 2.0, persistent=True)
 
-    disabled = ntproperty("/Disabling/Launcher", False, persistent=False)
+    # disabled = ntproperty("/Disabling/Launcher", False, persistent=False)
 
-    def __init__(self, motorID:int) -> None:
+    def __init__(self, motorID:int, isDisabled:typing.Callable[[], bool]) -> None:
         ### Motor Setup
         ## Launch Motor
         self.motor = TalonFX(motorID, "rio")
@@ -88,6 +88,8 @@ class Launcher(Subsystem):
         ### Functionality Setup
         self.velocity_req = VelocityVoltage(0.0)
 
+        self.disabled = isDisabled
+
         # Logging
         FalconLogger.addLoggedObject("Launcher/Inputs/motor", self.motor)
 
@@ -95,7 +97,7 @@ class Launcher(Subsystem):
         # Logging: Write Current Measured Subsystem State
 
         # Run Subsystem: Set New State To Subsystem
-        if RobotState.isDisabled():
+        if RobotState.isDisabled() or self.disabled():
             self.stop()
         else:
             self.run()
@@ -104,20 +106,22 @@ class Launcher(Subsystem):
         FalconLogger.logOutput("/Launcher/Outputs/Setpoint", self.getDesiredSpeed())
         FalconLogger.logOutput("/Launcher/Outputs/isAtSpeed", self.isAtSpeed())
 
-        FalconLogger.logOutput("systemStates/Agitator running", self.isAtSpeed())
+        FalconLogger.logOutput("systemStates/Launcher running", self.isAtSpeed())
+        FalconLogger.logOutput("/Disabling/Launcher", self.disabled())
 
     def run(self) -> None:
         # control velocity
-        if self.getDesiredSpeed() == 0 and not self.disabled:
+        if self.getDesiredSpeed() == 0 and not self.disabled():
             self.motor.set(0)
         else:
             self.motor.set_control(self.velocity_req)
 
     def stop(self) -> None:
         self.velocity_req.velocity = 0.0
+        self.motor.set(0)
 
-    def toggleDisabled(self) -> None:
-        self.disabled = not self.disabled
+    # def toggleDisabled(self) -> None:
+    #     self.disabled = not self.disabled
 
     def setDesiredSpeed(self, speed:rotations_per_second) -> None:
         self.velocity_req.velocity = min(speed, self.LauncherSpeeds.kMaxAllowedSpeed)
