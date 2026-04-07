@@ -15,6 +15,8 @@ class RunLauncherByDist(Command):
     a = ntproperty("Settings/RunLauncherByDist/mult a (dist)", 1.0, persistent=True)
     b = ntproperty("Settings/RunLauncherByDist/mult b (dist^2)", 0.2, persistent=True)
     c = ntproperty("Settings/RunLauncherByDist/const", 14.0, persistent=True)
+
+    postEqModifier = ntproperty("Settings/RunLauncherByDist/postEqModifier", 1.0, persistent=True)
     
     # Initialization
     def __init__( self,
@@ -45,7 +47,10 @@ class RunLauncherByDist(Command):
 
         # -----5 point equation-----
         #y = 26.92683 + (19.89756 - 26.92683)/(1 + (x/3.306039)^7.263255)^1.770582
-        speed = 26.92683 + (19.89756 - 26.92683)/pow((1 + pow((dist/3.306039), 7.263255)), 1.770582) + 1.0 # this is a sigmoid that peaks at 26.9 rps at 0 meters, and is about 19.9 rps at 10 meters, which seems to be about right for our mechanism
+        # speed = 26.92683 + (19.89756 - 26.92683)/pow((1 + pow((dist/3.306039), 7.263255)), 1.770582) + 1.0 # this is a sigmoid that peaks at 26.9 rps at 0 meters, and is about 19.9 rps at 10 meters, which seems to be about right for our mechanism
+       
+       # -----7 point equation w/ guessed 10meter-----
+        speed = 30.00298 + (18.8495 - 30.00298)/(1+pow(dist/3.248432, 3.77429)) + self.postEqModifier
 
         # apply speed
         self.launcher_sys.setDesiredSpeed(

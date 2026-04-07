@@ -64,16 +64,16 @@
     },
     {
       "anchor": {
-        "x": 3.0762111111111112,
+        "x": 2.559755555555556,
         "y": 2.505122222222221
       },
       "prevControl": {
-        "x": 4.917911111111112,
+        "x": 4.401455555555556,
         "y": 2.7974555555555547
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "fullOutpostunderoover"
+      "linkedName": null
     }
   ],
   "rotationTargets": [

@@ -80,16 +80,16 @@
     },
     {
       "anchor": {
-        "x": 3.027488888888889,
-        "y": 5.7500222222222215
+        "x": 2.3941000000000003,
+        "y": 5.6136
       },
       "prevControl": {
-        "x": 3.627979102977692,
-        "y": 5.835177520553852
+        "x": 2.994590214088803,
+        "y": 5.698755298331631
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Endunderoverdepot"
+      "linkedName": null
     }
   ],
   "rotationTargets": [
