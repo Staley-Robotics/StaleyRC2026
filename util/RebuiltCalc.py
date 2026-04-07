@@ -94,7 +94,7 @@ class RebuiltCalc:
     # variable definitions
     swerveSys:SwerveDrivetrain = None
     getRobotPose:typing.Callable[[], Pose2d] = lambda:Pose2d()
-    getRobotState:typing.Callable[[], Pose2d] = lambda:Pose2d()
+    getRobotState:typing.Callable[[], SwerveDrivetrain.SwerveDriveState] = lambda:Pose2d()
 
     crntRelayTarget:RelayTarget = RelayTarget.AUTO
     desiredRelayPoint:TargetPoints|None = None
@@ -240,12 +240,18 @@ class RebuiltCalc:
         # // Calculate estimated pose while accounting for phase delay
         estimatedPose:Pose2d = cls.getRobotPose()
         robotSpeeds:ChassisSpeeds = cls.getRobotState().speeds
-        return estimatedPose.exp(
+
+        # Apply current chassis speeds to current pose
+        futurePose = estimatedPose.exp(
             Twist2d(
                 robotSpeeds.vx * LaunchingConstants.launchTime,
                 robotSpeeds.vy * LaunchingConstants.launchTime,
-                robotSpeeds.omega * LaunchingConstants.launchTime)
+                robotSpeeds.omega * LaunchingConstants.launchTime # just 0?
             )
+        )
+        # futurePose.rotateBy(futurePose.rotation() - RebuiltCalc.getRotToTarget(futurePose)) # if just 0
+        
+        return futurePose
                 
     @classmethod
     def getDistToTarget(cls) -> meters:
@@ -256,11 +262,11 @@ class RebuiltCalc:
         return cls.getEstimatedPoseAtLaunchTime().translation().distance(cls.getCurrentTargetPose().translation())
 
     @classmethod
-    def getRotToTarget(cls) -> Rotation2d:
+    def getRotToTarget(cls, ovverrideCrntPose:Pose2d|None=None) -> Rotation2d:
         '''
         gets the Rotation2d to the current target relative to the field based on current robot translation
         '''
-        target = cls.getCurrentTargetPose()
+        target = cls.getCurrentTargetPose() if ovverrideCrntPose is None else ovverrideCrntPose
         rob_pose = cls.getEstimatedPoseAtLaunchTime()
 
         #this probably works idk
