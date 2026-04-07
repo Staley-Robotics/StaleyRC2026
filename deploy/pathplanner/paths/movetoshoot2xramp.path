@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.4826961483594863,
-        "y": 4.080285306704707
+        "x": 8.211533333333334,
+        "y": 4.843788888888888
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.4605420827389435,
-        "y": 4.817788873038516
+        "x": 9.211533333333334,
+        "y": 4.843788888888888
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "refilldoubleramp"
     },
     {
       "anchor": {
-        "x": 2.0982596291012836,
-        "y": 5.3353352353780314
+        "x": 3.4465000000000003,
+        "y": 5.7013
       },
       "prevControl": {
-        "x": 2.6804992867332382,
-        "y": 5.128316690442225
+        "x": 2.4465000000000003,
+        "y": 5.7013
       },
       "nextControl": null,
       "isLocked": false,
@@ -31,14 +31,7 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "LaunchBalls",
-      "waypointRelativePos": 1.0,
-      "endWaypointRelativePos": null,
-      "command": null
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 4.0,
     "maxAcceleration": 4.0,
@@ -49,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -27.154790159732723
+    "rotation": -56.39532105389282
   },
   "reversed": false,
   "folder": null,

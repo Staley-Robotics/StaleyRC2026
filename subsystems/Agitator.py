@@ -15,9 +15,8 @@ from phoenix6.controls import VelocityVoltage
 from util.FalconLogger import FalconLogger
 
 class Agitator(Subsystem):
-    '''This is functionally quite similar (if not the same) as Agitator, but for now they are kept seperate for simplicity's sake'''
+    '''This is functionally quite similar (if not the same) as Launcher, but for now they are kept seperate for simplicity's sake'''
     class Speeds:
-        WAIT:rotations_per_second = 5 # default speed for lower power consumption but faster acceleration when needed
         SPEED_LOW:rotations_per_second = 40
         SPEED_MED:rotations_per_second = 40
         SPEED_HIGH:rotations_per_second = 40
@@ -67,7 +66,7 @@ class Agitator(Subsystem):
             .with_stator_current_limit_enable(True)
             .with_supply_current_limit(20)
             .with_supply_current_limit_enable(True)
-            .with_supply_current_lower_limit(40)
+            .with_supply_current_lower_limit(20)
             .with_supply_current_lower_time(1.0)
         )
         # .with_current_limits(

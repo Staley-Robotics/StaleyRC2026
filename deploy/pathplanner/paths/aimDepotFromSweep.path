@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.4826961483594863,
-        "y": 4.080285306704707
+        "x": 4.0,
+        "y": 7.484533333333332
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.4605420827389435,
-        "y": 4.817788873038516
+        "x": 3.600477777777778,
+        "y": 7.484533333333332
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "ReturnDepotTrenchSweep"
     },
     {
       "anchor": {
-        "x": 2.0982596291012836,
-        "y": 5.3353352353780314
+        "x": 2.8618333333333332,
+        "y": 7.1824555555555545
       },
       "prevControl": {
-        "x": 2.6804992867332382,
-        "y": 5.128316690442225
+        "x": 2.6084777777777775,
+        "y": 6.919355555555556
       },
       "nextControl": null,
       "isLocked": false,
@@ -31,14 +31,7 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "LaunchBalls",
-      "waypointRelativePos": 1.0,
-      "endWaypointRelativePos": null,
-      "command": null
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 4.0,
     "maxAcceleration": 4.0,
@@ -49,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -27.154790159732723
+    "rotation": -60.7456527750992
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
-    "velocity": 0,
-    "rotation": 0.0
+    "velocity": 2.0,
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }

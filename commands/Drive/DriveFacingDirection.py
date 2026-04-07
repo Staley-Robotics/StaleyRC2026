@@ -54,7 +54,7 @@ class DriveFacingDirection(Command):
                           .with_deadband( self.swerve_sys.translation_deadband )
                           .with_rotational_deadband( self.swerve_sys.rotation_deadband )
 
-                          .with_target_direction( self.get_desired_rot().rotateBy(Rotation2d().fromDegrees(180)) )
+                          .with_target_direction( self.get_desired_rot() )
                           .with_heading_pid( self.drive_rot_kP, self.drive_rot_kI, self.drive_rot_kD )
         )
         #Debug:

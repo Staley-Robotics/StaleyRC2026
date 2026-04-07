@@ -1,13 +1,5 @@
 [
   {
-    "name": "/Settings/Launcher/atSpeed tolerance",
-    "type": "double",
-    "value": 3.0,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
     "name": "Settings/drive/max rot speed (rots/sec)",
     "type": "double",
     "value": 0.65,
@@ -26,7 +18,7 @@
   {
     "name": "Settings/drive/pid/kP",
     "type": "double",
-    "value": 10.0,
+    "value": 30.0,
     "properties": {
       "persistent": true
     }
@@ -112,33 +104,9 @@
     }
   },
   {
-    "name": "Settings/drive/customRotpid/kP",
+    "name": "/Settings/Launcher/atSpeed tolerance",
     "type": "double",
-    "value": 2.0,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "Settings/drive/customRotpid/kI",
-    "type": "double",
-    "value": 0.0,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "Settings/drive/customRotpid/kD",
-    "type": "double",
-    "value": 0.0,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Disabling/Intake",
-    "type": "boolean",
-    "value": false,
+    "value": 3.0,
     "properties": {
       "persistent": true
     }

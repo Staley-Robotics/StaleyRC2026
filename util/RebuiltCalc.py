@@ -45,10 +45,10 @@ class TargetPoints:
     # apl = AprilTagFieldLayout('./deploy/apriltags/2026-official.json')
 
     # apriltag version
-    relayRightRed:Pose2d=Pose2d(inchesToMeters(505.62), inchesToMeters(234.77), 0)
-    relayLeftRed:Pose2d=Pose2d(inchesToMeters(505.62), inchesToMeters(82.91), 0)
-    relayLeftBlue:Pose2d=Pose2d(inchesToMeters(145.6), inchesToMeters(234.77), 0)
-    relayRightBlue:Pose2d=Pose2d(inchesToMeters(145.6), inchesToMeters(82.91), 0)
+    relayRightRed:Pose2d=Pose2d(inchesToMeters(605.62), inchesToMeters(234.77), 0)
+    relayLeftRed:Pose2d=Pose2d(inchesToMeters(605.62), inchesToMeters(82.91), 0)
+    relayLeftBlue:Pose2d=Pose2d(inchesToMeters(45.6), inchesToMeters(234.77), 0)
+    relayRightBlue:Pose2d=Pose2d(inchesToMeters(45.6), inchesToMeters(82.91), 0)
     
     redHub:Pose2d=Pose2d(11.9154194, 4.0346376, 0)
     blueHub:Pose2d=Pose2d(4.6256194, 4.0346376, 0)
@@ -87,18 +87,22 @@ class FieldBoundaries:
 class LaunchingConstants:
     launcherOffset:Translation2d = Translation2d() #TODO: measure
     '''The offset of the launcher from the center of the robot'''
-    launchTime:seconds = 0.6 #ntproperty("Settings/RebuiltCalc/launchTime", 0.2, persistent=True) #TODO: measure
+    launchTime:seconds = 0.2 #ntproperty("Settings/RebuiltCalc/launchTime", 0.2, persistent=True) #TODO: measure
     '''The average time it takes for a fuel to move from the agitator to leaving the launcher'''
 
 class RebuiltCalc:
     # variable definitions
     swerveSys:SwerveDrivetrain = None
     getRobotPose:typing.Callable[[], Pose2d] = lambda:Pose2d()
-    getRobotState:typing.Callable[[], Pose2d] = lambda:Pose2d()
+    getRobotState:typing.Callable[[], SwerveDrivetrain.SwerveDriveState] = lambda:Pose2d()
 
+    crntRelayTarget:RelayTarget = RelayTarget.AUTO
     desiredRelayPoint:TargetPoints|None = None
 
     field_display = Field2d()
+
+    should_invert_auto_rot:bool = False
+    use_relay_targeting:bool = False
 
     '''
     defining all variables here in the class definition rather than __init__ means their values will be updated and accessible through the class
@@ -124,7 +128,9 @@ class RebuiltCalc:
         FalconLogger.logOutput("/RebuiltCalc/currentTargetName", cls.getCurrentTargetName())
         FalconLogger.logOutput("/RebuiltCalc/2dDistToTarget", cls.getDistToTarget())
         FalconLogger.logOutput("/RebuiltCalc/targetRotation", cls.getRotToTarget().degrees())
-        FalconLogger.logOutput("/RebuiltCalc/rotToTarget", cls.getRotToTarget().degrees() - pose.rotation().degrees() - 180)
+        FalconLogger.logOutput("/RebuiltCalc/rotToTarget", cls.getRotToTarget().degrees() - pose.rotation().degrees())
+        FalconLogger.logOutput("/RebuiltCalc/relayTargetingType", cls.crntRelayTarget.name)
+        FalconLogger.logOutput("/RebuiltCalc/useRelayTargeting", cls.use_relay_targeting)
 
         cls.field_display.setRobotPose(pose)
         cls.field_display.getObject('crntTarget').setPose(cls.getCurrentTargetPose())
@@ -132,20 +138,21 @@ class RebuiltCalc:
     
     @classmethod
     def setDesiredRelay(cls, relay:RelayTarget) -> None:
-        if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
-            if relay == RelayTarget.AUTO:
-                cls.desiredRelayPoint = None
-            elif relay == RelayTarget.LEFT:
-                cls.desiredRelayPoint = TargetPoints.relayLeftBlue
-            else:
-                cls.desiredRelayPoint = TargetPoints.relayRightBlue
-        else:
-            if relay == RelayTarget.AUTO:
-                cls.desiredRelayPoint = None
-            elif relay == RelayTarget.LEFT:
-                cls.desiredRelayPoint = TargetPoints.relayLeftRed
-            else:
-                cls.desiredRelayPoint = TargetPoints.relayRightRed
+        cls.crntRelayTarget = relay
+        # if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
+        #     if relay == RelayTarget.AUTO:
+        #         cls.desiredRelayPoint = None
+        #     elif relay == RelayTarget.LEFT:
+        #         cls.desiredRelayPoint = TargetPoints.relayLeftBlue
+        #     else:
+        #         cls.desiredRelayPoint = TargetPoints.relayRightBlue
+        # else:
+        #     if relay == RelayTarget.AUTO:
+        #         cls.desiredRelayPoint = None
+        #     elif relay == RelayTarget.LEFT:
+        #         cls.desiredRelayPoint = TargetPoints.relayLeftRed
+        #     else:
+        #         cls.desiredRelayPoint = TargetPoints.relayRightRed
     
     @classmethod
     def botInScoreZone(cls) -> bool:
@@ -168,31 +175,34 @@ class RebuiltCalc:
         """
         gets the Translation2d (point on the field) of the current target
         """
-        point = None
-        if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
-            point = TargetPoints.blueHub
+        if not cls.use_relay_targeting or cls.botInScoreZone():
+            if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
+                return TargetPoints.blueHub
+            else:
+                return TargetPoints.redHub
+        
+        if cls.crntRelayTarget == RelayTarget.AUTO:
+            if cls.botIsLeft():
+                if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
+                    return TargetPoints.relayLeftBlue
+                else:
+                    return TargetPoints.relayLeftRed
+            else:
+                if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
+                    return TargetPoints.relayRightBlue
+                else:
+                    return TargetPoints.relayRightRed
         else:
-            point = TargetPoints.redHub
-        # if cls.botInScoreZone():
-        #     if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
-        #         point = TargetPoints.blueHub
-        #     else:
-        #         point = TargetPoints.redHub
-        # elif not (cls.desiredRelayPoint is None):
-        #     point = cls.desiredRelayPoint
-        # else:
-        #     if cls.botIsLeft():
-        #         if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
-        #             point = TargetPoints.relayLeftBlue
-        #         else:
-        #             point = TargetPoints.relayLeftRed
-        #     else:
-        #         if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
-        #             point = TargetPoints.relayRightBlue
-        #         else:
-        #             point = TargetPoints.relayRightRed
-
-        return point
+            if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
+                if cls.crntRelayTarget == RelayTarget.LEFT:
+                    return TargetPoints.relayLeftBlue
+                else:
+                    return TargetPoints.relayRightBlue
+            else:
+                if cls.crntRelayTarget == RelayTarget.LEFT:
+                    return TargetPoints.relayLeftRed
+                else:
+                    return TargetPoints.relayRightRed
     
     @classmethod
     def getCurrentTargetName(cls) -> str:
@@ -230,12 +240,18 @@ class RebuiltCalc:
         # // Calculate estimated pose while accounting for phase delay
         estimatedPose:Pose2d = cls.getRobotPose()
         robotSpeeds:ChassisSpeeds = cls.getRobotState().speeds
-        return estimatedPose.exp(
+
+        # Apply current chassis speeds to current pose
+        futurePose = estimatedPose.exp(
             Twist2d(
                 robotSpeeds.vx * LaunchingConstants.launchTime,
                 robotSpeeds.vy * LaunchingConstants.launchTime,
-                robotSpeeds.omega * LaunchingConstants.launchTime)
+                robotSpeeds.omega * LaunchingConstants.launchTime # just 0?
             )
+        )
+        # futurePose.rotateBy(futurePose.rotation() - RebuiltCalc.getRotToTarget(futurePose)) # if just 0
+        
+        return futurePose
                 
     @classmethod
     def getDistToTarget(cls) -> meters:
@@ -246,11 +262,11 @@ class RebuiltCalc:
         return cls.getEstimatedPoseAtLaunchTime().translation().distance(cls.getCurrentTargetPose().translation())
 
     @classmethod
-    def getRotToTarget(cls) -> Rotation2d:
+    def getRotToTarget(cls, ovverrideCrntPose:Pose2d|None=None) -> Rotation2d:
         '''
         gets the Rotation2d to the current target relative to the field based on current robot translation
         '''
-        target = cls.getCurrentTargetPose()
+        target = cls.getCurrentTargetPose() if ovverrideCrntPose is None else ovverrideCrntPose
         rob_pose = cls.getEstimatedPoseAtLaunchTime()
 
         #this probably works idk
@@ -258,6 +274,19 @@ class RebuiltCalc:
         dY = target.y - rob_pose.y
         goalAngle = Rotation2d( x = -dX, y = -dY ) # these negatives are wrong, but I'm dealing with them other places so they stay for now
 
+        # if cls.should_invert_auto_rot:
+        #     goalAngle = goalAngle.rotateBy(Rotation2d().fromDegrees(180))
+        
+        if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
+            goalAngle = goalAngle.rotateBy(Rotation2d().fromDegrees(180))
         return goalAngle
+    
+    @classmethod
+    def toggleInvertAutoRot(cls) -> None:
+        cls.should_invert_auto_rot = not cls.should_invert_auto_rot
+
+    @classmethod
+    def toggleUseRelayTargeting(cls) -> None:
+        cls.use_relay_targeting = not cls.use_relay_targeting
     
 

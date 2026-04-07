@@ -13,13 +13,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "UnderSuckL"
+            "pathName": "depotTrenchSweep"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "ShootUL"
+            "pathName": "aimDepotFromSweep"
           }
         },
         {

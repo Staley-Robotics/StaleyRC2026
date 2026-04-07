@@ -19,7 +19,7 @@ from pathplannerlib.logging import PathPlannerLogging
 from ntcore.util import ntproperty
 
 from .tuner_constants import TunerSwerveDrivetrain, TunerConstants
-from util import FalconLogger
+from util import FalconLogger, RebuiltCalc
 
 
 class SwerveDrive(Subsystem, TunerSwerveDrivetrain):
@@ -173,7 +173,7 @@ class SwerveDrive(Subsystem, TunerSwerveDrivetrain):
         self._sim_notifier: Notifier | None = None
         self._last_sim_time: units.second = 0.0
 
-        self._has_applied_operator_perspective = False
+        # self._has_applied_operator_perspective = False
         """Keep track if we've ever applied the operator perspective before or not"""
 
         # module logging through FalconLogger
@@ -187,7 +187,7 @@ class SwerveDrive(Subsystem, TunerSwerveDrivetrain):
             pose_supplier = lambda: self.get_state().pose,
             reset_pose = self.reset_pose,
             robot_relative_speeds_supplier = lambda: self.get_state().speeds,
-            output = lambda speeds, feedforwards: self.set_control( swerve.requests.ApplyRobotSpeeds().with_speeds(speeds)), # nobody knows what feedforwards are for
+            output = lambda speeds, feedforwards: self.set_control( swerve.requests.ApplyRobotSpeeds().with_speeds(speeds)#.with_wheel_force_feedforwards_x(feedforwards)), # nobody knows what feedforwards are for
             controller = PPHolonomicDriveController(
                 PIDConstants(0.8, 0.0, 0.0),
                 PIDConstants(5.0, 0.0, 0.0)
@@ -197,8 +197,17 @@ class SwerveDrive(Subsystem, TunerSwerveDrivetrain):
             drive_subsystem = self
         )
 
-        # PP Logger
-        
+        ## Drive Reqs for Auto
+        self.auto_drive_w_rot = (
+            swerve.requests.RobotCentricFacingAngle()
+                .with_drive_request_type(swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE)
+                .with_steer_request_type(swerve.SwerveModule.SteerRequestType.POSITION)
+                .with_heading_pid(2,0,0)
+        )
+        self.auto_drive_std = (
+            swerve.requests.ApplyRobotSpeeds()
+                .with_drive_request_type(swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE)
+        )
 
         # Swerve requests to apply during SysId characterization
         self._translation_characterization = swerve.requests.SysIdSwerveTranslation()
@@ -287,9 +296,18 @@ class SwerveDrive(Subsystem, TunerSwerveDrivetrain):
             self._start_sim_thread()
     
     # output = lambda speeds, feedforwards: self.set_control( swerve.requests.ApplyRobotSpeeds().with_speeds(speeds)), # nobody knows what feedforwards are for
-    # def set_auto_control(self, speeds:ChassisSpeeds, feedforwards) -> None:
-    #     if self.auto_aim_in_auto:
-    #         req = swerve.requests.FieldCentricFacingAngle().wi
+    def set_auto_control(self, speeds:ChassisSpeeds, feedforwards) -> None:
+        if self.auto_aim_in_auto:
+            self.set_control(
+                self.auto_drive_w_rot.with_velocity_x(speeds.vx)
+                                     .with_velocity_y(speeds.vy)
+                                     .with_target_direction(RebuiltCalc.getRotToTarget())
+            )
+        else:
+            self.set_control(
+                self.auto_drive_std.with_speeds(speeds)
+            )
+
 
     def apply_request(
         self, request: Callable[[], swerve.requests.SwerveRequest]
@@ -334,19 +352,20 @@ class SwerveDrive(Subsystem, TunerSwerveDrivetrain):
         # This allows us to correct the perspective in case the robot code restarts mid-match.
         # Otherwise, only check and apply the operator perspective if the DS is disabled.
         # This ensures driving behavior doesn't change until an explicit disable event occurs during testing.
-        if not self._has_applied_operator_perspective or DriverStation.isDisabled():
-            alliance_color = DriverStation.getAlliance()
-            if alliance_color is not None:
-                self.set_operator_perspective_forward(
-                    self._RED_ALLIANCE_PERSPECTIVE_ROTATION
-                    if alliance_color == DriverStation.Alliance.kRed
-                    else self._BLUE_ALLIANCE_PERSPECTIVE_ROTATION
-                )
-                self._has_applied_operator_perspective = True
+        # if not self._has_applied_operator_perspective or DriverStation.isDisabled():
+        alliance_color = DriverStation.getAlliance()
+        if alliance_color is not None:
+            self.set_operator_perspective_forward(
+                self._RED_ALLIANCE_PERSPECTIVE_ROTATION
+                if alliance_color == DriverStation.Alliance.kRed
+                else self._BLUE_ALLIANCE_PERSPECTIVE_ROTATION
+            )
+            # self._has_applied_operator_perspective = True
         
         ## Logging
         self.field.setRobotPose( self.get_state().pose )
         FalconLogger.logOutput("swerve/pose", self.get_state().pose)
+        FalconLogger.logOutput("systemStates/Swerve Half Speed", self.drive_max_speed_pct <= 0.5)
         # FalconLogger.logOutput("swerve/state", self.get_state())
 
 

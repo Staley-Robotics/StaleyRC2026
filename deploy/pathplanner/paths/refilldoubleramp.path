@@ -3,56 +3,69 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 8.27,
-        "y": 5.866955555555555
+        "x": 3.368544444444445,
+        "y": 5.64586305278174
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.997471226401118,
-        "y": 5.675808705881776
+        "x": 4.886517173996875,
+        "y": 5.337098771547923
       },
       "isLocked": false,
-      "linkedName": "FullloadL"
+      "linkedName": "depotmultiramp"
     },
     {
       "anchor": {
-        "x": 5.837532097004279,
-        "y": 5.64586305278174
+        "x": 6.2528999999999995,
+        "y": 5.340755555555555
       },
       "prevControl": {
-        "x": 7.511544889360463,
-        "y": 5.641737497796636
+        "x": 5.256387432270695,
+        "y": 5.553825828977424
       },
       "nextControl": {
-        "x": 3.6260683368300115,
-        "y": 5.651313139771412
+        "x": 7.075411711721405,
+        "y": 5.164889439076454
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 3.368544444444445,
-        "y": 5.64586305278174
+        "x": 8.211533333333334,
+        "y": 4.843788888888888
       },
       "prevControl": {
-        "x": 4.48119978664049,
-        "y": 5.655410234237794
+        "x": 7.410160172573935,
+        "y": 5.028303758530691
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "depotmultiramp"
+      "linkedName": "refilldoubleramp"
     }
   ],
   "rotationTargets": [
     {
       "waypointRelativePos": 1,
-      "rotationDegrees": -45.0
+      "rotationDegrees": 0.0
     }
   ],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "DeployIntake",
+      "waypointRelativePos": 0.7523573200992661,
+      "endWaypointRelativePos": null,
+      "command": null
+    },
+    {
+      "name": "RunIntake",
+      "waypointRelativePos": 0.9985111662531003,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 4.0,
     "maxAcceleration": 4.0,
@@ -63,13 +76,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -51.35108577214542
+    "rotation": 0.0
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 1.0809241866606887
+    "rotation": -51.35108577214542
   },
   "useDefaultConstraints": true
 }
