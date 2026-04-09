@@ -239,8 +239,8 @@ class RobotContainer:
         ## Launching
         runLauncher = RunLauncherByNT(self.launcherSys)
 
-        self.controller1.rightBumper().onTrue(cmd.runOnce(runLauncher.changeSpeed(+0.5)))
-        self.controller1.leftBumper().onTrue(cmd.runOnce(runLauncher.changeSpeed(-0.5)))
+        self.controller1.rightBumper().onTrue(cmd.runOnce(runLauncher.increaseSpeed))
+        self.controller1.leftBumper().onTrue(cmd.runOnce(runLauncher.decreaseSpeed))
         
         self.controller1.leftTrigger(0.3).whileTrue(runLauncher)
         self.controller1.rightTrigger(0.3).whileTrue(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_MED))
@@ -425,13 +425,14 @@ class RobotContainer:
         ## Controls
         # Toggle halfspeed
         def toggleHalfSpeed():
-            self.swerveSys.drive_max_speed_pct = 0.3 if self.swerveSys.drive_max_speed_pct > 0.5 else 0.6
+            # the logic here is technically wrong but oh well.
+            self.swerveSys.drive_cur_speed_pct = self.swerveSys.drive_half_speed_pct if self.swerveSys.drive_cur_speed_pct > self.swerveSys.drive_half_speed_pct else self.swerveSys.drive_max_speed_pct
         self.controller1.leftStick().onTrue(cmd.runOnce(toggleHalfSpeed))
 
         # Brake (X shape)
         self.controller1.b().toggleOnTrue(self.drive_brake)
 
-        self.controller1.leftBumper().onTrue(cmd.runOnce(self.drive_by_stick.toggleFieldCentric))
+        self.controller1.start().onTrue(cmd.runOnce(self.drive_by_stick.toggleFieldCentric))
 
     def configureDriveCharacterizationBindings(self):
         '''

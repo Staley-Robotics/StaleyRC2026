@@ -11,7 +11,8 @@ class RunLauncherByNT(Command):
     # Variable Declaration
     flywheel_sys:Launcher = None
 
-    speed = ntproperty("/Settings/RunLauncherByNT/speed (rps: 0-70)", 0.0, persistent=True)
+    speed = ntproperty("/Settings/RunLauncherByNT/speed (rps: [0,70])", 0.0, persistent=True)
+    speedModification = ntproperty("/Settings/RunLauncherByNT/speed increment (rps: ~[0-2])", 0.5, persistent=True)
     
     # Initialization
     def __init__( self,
@@ -32,8 +33,17 @@ class RunLauncherByNT(Command):
     def end(self, interrupted:bool) -> None:
         self.flywheel_sys.setDesiredSpeed( 0.0 )
     
-    def changeSpeed(self, speedModification:rotations_per_second) -> None:
-        self.speed += speedModification
+    def increaseSpeed(self) -> None:
+        """
+        increases desired speed by speedModification (ntproperty)
+        """
+        self.speed += self.speedModification
+
+    def decreaseSpeed(self) -> None:
+        """
+        decreases desired speed by speedModification (ntproperty)
+        """
+        self.speed -= self.speedModification
 
     def isFinished(self) -> bool:
         return False

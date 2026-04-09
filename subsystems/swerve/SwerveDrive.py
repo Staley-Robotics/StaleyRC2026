@@ -40,14 +40,17 @@ class SwerveDrive(Subsystem, TunerSwerveDrivetrain):
 
     auto_aim_in_auto: bool = False
 
-    drive_max_speed_pct: percent =  ntproperty("Settings/drive/max speed %", 0.6, writeDefault=True)
+    default_max = 0.6
+    drive_max_speed_pct: percent = ntproperty("Settings/drive/max speed %", default_max, writeDefault=True)
+    drive_half_speed_pct: percent = ntproperty("Settings/drive/half speed %", 0.2, writeDefault=True)
+    drive_cur_speed_pct: percent =  ntproperty("Settings/drive/cur speed %", default_max, writeDefault=True) # set cur to max
     drive_max_rot_speed: percent =  ntproperty("Settings/drive/max rot speed (rots/sec)", 0.65, persistent=True)
 
     deadband_percentage:percent = 0.05
 
     @property
     def max_drive_speed(self) -> meters_per_second:
-        return self.drive_max_speed_pct * TunerConstants.speed_at_12_volts
+        return self.drive_cur_speed_pct * TunerConstants.speed_at_12_volts
     @property
     def max_rot_speed(self) -> units.rotations_per_second:
         return rotationsToRadians(self.drive_max_rot_speed)
@@ -365,7 +368,7 @@ class SwerveDrive(Subsystem, TunerSwerveDrivetrain):
         ## Logging
         self.field.setRobotPose( self.get_state().pose )
         FalconLogger.logOutput("swerve/pose", self.get_state().pose)
-        FalconLogger.logOutput("systemStates/Swerve Half Speed", self.drive_max_speed_pct <= 0.5)
+        FalconLogger.logOutput("systemStates/Swerve Half Speed", self.drive_cur_speed_pct <= 0.5)
         # FalconLogger.logOutput("swerve/state", self.get_state())
 
 

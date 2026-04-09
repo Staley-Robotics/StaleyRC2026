@@ -1,3 +1,9 @@
+"""
+This is a util python file that automatically writes any and all new
+command, sequence, subsystem, or util files
+within their respective __init__.py files
+"""
+
 import os
 from pathlib import Path
 
