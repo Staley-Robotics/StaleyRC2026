@@ -14,8 +14,9 @@ from phoenix6.controls import VelocityVoltage
 
 from util.FalconLogger import FalconLogger
 
-class Agitator(Subsystem):
-    '''This is functionally quite similar (if not the same) as Launcher, but for now they are kept seperate for simplicity's sake'''
+__all__ = ["Agitator"]
+
+class Agitator(Flywheel):
     class Speeds:
         SPEED_LOW:rotations_per_second = 40
         SPEED_MED:rotations_per_second = 40
@@ -29,22 +30,16 @@ class Agitator(Subsystem):
         k_S:float=0.22
         k_V:float=0.112
 
-        kAtSpeedTolerance:rotations_per_second = 3.0 # ntproperty("/Agitator/At speed tolerance (rps)", 2.0, persistent=True) #total guess
+        kAtSpeedTolerance:rotations_per_second = 3.0
 
-        '''
-        kraken free speed max: 6000 rpm = 100 rps
-        cut to 70 for safety (and because free speed is gonna be higher than max in our mechanism)
-
-        NOTE: actual flywheel speed will be double the motor speed because of gearing
-        '''
         kMaxAllowedSpeed:rotations_per_second = 60.0
         kSpeedAt12Volts:rotations_per_second = 90.0
+class Flywheel(Subsystem):
+    '''This is functionally quite similar (if not the same) as Launcher, but for now they are kept seperate for simplicity's sake'''
     
-    # disabled = ntproperty("/Disabling/Agitator", False, persistent=False)
-
     def __init__(self, motorID:int, isDisabled:typing.Callable[[], bool]) -> None:
         ### Motor Setup
-        ## Launch Motor
+        # Motor object
         self.motor = TalonFX(motorID, "rio")
 
         # Config
@@ -69,24 +64,18 @@ class Agitator(Subsystem):
             .with_supply_current_lower_limit(20)
             .with_supply_current_lower_time(1.0)
         )
-        # .with_current_limits(
-        #     CurrentLimitsConfigs()
-        #     .with_stator_current_limit(80.0)
-        #     .with_stator_current_limit_enable(True)
-        # ) # hitting limit caused continual crash without error
+
         self.motor.configurator.apply(motor_config)
 
-        ### Functionality Setup (velocity request)
+        ### Functionality Setup
         self.velocity_req = VelocityVoltage(0.0)
 
         self.disabled = isDisabled
 
-        # Logging
+        # Input Logging
         FalconLogger.addLoggedObject("Agitator/Inputs/motor", self.motor)
 
     def periodic(self) -> None:
-        # Logging: Write Current Measured Subsystem State
-
         # Run Subsystem: Set New State To Subsystem
         if RobotState.isDisabled() or self.disabled():
             self.stop()
@@ -101,16 +90,14 @@ class Agitator(Subsystem):
         FalconLogger.logOutput("/Disabling/Agitator", self.disabled())
 
     def run(self) -> None:
-        # control velocity
-        if not self.disabled():
-            self.motor.set_control(self.velocity_req)
+        # set velocity control
+        self.motor.set_control(self.velocity_req)
 
     def stop(self) -> None:
+        # sets desired speed to 0 for when reenabled
         self.velocity_req.velocity = 0.0
+        # sets real motor output to none for slow deceleration
         self.motor.set(0)
-    
-    # def toggleDisabled(self) -> None:
-    #     self.disabled = not self.disabled
 
     def setDesiredSpeed(self, speed:rotations_per_second) -> None:
         self.velocity_req.velocity = speed

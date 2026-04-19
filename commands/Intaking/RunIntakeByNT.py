@@ -1,7 +1,6 @@
 import typing
 
 from commands2 import Command, Subsystem
-# from wpimath.units import percent
 from ntcore.util import ntproperty
 
 from subsystems import Intake
@@ -19,17 +18,17 @@ class RunIntakeByNT(Command):
         # Command Attributes
         self.intake_sys:Intake = intakeSys
 
-        self.setName( f"RunIntakeByNT" )
+        self.setName( self.__class__.__name__ )
         self.addRequirements( intakeSys )
 
     def initialize(self) -> None:
         pass
 
     def execute(self) -> None:
-        self.intake_sys.setIntakeSpeed( self.speed )
+        self.intake_sys.setIntakeSpeed( self.speed ) # this should technically be able to go in the initialize, but I don't trust it
 
     def end(self, interrupted:bool) -> None:
-        self.intake_sys.setIntakeSpeed(Intake.Speeds.STOP)
+        self.intake_sys.setIntakeSpeed( Intake.Speeds.STOP )
 
     def isFinished(self) -> bool:
         return False

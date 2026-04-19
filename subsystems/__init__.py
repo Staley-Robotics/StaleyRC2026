@@ -1,6 +1,4 @@
 from .Agitator import *
-from .ClimberClosedLoop import *
-from .ClimberOpenLoop import *
 from .Intake import *
 from .Launcher import *
 from .LimelightVision import *

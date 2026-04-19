@@ -9,6 +9,10 @@ from subsystems import Launcher, Agitator
 from util import RebuiltCalc
 
 class LaunchBalls(Command):
+    '''
+    Handle efficient running of Agitator to launch balls a consistent distance
+    NOTE: Currently unfinished and based on old control paradigm
+    '''
     # Variable Declaration
 
     a = ntproperty("Settings/RunLauncherByDist/mult a (dist)", 5.0, persistent=True)

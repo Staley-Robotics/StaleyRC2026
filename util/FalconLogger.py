@@ -5,11 +5,13 @@ from typing import Any
 from wpilib import RobotController, RobotBase
 from ntcore import NetworkTableInstance, NetworkTable, StructPublisher, _setNow
 
-from phoenix6.hardware import TalonFX
+from phoenix6.hardware import TalonFX, CANcoder
 from rev import SparkMax
 
+LoggableObject = TalonFX | SparkMax | CANcoder
+
 class LoggedObject:
-    def __init__(self, key:str, obj:TalonFX | SparkMax):
+    def __init__(self, key:str, obj:LoggableObject):
         self.key = key
         self.obj = obj
 
@@ -37,23 +39,29 @@ class FalconLogger:
         for logged_obj in self.__loggedObjects:
             match logged_obj.obj:
                 case SparkMax():
-                    self.logInput(logged_obj.key + "/set speed", logged_obj.obj.get())
+                    self.logInput(logged_obj.key + "/set speed - pct", logged_obj.obj.get())
                     self.logInput(logged_obj.key + "/duty cycle output", logged_obj.obj.getAppliedOutput())
-                    self.logInput(logged_obj.key + "/converted position", logged_obj.obj.getAbsoluteEncoder().getPosition())
-                    self.logInput(logged_obj.key + "/converted velocity", logged_obj.obj.getAbsoluteEncoder().getVelocity())
+                    self.logInput(logged_obj.key + "/converted position - rot", logged_obj.obj.getAbsoluteEncoder().getPosition())
+                    self.logInput(logged_obj.key + "/converted velocity - rot/s", logged_obj.obj.getAbsoluteEncoder().getVelocity())
                     self.logInput(logged_obj.key + "/output current - amps", logged_obj.obj.getOutputCurrent())
                     self.logInput(logged_obj.key + "/temp - c", logged_obj.obj.getMotorTemperature())
                 case TalonFX():
                     #NOTE: this is likely not the best way to log data from phoenix hardware, but is still used for consistency
-                    self.logInput(logged_obj.key + "/rotor velocity", logged_obj.obj.get_rotor_velocity().value)
-                    self.logInput(logged_obj.key + "/converted velocity", logged_obj.obj.get_velocity().value)
-                    self.logInput(logged_obj.key + "/rotor position", logged_obj.obj.get_rotor_position().value)
-                    self.logInput(logged_obj.key + "/converted position", logged_obj.obj.get_position().value)
+                    self.logInput(logged_obj.key + "/rotor velocity - rot/s", logged_obj.obj.get_rotor_velocity().value)
+                    self.logInput(logged_obj.key + "/converted velocity - rot/s", logged_obj.obj.get_velocity().value)
+                    self.logInput(logged_obj.key + "/rotor position - rot", logged_obj.obj.get_rotor_position().value)
+                    self.logInput(logged_obj.key + "/converted position - rot", logged_obj.obj.get_position().value)
                     self.logInput(logged_obj.key + "/stator current - amps", logged_obj.obj.get_stator_current().value)
                     self.logInput(logged_obj.key + "/torque current - amps", logged_obj.obj.get_torque_current().value)
                     self.logInput(logged_obj.key + "/stall current - amps", logged_obj.obj.get_motor_stall_current().value)
                     self.logInput(logged_obj.key + "/supply current - amps", logged_obj.obj.get_supply_current().value)
                     self.logInput(logged_obj.key + "/temp - c", logged_obj.obj.get_device_temp().value)
+                case CANcoder():
+                    #NOTE: this is likely not the best way to log data from phoenix hardware, but is still used for consistency
+                    self.logInput(logged_obj.key + "/absolute position - rots", logged_obj.obj.get_absolute_position().value)
+                    self.logInput(logged_obj.key + "/velocity - rps", logged_obj.obj.get_velocity().value)
+                    self.logInput(logged_obj.key + "/magnet health", logged_obj.obj.get_magnet_health().value)
+                    self.logInput(logged_obj.key + "/total position - rots", logged_obj.obj.get_position().value)
                 case _:
                     print(f"Unsupported object {logged_obj} added to FalconLogger's loggedInputs")
 
@@ -131,7 +139,7 @@ class FalconLogger:
         self.__outputs.update( {key: value} )
     
     @classmethod
-    def addLoggedObject(self, key:str, value:TalonFX | SparkMax) -> None:
+    def addLoggedObject(self, key:str, value:LoggableObject) -> None:
         """
         Add a new object to have its inputs automatically logged
         This function only needs to be called on an object once

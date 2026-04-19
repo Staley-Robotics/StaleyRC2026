@@ -16,7 +16,7 @@ from util.FalconLogger import FalconLogger
 
 class Launcher(Subsystem):
     '''This is functionally quite similar (if not the same) as Agitator, but for now they are kept seperate for a variety of annoyances' sake'''
-    class LauncherSpeeds:
+    class Speeds:
         WAIT:rotations_per_second = 10 # default speed for lower power consumption but faster acceleration when needed
         SPEED_AT_ZERO_DIST:rotations_per_second = 20 # total guess, speed at minimum distance TODO: measure
         SPEED_AT_MAX_DIST:rotations_per_second = 70 # total guess, speed at some arbitrary larger distance TODO: measure
@@ -111,7 +111,8 @@ class Launcher(Subsystem):
 
     def run(self) -> None:
         # control velocity
-        if self.getDesiredSpeed() == 0 and not self.disabled():
+        # If
+        if self.getDesiredSpeed() == 0 or (self.getDesiredSpeed() == self.Speeds.WAIT and self.getCurrentSpeed() > self.Speeds.WAIT + self.kAtSpeedTolerance):
             self.motor.set(0)
         else:
             self.motor.set_control(self.velocity_req)
@@ -120,14 +121,12 @@ class Launcher(Subsystem):
         self.velocity_req.velocity = 0.0
         self.motor.set(0)
 
-    # def toggleDisabled(self) -> None:
-    #     self.disabled = not self.disabled
-
     def setDesiredSpeed(self, speed:rotations_per_second) -> None:
-        self.velocity_req.velocity = min(speed, self.LauncherSpeeds.kMaxAllowedSpeed)
+        self.velocity_req.velocity = min(speed, self.Speeds.kMaxAllowedSpeed)
     
     def getCurrentSpeed(self) -> rotations_per_second:
         return self.motor.get_velocity().value
+    
     def getDesiredSpeed(self) -> rotations_per_second:
         return self.velocity_req.velocity
     

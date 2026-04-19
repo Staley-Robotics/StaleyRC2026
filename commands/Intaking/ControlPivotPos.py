@@ -20,7 +20,7 @@ class ControlPivotPos(Command):
         self.intake_sys:Intake = intakeSys
         self.get_speed = posInput
 
-        self.setName( f"ControlPivotPos" )
+        self.setName( self.__class__.__name__ )
         self.addRequirements( intakeSys )
 
     def initialize(self) -> None:

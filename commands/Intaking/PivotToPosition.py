@@ -24,18 +24,16 @@ class PivotToPosition(Command):
 
     def initialize(self) -> None:
         pass
-        # self.intake_sys.setPivotSetpoint(self.setPos)
 
     def execute(self) -> None:
-        self.intake_sys.setPivotSetpoint(self.setPos)
+        self.intake_sys.setPivotSetpoint(self.setPos) # this should technically be able to go in the initialize, but I don't trust it
 
     def end(self, interrupted:bool) -> None:
-        pass
-        # if interrupted:
-        # self.intake_sys.setPivotSetpoint(self.intake_sys.getPivotPosition())
+        if interrupted:
+            self.intake_sys.setPivotSetpoint(self.intake_sys.getPivotPosition())
 
     def isFinished(self) -> bool:
-        return self.intake_sys.getAtSetpoint()
+        return self.intake_sys.getClosedLoopAtSetpoint()
 
     def runsWhenDisabled(self) -> bool:
         return False

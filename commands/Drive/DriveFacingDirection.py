@@ -38,7 +38,7 @@ class DriveFacingDirection(Command):
                 .with_steer_request_type(swerve.SwerveModule.SteerRequestType.POSITION)
         )
 
-        self.setName( f"{self.__class__.__name__}" )
+        self.setName( self.__class__.__name__ )
         self.addRequirements( swerveSys )
 
     # On Start

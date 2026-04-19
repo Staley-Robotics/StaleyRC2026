@@ -43,7 +43,7 @@ class SwerveDrive(Subsystem, TunerSwerveDrivetrain):
     default_max = 0.6
     drive_max_speed_pct: percent = ntproperty("Settings/drive/max speed %", default_max, writeDefault=True)
     drive_half_speed_pct: percent = ntproperty("Settings/drive/half speed %", 0.2, writeDefault=True)
-    drive_cur_speed_pct: percent =  ntproperty("Settings/drive/cur speed %", default_max, writeDefault=True) # set cur to max
+    drive_cur_speed_pct: percent =  ntproperty("Settings/drive/crnt max speed %", default_max, writeDefault=True) # set cur to max
     drive_max_rot_speed: percent =  ntproperty("Settings/drive/max rot speed (rots/sec)", 0.65, persistent=True)
 
     deadband_percentage:percent = 0.05

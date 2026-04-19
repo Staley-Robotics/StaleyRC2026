@@ -10,7 +10,7 @@ from wpimath.units import *
 from phoenix6.units import *
 
 from phoenix6.hardware import TalonFX, CANcoder
-from phoenix6.configs import * #TalonFXConfiguration, MotorOutputConfigs, Slot0Configs, FeedbackConfigs, CANcoderConfiguration, MagnetSensorConfigs, ClosedLoopGeneralConfigs, Slot1Configs
+from phoenix6.configs import *
 from phoenix6.signals import InvertedValue, NeutralModeValue, FeedbackSensorSourceValue, GravityTypeValue, SensorDirectionValue, StaticFeedforwardSignValue, GainSchedBehaviorValue
 from phoenix6.controls import PositionVoltage, VoltageOut
 from phoenix6.sim import ChassisReference
@@ -18,13 +18,13 @@ from phoenix6.sim import ChassisReference
 from util.FalconLogger import FalconLogger
 
 class IntakeConstants:
-    kP:float=23.0    # proportion       The farther away, the harder it pushes
+    kP:float=23.0   # proportion       The farther away, the harder it pushes
     kI:float=0.2    # integral         The longer it's been off, the harder it pushes
     kD:float=1.0    # differential     The harder it pushes, the less it pushes :ROFL:
-    kS:float=0.3    # static
-    kG:float=0.27    # gravity          Constant force, but accounting for gravity
+    kS:float=0.3    # static           The amount of force required to overcome static friction (friction while not moving)
+    kG:float=0.27   # gravity          Constant force, but accounting for gravity - scales by rotation for pivots
 
-    gear_ratio:float=1/75#1/83.25 #11/60 # rotor/mechanism
+    gear_ratio:float=1/75 # rotor/mechanism
 
     tolerance:degrees = 2
     wiggle_tolerance:degrees = 10
@@ -38,19 +38,18 @@ class Intake(Subsystem):
     class Positions:
         '''
         Position setpoints for the intake in degrees
-        0 should be the horizontal/outward/deployed position
+        0 should be the horizontal position
         90 should be straight up
         '''
-        MAX:degrees = (0.354004 * 360) - 5 # -5 degrees
-        MIN:degrees = 1.5    # 0 (by definition)
-        START:degree = MAX
+        MAX:degrees = (0.354004 * 360) - 5  #
+        MIN:degrees = 0                     # 0 (by definition)
+        START:degree = MAX                  #
 
         STORED:degrees =  MAX - 1
         INTAKING:degrees = MIN
         BOUNCE_DOWN:degrees = 30
         BOUNCE_UP:degrees = 90
     
-    # disablePivot = ntproperty("/Disabling/IntakePivot", False, persistent=False)
 
     def __init__(self, intakeMotorID:int, pivotMotorID:int, pivotEncoderID:int, pivotEncoderOffset:rotation, isDisabled:typing.Callable[[], bool]) -> None:
         ### Motor Setup
@@ -88,9 +87,9 @@ class Intake(Subsystem):
                 .with_gain_sched_behavior(GainSchedBehaviorValue.USE_SLOT1)
         ).with_slot1(
             Slot1Configs()
-                .with_k_p(0)#IntakeConstants.kP)
+                .with_k_p(0)
                 .with_k_i(0)
-                .with_k_d(0)#IntakeConstants.kD)
+                .with_k_d(0)
                 .with_k_s(0)
                 .with_k_g(0)
                 .with_gravity_type(GravityTypeValue.ARM_COSINE)
@@ -136,6 +135,7 @@ class Intake(Subsystem):
         self.disablePivot = isDisabled
  
         ## Logging
+        FalconLogger.addLoggedObject("/Intake/PivotEncoder", self.pivot_encoder)
         FalconLogger.addLoggedObject("/Intake/PivotMotor", self.pivot_motor)
         FalconLogger.addLoggedObject("/Intake/IntakeMotor", self.intake_motor)
 
@@ -193,7 +193,7 @@ class Intake(Subsystem):
         FalconLogger.logOutput("/Intake/Outputs/Error (deg)", self.pivot_motor.get_closed_loop_error().value * 360)
         FalconLogger.logOutput("/Intake/Outputs/closed loop reference (deg)", self.pivot_motor.get_closed_loop_reference().value * 360)
         FalconLogger.logOutput("/Intake/Outputs/Position (deg)", self.getPivotPosition())
-        FalconLogger.logOutput("/Intake/Outputs/isAtSetpoint", self.getAtSetpoint())
+        FalconLogger.logOutput("/Intake/Outputs/isAtSetpoint", self.getClosedLoopAtSetpoint())
 
         FalconLogger.logOutput("systemStates/Intake running", self.getIntakeSpeed() > 0.1)
         FalconLogger.logOutput("systemStates/Intake deployed", self.getPivotPosition() < 60)
@@ -275,5 +275,8 @@ class Intake(Subsystem):
     def getPivotPosition(self) -> degrees:
         return self.pivot_encoder.get_absolute_position().value * 360 # rot to deg
     
-    def getAtSetpoint(self) -> bool:
-        return abs(self.pivot_motor.get_closed_loop_error().value * 360) < IntakeConstants.tolerance
+    def getClosedLoopAtSetpoint(self, ovverrideTolerance:rotation|None=None) -> bool:
+        return abs(self.pivot_motor.get_closed_loop_error().value * 360) < (IntakeConstants.tolerance if ovverrideTolerance != None else ovverrideTolerance)
+    
+    def getAtSetpoint(self, ovverrideTolerance:rotation|None=None) -> bool:
+        return abs(self.getPivotPosition() - self.getPivotSetpoint()) < (IntakeConstants.tolerance if ovverrideTolerance != None else ovverrideTolerance)

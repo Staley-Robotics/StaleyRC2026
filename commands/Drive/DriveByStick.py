@@ -14,10 +14,10 @@ class DriveByStick(Command):
     # Initialization
     def __init__( self,
                   swerveSys: SwerveDrive,
-                  getX: typing.Callable[[], float] = lambda: 0.0,
-                  getY: typing.Callable[[], float] = lambda: 0.0,
-                  getRot: typing.Callable[[], float] = lambda: 0.0,
-                  isDisabled: typing.Callable[[], bool] = lambda: False
+                  getX: typing.Callable[[], float],
+                  getY: typing.Callable[[], float],
+                  getRot: typing.Callable[[], float],
+                  isDisabled: typing.Callable[[], bool]
                 ) -> None:
         # Command Attributes
         self.swerve_sys:SwerveDrive = swerveSys
@@ -39,7 +39,7 @@ class DriveByStick(Command):
                 .with_drive_request_type(swerve.SwerveModule.DriveRequestType.OPEN_LOOP_VOLTAGE)
         )
 
-        self.setName( f"{self.__class__.__name__}" )
+        self.setName( self.__class__.__name__ )
         self.addRequirements( swerveSys )
 
     # On Start

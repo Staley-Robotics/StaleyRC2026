@@ -8,30 +8,31 @@ from ntcore.util import ntproperty
 from subsystems import Launcher
 
 class RunLauncherByNT(Command):
+    '''Made seperate from RunAgitatorByNT because of ntproperty's class-based functionality'''
     # Variable Declaration
-    flywheel_sys:Launcher = None
+    agitator_sys:Launcher = None
 
     speed = ntproperty("/Settings/RunLauncherByNT/speed (rps: [0,70])", 0.0, persistent=True)
     speedModification = ntproperty("/Settings/RunLauncherByNT/speed increment (rps: ~[0-2])", 0.5, persistent=True)
     
     # Initialization
     def __init__( self,
-                  flywheelSys:Launcher,
+                  launcherSys:Launcher,
                 ) -> None:
         # Command Attributes
-        self.flywheel_sys:Launcher = flywheelSys
+        self.agitator_sys:Launcher = launcherSys
 
-        self.setName( f"RunLauncherByNT" )
-        self.addRequirements( flywheelSys )
+        self.setName( self.__class__.__name__ )
+        self.addRequirements( launcherSys )
 
     def initialize(self) -> None:
         pass
 
     def execute(self) -> None:
-        self.flywheel_sys.setDesiredSpeed( self.speed )
+        self.agitator_sys.setDesiredSpeed( self.speed )
 
     def end(self, interrupted:bool) -> None:
-        self.flywheel_sys.setDesiredSpeed( 0.0 )
+        self.agitator_sys.setDesiredSpeed( 0.0 )
     
     def increaseSpeed(self) -> None:
         """

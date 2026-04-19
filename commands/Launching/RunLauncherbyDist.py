@@ -12,9 +12,10 @@ class RunLauncherByDist(Command):
     # Variable Declaration
     launcher_sys:Launcher = None
 
-    a = ntproperty("Settings/RunLauncherByDist/mult a (dist)", 1.0, persistent=True)
-    b = ntproperty("Settings/RunLauncherByDist/mult b (dist^2)", 0.2, persistent=True)
-    c = ntproperty("Settings/RunLauncherByDist/const", 14.0, persistent=True)
+    # Active Tuning variable implementation:
+    # a = ntproperty("Settings/RunLauncherByDist/mult a (dist)", 1.0, persistent=True)
+    # b = ntproperty("Settings/RunLauncherByDist/mult b (dist^2)", 0.2, persistent=True)
+    # c = ntproperty("Settings/RunLauncherByDist/const", 14.0, persistent=True)
 
     postEqModifier = ntproperty("Settings/RunLauncherByDist/postEqModifier", 1.0, persistent=True)
     
@@ -66,5 +67,5 @@ class RunLauncherByDist(Command):
     def runsWhenDisabled(self) -> bool:
         return False
     
-    def change_c(self, change_by:float) -> None:
-        self.c += change_by
+    # def change_c(self, change_by:float) -> None:
+    #     self.c += change_by

@@ -27,7 +27,7 @@ class LauncherDefault(Command):
 
     def execute(self) -> None:
         self.launcher_sys.setDesiredSpeed(
-            self.launcher_sys.LauncherSpeeds.WAIT
+            self.launcher_sys.Speeds.WAIT
         )
 
     def end(self, interrupted:bool) -> None:
