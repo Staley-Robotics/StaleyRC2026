@@ -1,8 +1,8 @@
 [
   {
-    "name": "/Settings/Launcher/atSpeed tolerance",
+    "name": "Settings/drive/max rot speed (rots/sec)",
     "type": "double",
-    "value": 3.0,
+    "value": 0.65,
     "properties": {
       "persistent": true
     }
@@ -19,6 +19,14 @@
     "name": "/Settings/ControlIntakePos/input mult",
     "type": "double",
     "value": 0.04,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "Settings/RunLauncherByDist/postEqModifier",
+    "type": "double",
+    "value": 1.0,
     "properties": {
       "persistent": true
     }
@@ -56,33 +64,17 @@
     }
   },
   {
-    "name": "/Settings/RunLauncherByNT/speed (rps: 0-70)",
+    "name": "/Settings/RunLauncherByNT/speed (rps: [0,70])",
     "type": "double",
-    "value": 0.0,
+    "value": -1.5,
     "properties": {
       "persistent": true
     }
   },
   {
-    "name": "/Settings/ControlClimberOpenLoop/input mult",
+    "name": "/Settings/RunLauncherByNT/speed increment (rps: ~[0-2])",
     "type": "double",
-    "value": 0.6,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "Settings/drive/max speed %",
-    "type": "double",
-    "value": 0.6,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "Settings/drive/max rot speed (rots/sec)",
-    "type": "double",
-    "value": 0.65,
+    "value": 0.5,
     "properties": {
       "persistent": true
     }
@@ -113,6 +105,30 @@
   },
   {
     "name": "/climberSpeed",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Settings/ControlClimberOpenLoop/input mult",
+    "type": "double",
+    "value": 0.6,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Settings/Launcher/atSpeed tolerance",
+    "type": "double",
+    "value": 3.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Settings/RunLauncherByNT/speed (rps: 0-70)",
     "type": "double",
     "value": 0.0,
     "properties": {

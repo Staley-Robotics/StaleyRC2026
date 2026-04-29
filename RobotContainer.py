@@ -16,7 +16,7 @@ from pathplannerlib.auto import AutoBuilder, NamedCommands
 
 ## Local Imports
 from commands import *
-from subsystems import TunerConstants, ClimberClosedLoop, Intake, Launcher, Agitator, Vision
+from subsystems import TunerConstants, Intake, Launcher, Agitator, Vision
 
 from util import * #FalconXboxController, Telemetry, ControlMode, RebuiltCalc, RebuiltControlBoard
 

@@ -16,24 +16,6 @@ from util.FalconLogger import FalconLogger
 
 __all__ = ["Agitator"]
 
-class Agitator(Flywheel):
-    class Speeds:
-        SPEED_LOW:rotations_per_second = 40
-        SPEED_MED:rotations_per_second = 40
-        SPEED_HIGH:rotations_per_second = 40
-        EJECT:rotations_per_second = -20
-
-    class Constants:
-        k_P:float=0.0
-        k_I:float=0.0
-        k_D:float=0.0
-        k_S:float=0.22
-        k_V:float=0.112
-
-        kAtSpeedTolerance:rotations_per_second = 3.0
-
-        kMaxAllowedSpeed:rotations_per_second = 60.0
-        kSpeedAt12Volts:rotations_per_second = 90.0
 class Flywheel(Subsystem):
     '''This is functionally quite similar (if not the same) as Launcher, but for now they are kept seperate for simplicity's sake'''
     
@@ -107,3 +89,22 @@ class Flywheel(Subsystem):
     
     def isAtSpeed(self) -> bool:
         return abs(self.motor.get_closed_loop_error().value) < self.Constants.kAtSpeedTolerance
+    
+class Agitator(Flywheel):
+    class Speeds:
+        SPEED_LOW:rotations_per_second = 40
+        SPEED_MED:rotations_per_second = 40
+        SPEED_HIGH:rotations_per_second = 40
+        EJECT:rotations_per_second = -20
+
+    class Constants:
+        k_P:float=0.0
+        k_I:float=0.0
+        k_D:float=0.0
+        k_S:float=0.22
+        k_V:float=0.112
+
+        kAtSpeedTolerance:rotations_per_second = 3.0
+
+        kMaxAllowedSpeed:rotations_per_second = 60.0
+        kSpeedAt12Volts:rotations_per_second = 90.0

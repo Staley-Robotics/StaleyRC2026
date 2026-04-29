@@ -275,8 +275,8 @@ class Intake(Subsystem):
     def getPivotPosition(self) -> degrees:
         return self.pivot_encoder.get_absolute_position().value * 360 # rot to deg
     
-    def getClosedLoopAtSetpoint(self, ovverrideTolerance:rotation|None=None) -> bool:
-        return abs(self.pivot_motor.get_closed_loop_error().value * 360) < (IntakeConstants.tolerance if ovverrideTolerance != None else ovverrideTolerance)
+    def getClosedLoopAtSetpoint(self, ovverrideTolerance:degrees|None=None) -> bool:
+        return abs(self.pivot_motor.get_closed_loop_error().value * 360) < (IntakeConstants.tolerance if ovverrideTolerance == None else ovverrideTolerance)
     
-    def getAtSetpoint(self, ovverrideTolerance:rotation|None=None) -> bool:
-        return abs(self.getPivotPosition() - self.getPivotSetpoint()) < (IntakeConstants.tolerance if ovverrideTolerance != None else ovverrideTolerance)
+    def getAtSetpoint(self, ovverrideTolerance:degrees|None=None) -> bool:
+        return abs(self.getPivotPosition() - self.getPivotSetpoint()) < (IntakeConstants.tolerance if ovverrideTolerance == None else ovverrideTolerance)
