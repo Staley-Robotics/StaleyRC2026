@@ -34,6 +34,8 @@ class MyRobot(TimedRobot):
 
         # handle phoenix logs
         if RobotBase.isSimulation() or not RobotBase.isReal():
+            if not Path('.logs/ctre').is_dir():
+                Path('.logs/ctre').mkdir(parents=True, exist_ok=True)
             SignalLogger.set_path('.logs/ctre')
         
         # Built The Robot
