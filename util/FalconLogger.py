@@ -60,7 +60,7 @@ class FalconLogger:
                     #NOTE: this is likely not the best way to log data from phoenix hardware, but is still used for consistency
                     self.logInput(logged_obj.key + "/absolute position - rots", logged_obj.obj.get_absolute_position().value)
                     self.logInput(logged_obj.key + "/velocity - rps", logged_obj.obj.get_velocity().value)
-                    self.logInput(logged_obj.key + "/magnet health", logged_obj.obj.get_magnet_health().value)
+                    self.logInput(logged_obj.key + "/magnet health", logged_obj.obj.get_magnet_health().value.name)
                     self.logInput(logged_obj.key + "/total position - rots", logged_obj.obj.get_position().value)
                 case _:
                     print(f"Unsupported object {logged_obj} added to FalconLogger's loggedInputs")

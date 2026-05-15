@@ -104,10 +104,16 @@ class RebuiltCalc:
     should_invert_auto_rot:bool = False
     use_relay_targeting:bool = False
 
+    is_blue_alliance:bool = False
+
     '''
     defining all variables here in the class definition rather than __init__ means their values will be updated and accessible through the class
     this means if you define a RebuiltCalc() object in one place, referencing the RebuiltCalc class should provide the same data
     '''
+
+    @classmethod
+    def isBlueAlliance(cls) -> bool:
+        return cls.is_blue_alliance
 
     @classmethod
     def assignSwerveSys(cls, swerveSys:SwerveDrivetrain):
@@ -135,11 +141,13 @@ class RebuiltCalc:
         cls.field_display.setRobotPose(pose)
         cls.field_display.getObject('crntTarget').setPose(cls.getCurrentTargetPose())
         cls.field_display.getObject('poseAtLaunch').setPose(cls.getEstimatedPoseAtLaunchTime())
+
+        cls.is_blue_alliance = DriverStation.getAlliance() == DriverStation.Alliance.kBlue
     
     @classmethod
     def setDesiredRelay(cls, relay:RelayTarget) -> None:
         cls.crntRelayTarget = relay
-        # if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
+        # if cls.isBlueAlliance():
         #     if relay == RelayTarget.AUTO:
         #         cls.desiredRelayPoint = None
         #     elif relay == RelayTarget.LEFT:
@@ -157,7 +165,7 @@ class RebuiltCalc:
     @classmethod
     def botInScoreZone(cls) -> bool:
         pose = cls.getRobotPose()
-        if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
+        if cls.isBlueAlliance():
             return pose.x < FieldBoundaries.blueScoreZoneX
         else:
             return pose.x > FieldBoundaries.redScoreZoneX
@@ -165,7 +173,7 @@ class RebuiltCalc:
     @classmethod
     def botIsLeft(cls) -> bool:
         pose = cls.getRobotPose()
-        if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
+        if cls.isBlueAlliance():
             return pose.y > FieldBoundaries.centerLineY
         else:
             return pose.y < FieldBoundaries.centerLineY
@@ -176,24 +184,24 @@ class RebuiltCalc:
         gets the Translation2d (point on the field) of the current target
         """
         if not cls.use_relay_targeting or cls.botInScoreZone():
-            if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
+            if cls.isBlueAlliance():
                 return TargetPoints.blueHub
             else:
                 return TargetPoints.redHub
         
         if cls.crntRelayTarget == RelayTarget.AUTO:
             if cls.botIsLeft():
-                if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
+                if cls.isBlueAlliance():
                     return TargetPoints.relayLeftBlue
                 else:
                     return TargetPoints.relayLeftRed
             else:
-                if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
+                if cls.isBlueAlliance():
                     return TargetPoints.relayRightBlue
                 else:
                     return TargetPoints.relayRightRed
         else:
-            if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
+            if cls.isBlueAlliance():
                 if cls.crntRelayTarget == RelayTarget.LEFT:
                     return TargetPoints.relayLeftBlue
                 else:
@@ -210,7 +218,7 @@ class RebuiltCalc:
         gets the Translation2d (point on the field) of the current target
         """
         if cls.botInScoreZone():
-            if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
+            if cls.isBlueAlliance():
                 return "blueHub"
             else:
                 return "redHub"
@@ -219,12 +227,12 @@ class RebuiltCalc:
             return "desiredRelayPoint"
         else:
             if cls.botIsLeft():
-                if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
+                if cls.isBlueAlliance():
                     return "relayLeftBlue"
                 else:
                     return "relayLeftRed"
             else:
-                if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
+                if cls.isBlueAlliance():
                     return "relayRightBlue"
                 else:
                     return "relayRightRed"
@@ -277,7 +285,7 @@ class RebuiltCalc:
         # if cls.should_invert_auto_rot:
         #     goalAngle = goalAngle.rotateBy(Rotation2d().fromDegrees(180))
         
-        if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
+        if cls.isBlueAlliance():
             goalAngle = goalAngle.rotateBy(Rotation2d().fromDegrees(180))
         return goalAngle
     

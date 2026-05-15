@@ -22,6 +22,8 @@ from util import * #FalconXboxController, Telemetry, ControlMode, RebuiltCalc, R
 
 class RobotContainer:
 
+    test = ntproperty("hi/../testingthisthing", 42)
+
     def __init__(self) -> None:
         ### Controllers
         self.controller1 = FalconXboxController( 0 )

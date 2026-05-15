@@ -162,8 +162,11 @@ cython_debug/
 # FRC Simulation
 networktables*.json
 simgui*.json
+FRC*.wpilog
+
 ctre_sim/
-.logs/*
+.logs/ctre/*
+
 logs/*
 
 # vscode config
