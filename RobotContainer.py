@@ -234,7 +234,7 @@ class RobotContainer:
             SetIntakeSpeed(self.intakeSys, Intake.Speeds.OUT)
             .alongWith(SetFlywheelSpeed(self.launcherSys, Launcher.Speeds.EJECT))
             .alongWith(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_MED))
-        ) # Poop
+        ) # Poop <- Austin Approved
 
         ## Launching
         runLauncher = RunLauncherByNT(self.launcherSys)
