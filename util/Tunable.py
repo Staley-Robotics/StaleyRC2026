@@ -18,7 +18,7 @@ class Tunable:
 
     base_key = "Tuning/"
 
-    ntInst: NetworkTableInstance = NetworkTable.getInstance()
+    ntInst: NetworkTableInstance.getDefault()
 
     def __init__(self, key:str, defaultValue:tp.Any, persistent:bool=False, writeDefault:bool=False, updator:tp.Callable[[], None]=lambda:None):
         ## Create nt entry key
