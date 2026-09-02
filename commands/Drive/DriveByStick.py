@@ -51,16 +51,16 @@ class DriveByStick(Command):
         if not self.is_disabled():
             if self.field_centric:
                 self.swerve_sys.set_control(
-                    self.drive_fc.with_velocity_x( self.get_y() * self.swerve_sys.max_drive_speed )
-                                .with_velocity_y( self.get_x() * self.swerve_sys.max_drive_speed )
+                    self.drive_fc.with_velocity_x( -self.get_y() * self.swerve_sys.max_drive_speed )
+                                .with_velocity_y( -self.get_x() * self.swerve_sys.max_drive_speed )
                                 .with_rotational_rate( -self.get_rot() * self.swerve_sys.max_rot_speed )
                                 .with_deadband( self.swerve_sys.translation_deadband )
                                 .with_rotational_deadband( self.swerve_sys.rotation_deadband )
                 )
             else:
                 self.swerve_sys.set_control(
-                    self.drive_rc.with_velocity_x( -self.get_y() * self.swerve_sys.max_drive_speed )
-                                .with_velocity_y( -self.get_x() * self.swerve_sys.max_drive_speed )
+                    self.drive_rc.with_velocity_x( self.get_y() * self.swerve_sys.max_drive_speed )
+                                .with_velocity_y( self.get_x() * self.swerve_sys.max_drive_speed )
                                 .with_rotational_rate( -self.get_rot() * self.swerve_sys.max_rot_speed )
                                 .with_deadband( self.swerve_sys.translation_deadband )
                                 .with_rotational_deadband( self.swerve_sys.rotation_deadband )
