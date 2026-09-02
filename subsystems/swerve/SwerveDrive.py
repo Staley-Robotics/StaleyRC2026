@@ -187,7 +187,7 @@ class SwerveDrive(Subsystem, TunerSwerveDrivetrain):
             pose_supplier = lambda: self.get_state().pose,
             reset_pose = self.reset_pose,
             robot_relative_speeds_supplier = lambda: self.get_state().speeds,
-            output = lambda speeds, feedforwards: self.set_control( swerve.requests.ApplyRobotSpeeds().with_speeds(speeds)#.with_wheel_force_feedforwards_x(feedforwards)), # nobody knows what feedforwards are for
+            output = lambda speeds, feedforwards: self.set_control( swerve.requests.ApplyRobotSpeeds().with_speeds(speeds)),#.with_wheel_force_feedforwards_x(feedforwards)), # nobody knows what feedforwards are for
             controller = PPHolonomicDriveController(
                 PIDConstants(0.8, 0.0, 0.0),
                 PIDConstants(5.0, 0.0, 0.0)
