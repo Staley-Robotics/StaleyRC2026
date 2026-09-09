@@ -1,5 +1,4 @@
 from enum import Enum
-
 from commands2 import Subsystem
 from wpilib import RobotState, DutyCycleEncoder, SmartDashboard, RobotBase, RobotController, Mechanism2d, Color8Bit, Color
 from wpilib.simulation import SingleJointedArmSim, LinearSystemSim_2_1_2
