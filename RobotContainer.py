@@ -284,35 +284,35 @@ class RobotContainer:
         """
 
         '''--------------------Create drive commands--------------------'''        
-        self.drive_idle = self.swerveSys.apply_request(lambda: swerve.requests.Idle()).ignoringDisable(True).withName('Idling')
+        # self.drive_idle = self.swerveSys.apply_request(lambda: swerve.requests.Idle()).ignoringDisable(True).withName('Idling')
         self.drive_brake = self.swerveSys.apply_request(lambda: swerve.requests.SwerveDriveBrake()).withName('Brake')
 
-        self.drive_by_stick = DriveByStick(
-            self.swerveSys,
-            self.controller1.getLeftX,
-            self.controller1.getLeftY,
-            self.controller1.getRightX,
-            self.controlBoard.switch3().getAsBoolean
-        )
+        # self.drive_by_stick = DriveByStick(
+        #     self.swerveSys,
+        #     self.controller1.getLeftX,
+        #     self.controller1.getLeftY,
+        #     self.controller1.getRightX,
+        #     self.controlBoard.switch3().getAsBoolean
+        # )
 
         '''--------------------Assign Drive Commands--------------------'''
         ## Defaults
-        self.swerveSys.setDefaultCommand(self.drive_by_stick)
+        # self.swerveSys.setDefaultCommand(self.drive_by_stick)
 
         # Idle while the robot is disabled.
         Trigger(DriverStation.isDisabled).whileTrue(self.drive_idle)
 
         ## Controls
         # Toggle halfspeed
-        def toggleHalfSpeed():
-            # the logic here is technically wrong but oh well.
-            self.swerveSys.drive_cur_speed_pct = self.swerveSys.drive_half_speed_pct if self.swerveSys.drive_cur_speed_pct > self.swerveSys.drive_half_speed_pct else self.swerveSys.drive_max_speed_pct
-        self.controller1.leftStick().onTrue(cmd.runOnce(toggleHalfSpeed))
+        # def toggleHalfSpeed():
+        #     # the logic here is technically wrong but oh well.
+        #     self.swerveSys.drive_cur_speed_pct = self.swerveSys.drive_half_speed_pct if self.swerveSys.drive_cur_speed_pct > self.swerveSys.drive_half_speed_pct else self.swerveSys.drive_max_speed_pct
+        # self.controller1.leftStick().onTrue(cmd.runOnce(toggleHalfSpeed))
 
         # Brake (X shape)
         self.controller1.b().toggleOnTrue(self.drive_brake)
 
-        self.controller1.start().onTrue(cmd.runOnce(self.drive_by_stick.toggleFieldCentric))
+        # self.controller1.start().onTrue(cmd.runOnce(self.drive_by_stick.toggleFieldCentric))
 
     def configureDriveCharacterizationBindings(self) -> None:
         '''
