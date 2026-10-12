@@ -88,6 +88,54 @@
     }
   },
   {
+    "name": "Settings/RunLauncherByDist/postEqModifier",
+    "type": "double",
+    "value": 1.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "Settings/RunLauncherByDistBoost/mult a (dist)",
+    "type": "double",
+    "value": 1.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "Settings/RunLauncherByDistBoost/mult b (dist^2)",
+    "type": "double",
+    "value": 0.2,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "Settings/RunLauncherByDistBoost/const",
+    "type": "double",
+    "value": 14.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "Settings/RunLauncherByDistBoost/postEqModifier",
+    "type": "double",
+    "value": -1.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "Settings/RunLauncherByDistBoost/BoostVal (rpm)",
+    "type": "double",
+    "value": 2.5,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
     "name": "/Settings/RunLauncherByNT/speed (rps: 0-70)",
     "type": "double",
     "value": 0.0,

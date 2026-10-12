@@ -63,6 +63,17 @@ class Intake(Subsystem):
             MotorOutputConfigs()
             .with_neutral_mode(NeutralModeValue.COAST)
             .with_inverted(InvertedValue.CLOCKWISE_POSITIVE)
+        ).with_closed_loop_ramps(
+            ClosedLoopRampsConfigs()
+            .with_voltage_closed_loop_ramp_period(0.1)
+        ).with_current_limits(
+            CurrentLimitsConfigs()
+            .with_stator_current_limit(40.0)
+            .with_stator_current_limit_enable(True)
+            .with_supply_current_limit(30)
+            .with_supply_current_limit_enable(True)
+            .with_supply_current_lower_limit(15)
+            .with_supply_current_lower_time(1.0)
         )
         self.intake_motor.configurator.apply(intake_motor_config)
 
@@ -107,7 +118,7 @@ class Intake(Subsystem):
                 .with_gain_sched_error_threshold(IntakeConstants.tolerance / 360)
         ).with_closed_loop_ramps(
             ClosedLoopRampsConfigs()
-                .with_voltage_closed_loop_ramp_period(0.03)
+                .with_voltage_closed_loop_ramp_period(0.2)
         ).with_current_limits(
             CurrentLimitsConfigs()
             .with_stator_current_limit(60.0)

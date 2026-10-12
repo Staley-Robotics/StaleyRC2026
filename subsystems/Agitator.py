@@ -68,6 +68,9 @@ class Agitator(Subsystem):
             .with_supply_current_limit_enable(True)
             .with_supply_current_lower_limit(20)
             .with_supply_current_lower_time(1.0)
+        ).with_closed_loop_ramps(
+            ClosedLoopRampsConfigs()
+                .with_voltage_closed_loop_ramp_period(0.1)
         )
         # .with_current_limits(
         #     CurrentLimitsConfigs()

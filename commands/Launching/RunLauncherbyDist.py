@@ -16,7 +16,7 @@ class RunLauncherByDist(Command):
     b = ntproperty("Settings/RunLauncherByDist/mult b (dist^2)", 0.2, persistent=True)
     c = ntproperty("Settings/RunLauncherByDist/const", 14.0, persistent=True)
 
-    postEqModifier = ntproperty("Settings/RunLauncherByDist/postEqModifier", 1.0, persistent=True)
+    postEqModifier = ntproperty("Settings/RunLauncherByDist/postEqModifier", -1.0, persistent=True)
     
     # Initialization
     def __init__( self,

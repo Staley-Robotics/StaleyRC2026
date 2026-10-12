@@ -1,0 +1,79 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 7.804208273894435,
+        "y": 5.387089871611984
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 7.757095765909442,
+        "y": 6.545478752404499
+      },
+      "isLocked": false,
+      "linkedName": "OSunddepotFill"
+    },
+    {
+      "anchor": {
+        "x": 6.368017118402282,
+        "y": 7.41845934379458
+      },
+      "prevControl": {
+        "x": 7.904000091933082,
+        "y": 7.433174930208878
+      },
+      "nextControl": {
+        "x": 1.3344919631016046,
+        "y": 7.370235323302284
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.344094151212553,
+        "y": 7.1855634807417985
+      },
+      "prevControl": {
+        "x": 3.0039657631954344,
+        "y": 7.224379457917261
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "OShookDepotrefill"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 1,
+      "rotationDegrees": 1.0
+    },
+    {
+      "waypointRelativePos": 1.4797441364605397,
+      "rotationDegrees": 2.0
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 4.0,
+    "maxAcceleration": 4.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -54.7824070318073
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -93.73139699916045
+  },
+  "useDefaultConstraints": true
+}

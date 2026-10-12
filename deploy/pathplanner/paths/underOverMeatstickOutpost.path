@@ -117,6 +117,12 @@
           "name": "DeployIntake"
         }
       }
+    },
+    {
+      "name": "RunIntake",
+      "waypointRelativePos": 0.9074949358541657,
+      "endWaypointRelativePos": null,
+      "command": null
     }
   ],
   "globalConstraints": {

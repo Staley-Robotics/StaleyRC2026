@@ -96,6 +96,10 @@ class RobotContainer:
         # Bawlz
         # allow controller 1 or 2 to hold on a(), and c1 to hold either trigger
         ((self.controller1.a() | self.controller2.a()) | (self.controller1.rightTrigger(0.3) | self.controller1.leftTrigger(0.3))).whileTrue(SetIntakeSpeed(self.intakeSys, Intake.Speeds.IN))
+
+        # allow controller 2 to temp disable intake
+        self.controller2.b().whileTrue(SetIntakeSpeed(self.intakeSys, Intake.Speeds.STOP))
+        
         # Eject
         self.controlBoard.extra1().whileTrue(
             SetIntakeSpeed(self.intakeSys, Intake.Speeds.OUT)
@@ -105,6 +109,7 @@ class RobotContainer:
 
         ## Launching
         runLauncher = RunLauncherByDist(self.launcherSys)
+        # runLauncherBoost = RunLauncherByDistBoost(self.launcherSys)
 
         # self.controller2.rightBumper().onTrue(cmd.runOnce(runLauncher.change_c(+0.5)))
         # self.controller2.leftBumper().onTrue(cmd.runOnce(runLauncher.change_c(-0.5)))
@@ -113,6 +118,7 @@ class RobotContainer:
 
         self.controller2.x().toggleOnTrue(runLauncher)
         self.controller2.leftTrigger(0.3).whileTrue(RunLauncherByDist(self.launcherSys)) # uses different instance of command for better control
+        self.controller2.leftBumper().whileTrue(RunLauncherByDistBoost(self.launcherSys)) # boosted launch (boost is a ntproperty)
         self.controller2.rightTrigger(0.3).whileTrue(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_MED).onlyWhile(
             # only launch if launcher at speed OR switch say yes
             lambda: (self.launcherSys.isAtSpeed() and self.launcherSys.getDesiredSpeed() != Launcher.LauncherSpeeds.WAIT) or self.controlBoard.switch1().getAsBoolean()

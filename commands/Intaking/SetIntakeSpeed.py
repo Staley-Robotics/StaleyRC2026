@@ -26,7 +26,7 @@ class SetIntakeSpeed(Command):
         pass
 
     def end(self, interrupted:bool) -> None:
-        self.intake_sys.setIntakeSpeed(Intake.Speeds.STOP)
+        self.intake_sys.setIntakeSpeed(self.set_speed)
 
     def isFinished(self) -> bool:
         return False

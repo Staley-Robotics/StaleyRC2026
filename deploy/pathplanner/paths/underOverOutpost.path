@@ -53,7 +53,7 @@
       },
       "prevControl": {
         "x": 7.8492787676267115,
-        "y": 2.7305775369341467
+        "y": 2.7305775369341454
       },
       "nextControl": {
         "x": 7.821755555555557,
@@ -119,6 +119,12 @@
           "name": "DeployIntake"
         }
       }
+    },
+    {
+      "name": "RunIntake",
+      "waypointRelativePos": 1.9986495611073496,
+      "endWaypointRelativePos": null,
+      "command": null
     }
   ],
   "globalConstraints": {

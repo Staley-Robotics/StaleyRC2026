@@ -1,0 +1,144 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 3.3295666666666666,
+        "y": 2.4953777777777773
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 2.30527817403709,
+        "y": 1.8418972895863055
+      },
+      "isLocked": false,
+      "linkedName": "needrefillrdoubleramp"
+    },
+    {
+      "anchor": {
+        "x": 3.1592296718972896,
+        "y": 0.5739087018544944
+      },
+      "prevControl": {
+        "x": 2.5545911455486876,
+        "y": 0.5587640345991068
+      },
+      "nextControl": {
+        "x": 3.7722608475986688,
+        "y": 0.5892635837692198
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 5.876348074179743,
+        "y": 0.5739087018544944
+      },
+      "prevControl": {
+        "x": 5.314132870081432,
+        "y": 0.540495180991442
+      },
+      "nextControl": {
+        "x": 6.438563278278055,
+        "y": 0.6073222227175468
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 7.817146932952923,
+        "y": 0.8714978601997154
+      },
+      "prevControl": {
+        "x": 7.582845425317811,
+        "y": 0.5374477880371797
+      },
+      "nextControl": {
+        "x": 8.051448440588036,
+        "y": 1.205547932362251
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 7.985349500713266,
+        "y": 2.8122967189728967
+      },
+      "prevControl": {
+        "x": 7.985349500713266,
+        "y": 3.0635200352343137
+      },
+      "nextControl": {
+        "x": 7.985349500713266,
+        "y": 2.514707560627676
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 3.3295666666666666,
+        "y": 2.4953777777777773
+      },
+      "prevControl": {
+        "x": 5.319985734664764,
+        "y": 2.3465049928673327
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "needrefillrdoubleramp"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 1,
+      "rotationDegrees": -2.8624052261117767
+    },
+    {
+      "waypointRelativePos": 2,
+      "rotationDegrees": 10.619655276155003
+    },
+    {
+      "waypointRelativePos": 3,
+      "rotationDegrees": 82.18470645323295
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [
+    {
+      "name": "DeployIntake",
+      "waypointRelativePos": 2.4577987846050027,
+      "endWaypointRelativePos": null,
+      "command": null
+    },
+    {
+      "name": "RunIntake",
+      "waypointRelativePos": 2.9304523970290304,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 4.0,
+    "maxAcceleration": 4.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 52.076378177636805
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 52.076378177636805
+  },
+  "useDefaultConstraints": true
+}
