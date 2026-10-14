@@ -431,3 +431,5 @@ class RobotContainer:
             )
         NamedCommands.registerCommand("DeployIntake", PivotToPosition(self.intakeSys, Intake.Positions.INTAKING))
         NamedCommands.registerCommand("RunIntake", SetIntakeSpeed(self.intakeSys, Intake.Speeds.IN))
+        NamedCommands.registerCommand("UndeployIntake", PivotToPosition(self.intakeSys, Intake.Positions.START))
+        NamedCommands.registerCommand("Explode", PivotToPosition(self.intakeSys, Intake.Positions.START))
