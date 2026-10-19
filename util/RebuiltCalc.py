@@ -104,6 +104,8 @@ class RebuiltCalc:
     should_invert_auto_rot:bool = False
     use_relay_targeting:bool = False
 
+    
+
     '''
     defining all variables here in the class definition rather than __init__ means their values will be updated and accessible through the class
     this means if you define a RebuiltCalc() object in one place, referencing the RebuiltCalc class should provide the same data
