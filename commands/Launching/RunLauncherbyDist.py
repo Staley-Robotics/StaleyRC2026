@@ -6,7 +6,7 @@ from wpimath.units import percent
 from ntcore.util import ntproperty
 
 from subsystems import Launcher
-from util import RebuiltCalc
+from util import RebuiltCalc, LaunchCalc
 
 class RunLauncherByDist(Command):
     # Variable Declaration
@@ -51,7 +51,7 @@ class RunLauncherByDist(Command):
        
        # -----7 point equation w/ guessed 10meter-----
         # speed = 30.00298 + (18.8495 - 30.00298)/(1+pow(dist/3.248432, 3.77429)) + self.postEqModifier
-        speed = self.postEqModifier
+        speed = self.postEqModifier + LaunchCalc.get_target_speed(dist)
 
         # apply speed
         self.launcher_sys.setDesiredSpeed(

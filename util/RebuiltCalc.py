@@ -1,10 +1,14 @@
 import typing
 from enum import Enum, auto
+from bisect import bisect_right
+from math import isfinite
 
 from wpilib import DriverStation, Field2d, SmartDashboard
 from wpimath.geometry import Pose2d, Translation2d, Translation3d, Rotation2d, Twist2d
 from wpimath.kinematics import ChassisSpeeds
 from wpimath.units import meters, inchesToMeters, seconds
+from phoenix6.units import rotations_per_second
+import wpimath.interpolation
 
 from ntcore.util import ntproperty
 
@@ -103,8 +107,6 @@ class RebuiltCalc:
 
     should_invert_auto_rot:bool = False
     use_relay_targeting:bool = False
-
-    
 
     '''
     defining all variables here in the class definition rather than __init__ means their values will be updated and accessible through the class
@@ -292,3 +294,76 @@ class RebuiltCalc:
         cls.use_relay_targeting = not cls.use_relay_targeting
     
 
+class LaunchCalc:
+    """
+    Class for calculating the launch speed of fuel based on distance to target through interpolation and extrapolation of a table of distance/speed points
+    """
+
+    # format of data point: (distance_meters, velocity_rps)
+    # currently sample data points with changing slope
+    # TODO change to measured data points
+    speed_table = (
+        (2.0, 20.0),
+        (3.0, 30.0),
+        (5.0, 40.0),
+        (7.0, 50.0),
+        (11.0, 60.0),
+    )
+    
+    _distances = tuple(point[0] for point in speed_table)
+
+    # Derive boundaries from the table.
+    MIN_DISTANCE = _distances[0]
+    MAX_DISTANCE = _distances[-1]
+
+    MIN_SAFE_RPS = 0.0
+    MAX_PHYSICAL_LIMIT_RPS = 100.0
+    
+    @classmethod
+    def get_target_speed(cls, distance_meters: float) -> rotations_per_second:
+        """
+        Interpolate within the table or extrapolate outside it,
+        then clamp the result to the configured RPM limits.
+
+        Non-finite distances return zero RPM.
+        """
+        if not isfinite(distance_meters):
+            return 0.0
+
+        # Find the segment containing the distance.
+        index = bisect_right(cls._distances, distance_meters) - 1
+
+        # Outside the table, use the first or last segment to extrapolate.
+        index = max(0, min(index, len(cls.speed_table) - 2))
+        
+        # for testing/debugging
+        # print(f"index: {index}, distance: {distance_meters}, segment: {cls.speed_table[index]} to {cls.speed_table[index + 1]}")
+
+        x1, y1 = cls.speed_table[index]
+        x2, y2 = cls.speed_table[index + 1]
+        
+        # print x1, y1, x2, y2 for debugging
+        # print(f"x1: {x1}, y1: {y1}, x2: {x2}, y2: {y2}")
+
+        # The same linear formula handles interpolation and extrapolation.
+        raw_rps = cls._extrapolate(
+            x1, y1, x2, y2, distance_meters
+        )
+
+        return max(
+            cls.MIN_SAFE_RPS,
+            min(raw_rps, cls.MAX_PHYSICAL_LIMIT_RPS),
+        )
+        
+    @classmethod
+    def _extrapolate(
+        cls,
+        x1: float,
+        y1: float,
+        x2: float,
+        y2: float,
+        target_x: float,
+    ) -> float:
+        """Evaluate the line through two distinct distance/RPS points."""
+        slope = (y2 - y1) / (x2 - x1)
+        return y1 + slope * (target_x - x1)

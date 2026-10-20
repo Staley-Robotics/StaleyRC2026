@@ -14,6 +14,11 @@ class LoggedObject:
         self.obj = obj
 
 class FalconLogger:
+    """logs info on loggable objects
+
+    Raises:
+        TypeError: if the object logged is not a supported type (currently only TalonFX and SparkMax)
+    """
     __outputBase:str = "Real"
     __tbl:NetworkTable = NetworkTableInstance.getDefault().getTable("/")
     __publishers:dict = {}

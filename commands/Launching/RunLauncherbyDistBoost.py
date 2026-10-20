@@ -6,7 +6,7 @@ from wpimath.units import percent
 from ntcore.util import ntproperty
 
 from subsystems import Launcher
-from util import RebuiltCalc
+from util import RebuiltCalc, LaunchCalc
 
 class RunLauncherByDistBoost(Command):
     # Variable Declaration
@@ -52,7 +52,8 @@ class RunLauncherByDistBoost(Command):
         # speed = 26.92683 + (19.89756 - 26.92683)/pow((1 + pow((dist/3.306039), 7.263255)), 1.770582) + 1.0 # this is a sigmoid that peaks at 26.9 rps at 0 meters, and is about 19.9 rps at 10 meters, which seems to be about right for our mechanism
        
        # -----7 point equation w/ guessed 10meter-----
-        speed = 30.00298 + (18.8495 - 30.00298)/(1+pow(dist/3.248432, 3.77429)) + self.postEqModifier + self.boost
+        # speed = 30.00298 + (18.8495 - 30.00298)/(1+pow(dist/3.248432, 3.77429)) + self.postEqModifier + self.boost
+        speed = self.postEqModifier + LaunchCalc.get_target_speed(dist) + self.boost
 
         # apply speed
         self.launcher_sys.setDesiredSpeed(
