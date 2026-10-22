@@ -75,8 +75,8 @@ if this is wrong, go look at https://docs.limelightvision.io/docs/docs-limelight
 class Vision(Subsystem):
 
     Limelight_IDs = {
-        'one':"10.49.59.11",
-        'two':"10.49.59.12"
+        'top':"10.49.59.11",
+        'bottom':"10.49.59.13"
         }
 
     def __init__(self, applyMeasurement:typing.Callable[[Pose2d, seconds, tuple[float]], None]):

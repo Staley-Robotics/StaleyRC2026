@@ -53,7 +53,7 @@ class RunLauncherByDistBoost(Command):
        
        # -----7 point equation w/ guessed 10meter-----
         # speed = 30.00298 + (18.8495 - 30.00298)/(1+pow(dist/3.248432, 3.77429)) + self.postEqModifier + self.boost
-        speed = self.postEqModifier + LaunchCalc.get_target_speed(dist) + self.boost
+        speed = self.postEqModifier + self.boost + LaunchCalc.get_target_speed(dist) + self.boost
 
         # apply speed
         self.launcher_sys.setDesiredSpeed(

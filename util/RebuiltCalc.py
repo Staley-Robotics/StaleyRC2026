@@ -303,11 +303,20 @@ class LaunchCalc:
     # currently sample data points with changing slope
     # TODO change to measured data points
     speed_table = (
-        (2.0, 20.0),
-        (3.0, 30.0),
-        (5.0, 40.0),
-        (7.0, 50.0),
-        (11.0, 60.0),
+        (2.0, 46.0),
+        (2.1, 46.0),
+        (2.2, 46.0),
+        (2.3, 47.0),
+        (2.4, 48.0),
+        (2.5, 48.5),
+        (2.6, 49.0),
+        (2.7, 50.0),
+        (2.8, 50.75),
+        (2.9, 51.0),
+        (3.0, 52.0),
+        (3.3, 54.0),
+        (3.5, 55.0),
+        (4.0, 60.0),
     )
     
     _distances = tuple(point[0] for point in speed_table)
