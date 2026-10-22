@@ -17,7 +17,7 @@ from util.FalconLogger import FalconLogger
 class Launcher(Subsystem):
     '''This is functionally quite similar (if not the same) as Agitator, but for now they are kept seperate for a variety of annoyances' sake'''
     class LauncherSpeeds:
-        WAIT:rotations_per_second = 10 # default speed for lower power consumption but faster acceleration when needed
+        WAIT:rotations_per_second = 20 #10 # default speed for lower power consumption but faster acceleration when needed
         SPEED_AT_ZERO_DIST:rotations_per_second = 20 # total guess, speed at minimum distance TODO: measure
         SPEED_AT_MAX_DIST:rotations_per_second = 70 # total guess, speed at some arbitrary larger distance TODO: measure
         SPEED_LOW:rotations_per_second = 20
