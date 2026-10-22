@@ -1,0 +1,90 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 2.5769900142653355,
+        "y": 0.6515406562054205
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 2.867358033845584,
+        "y": 0.773008695706882
+      },
+      "isLocked": false,
+      "linkedName": "OSOUempty"
+    },
+    {
+      "anchor": {
+        "x": 6.898502139800283,
+        "y": 0.6515406562054205
+      },
+      "prevControl": {
+        "x": 6.015059699055277,
+        "y": 0.5850404872310083
+      },
+      "nextControl": {
+        "x": 8.044311226692399,
+        "y": 0.7377901891421516
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 7.778330955777461,
+        "y": 3.4074750356633388
+      },
+      "prevControl": {
+        "x": 8.010971503319809,
+        "y": 2.3761907080601468
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "OSDfilled"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.01279317697228426,
+      "rotationDegrees": 0.0
+    },
+    {
+      "waypointRelativePos": 0.5,
+      "rotationDegrees": 1.0
+    },
+    {
+      "waypointRelativePos": 1,
+      "rotationDegrees": 78.40782458970865
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [
+    {
+      "name": "RunIntake",
+      "waypointRelativePos": 1.1883862255232904,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 4.0,
+    "maxAcceleration": 4.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 91.30195267257889
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 60.64224645720875
+  },
+  "useDefaultConstraints": true
+}
