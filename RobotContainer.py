@@ -31,7 +31,7 @@ class RobotContainer:
 
         ### Subsystems
         ## Intake
-        self.intakeSys = Intake( 10, 11, 0, 0.182617)
+        self.intakeSys = Intake( 10, 11, 0, -0.149170)
 
         ## Agitator
         self.agitatorSys = Agitator( 12 )
@@ -116,20 +116,25 @@ class RobotContainer:
         
         self.launcherSys.setDefaultCommand(LauncherDefault(self.launcherSys))
 
-        self.controller2.y().whileTrue(RunLauncherByDist(self.launcherSys)
-            .alongWith(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_MED).onlyWhile(
-            #only launch if launcher at speed OR switch say yes
-            lambda: (self.launcherSys.isAtSpeed() and self.launcherSys.getDesiredSpeed() != Launcher.LauncherSpeeds.WAIT) or self.controlBoard.switch1().getAsBoolean()
-            )
-        ))                                             
+        self.controller2.y().whileTrue(RunLauncherByDist(self.launcherSys))
+        #     .alongWith(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_MED).onlyWhile(
+        #     #only launch if launcher at speed OR switch say yes
+        #     lambda: (self.launcherSys.isAtSpeed() and self.launcherSys.getCurrentSpeed() != Launcher.LauncherSpeeds.WAIT) or self.controlBoard.switch1().getAsBoolean()
+        #     )
+        # ))                                             
 
         self.controller2.x().toggleOnTrue(runLauncher)
         self.controller2.leftTrigger(0.3).whileTrue(RunLauncherByDist(self.launcherSys)) # uses different instance of command for better control
         self.controller2.leftBumper().whileTrue(RunLauncherByDistBoost(self.launcherSys)) # boosted launch (boost is a ntproperty)
-        self.controller2.rightTrigger(0.3).__or__(self.controller2.y()).whileTrue(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_MED).onlyWhile(
-            # only launch if launcher at speed OR switch say yes
-            lambda: (self.launcherSys.isAtSpeed() and self.launcherSys.getDesiredSpeed() != Launcher.LauncherSpeeds.WAIT) or self.controlBoard.switch1().getAsBoolean()
-            )
+        self.controller2.rightTrigger(0.3).or_(self.controller2.y()).and_(
+            lambda: (
+                self.launcherSys.isAtSpeed()
+                and self.launcherSys.getDesiredSpeed() != Launcher.LauncherSpeeds.WAIT)
+                or self.controlBoard.switch1().getAsBoolean()
+        ).whileTrue(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.SPEED_MED)#.onlyWhile(
+        #     # only launch if launcher at speed OR switch say yes
+        #     lambda: (self.launcherSys.isAtSpeed() and self.launcherSys.getDesiredSpeed() != Launcher.LauncherSpeeds.WAIT) or self.controlBoard.switch1().getAsBoolean()
+        #     )
         )
 
         self.controlBoard.bigRed().whileTrue(SetFlywheelSpeed(self.agitatorSys, Agitator.Speeds.EJECT))

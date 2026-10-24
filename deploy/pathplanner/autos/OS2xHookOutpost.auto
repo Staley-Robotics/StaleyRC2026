@@ -42,7 +42,7 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 3.5
+                  "waitTime": 6.0
                 }
               },
               {
@@ -52,18 +52,6 @@
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "OSOrefillH"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "OSOunderOutShoot"
           }
         },
         {
@@ -73,16 +61,22 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 3.0
+                  "waitTime": 1.5
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "LaunchBalls"
+                  "name": "DeployIntake"
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "OSOrefillH"
           }
         }
       ]
